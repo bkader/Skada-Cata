@@ -1578,7 +1578,7 @@ do
 				action.petname = action.playername
 
 				if self.db.profile.mergepets then
-					if action.spellname then
+					if action.spellname and action.playername then
 						action.spellname = format("%s (%s)", action.spellname, action.playername)
 					end
 					action.playerid = owner.id

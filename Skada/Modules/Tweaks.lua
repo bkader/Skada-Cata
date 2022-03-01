@@ -76,17 +76,17 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 		function Skada:CombatLogEvent(...)
 
-			local timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _
+			local eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _
 			local offset = 9
 
 			if self.WoWBuild >= 40200 then
-				_, timestamp, eventtype, _, srcGUID, srcName, srcFlags, _, dstGUID, dstName, dstFlags, _ = ...
+				_, _, eventtype, _, srcGUID, srcName, srcFlags, _, dstGUID, dstName, dstFlags, _ = ...
 				offset = 13
 			elseif self.WoWBuild >= 40100 then
-				_, timestamp, eventtype, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags = ...
+				_, _, eventtype, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags = ...
 				offset = 11
 			else
-				_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags = ...
+				_, _, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags = ...
 			end
 
 			-- The Lich King fight & Fury of Frostmourne

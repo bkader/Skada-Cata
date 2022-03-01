@@ -901,11 +901,14 @@ function actorPrototype:GetAbsorbTargets(tbl)
 
 		for _, spell in pairs(self.absorbspells) do
 			if spell.targets then
-				for name, amount in pairs(spell.targets) do
+				for name, target in pairs(spell.targets) do
 					if not tbl[name] then
-						tbl[name] = {amount = amount}
+						tbl[name] = {amount = target.amount, overheal = target.overheal}
 					else
-						tbl[name].amount = tbl[name].amount + amount
+						tbl[name].amount = tbl[name].amount + target.amount
+						if target.overheal then
+							tbl[name].overheal = (tbl[name].overheal or 0) + target.overheal
+						end
 					end
 
 					-- attempt to get actor details
@@ -937,11 +940,14 @@ function actorPrototype:GetAbsorbHealTargets(tbl)
 		if self.absorbspells then
 			for _, spell in pairs(self.absorbspells) do
 				if spell.targets then
-					for name, amount in pairs(spell.targets) do
+					for name, target in pairs(spell.targets) do
 						if not tbl[name] then
-							tbl[name] = {amount = amount}
+							tbl[name] = {amount = target.amount, overheal = target.overheal}
 						else
-							tbl[name].amount = tbl[name].amount + amount
+							tbl[name].amount = tbl[name].amount + target.amount
+							if target.overheal then
+								tbl[name].overheal = (tbl[name].overheal or 0) + target.overheal
+							end
 						end
 
 						-- attempt to get actor details
@@ -1012,7 +1018,10 @@ function actorPrototype:GetAbsorbHealOnTarget(name)
 	if name and self.absorbspells then
 		for _, spell in pairs(self.absorbspells) do
 			if spell.targets and spell.targets[name] then
-				heal = heal + spell.targets[name]
+				heal = heal + spell.targets[name].amount
+				if spell.targets[name].overheal then
+					overheal = overheal + spell.targets[name].overheal
+				end
 			end
 		end
 	end
