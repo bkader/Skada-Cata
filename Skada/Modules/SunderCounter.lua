@@ -53,7 +53,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 					mod.targets[dstGUID].time = timestamp
 				elseif not mod.targets[dstGUID].full then
 					mod.targets[dstGUID].count = (mod.targets[dstGUID].count or 0) + 1
-					if mod.targets[dstGUID].count == 5 then
+					if mod.targets[dstGUID].count == 3 then
 						mod:Announce(format(
 							L["%s stacks of %s applied on %s in %s sec!"],
 							mod.targets[dstGUID].count,
@@ -225,7 +225,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 
 	function mod:Announce(msg, guid)
 		-- only in a group
-		if not IsInGroup() or not msg then return end
+		if (Skada.db.profile.modules.sunderchannel ~= "SELF" and not IsInGroup()) or not msg then return end
 
 		-- -- only on bosses!
 		if Skada.db.profile.modules.sunderbossonly and guid and not Skada:IsBoss(guid) then return end

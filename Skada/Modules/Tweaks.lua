@@ -74,9 +74,23 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			return hitline, targetline
 		end
 
-		function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		function Skada:CombatLogEvent(...)
+
+			local timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _
+			local offset = 9
+
+			if self.WoWBuild >= 40200 then
+				_, timestamp, eventtype, _, srcGUID, srcName, srcFlags, _, dstGUID, dstName, dstFlags, _ = ...
+				offset = 13
+			elseif self.WoWBuild >= 40100 then
+				_, timestamp, eventtype, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags = ...
+				offset = 11
+			else
+				_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags = ...
+			end
+
 			-- The Lich King fight & Fury of Frostmourne
-			if ... == 72350 or select(2, ...) == fofrostmourne then
+			if select(offset, ...) == 72350 or select(offset + 1, ...) == fofrostmourne then
 				-- the segment should be flagged as success.
 				if self.current and not self.current.success then
 					self.current.success = true
@@ -101,7 +115,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 				(trigger_events[eventtype] or eventtype == "SPELL_CAST_SUCCESS") and
 				srcName and
 				dstName and
-				not ignoredspells[(select(1, ...))]
+				not ignoredspells[(select(offset, ...))]
 			then
 				if
 					(band(srcFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(dstGUID, dstName)) or
@@ -143,14 +157,14 @@ Skada:AddLoadableModule("Tweaks", function(L)
 					end
 
 					if output then
-						local link = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or (GetSpellLink((select(1, ...))) or GetSpellInfo((select(1, ...))))
+						local link = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or (GetSpellLink((select(offset, ...))) or GetSpellInfo((select(offset, ...))))
 						firsthit.hitline, firsthit.targetline = WhoPulled(format(L["|cffffff00First Hit|r: %s from %s"], link or "", output))
 					end
 				end
 			end
 
 			-- use the original function
-			Skada_CombatLogEvent(Skada, nil, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			Skada_CombatLogEvent(self, ...)
 		end
 
 		function mod:PrintFirstHit()

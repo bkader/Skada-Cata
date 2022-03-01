@@ -3609,9 +3609,22 @@ do
 		tick_timer = self:ScheduleRepeatingTimer("Tick", 1)
 	end
 
-	function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	function Skada:CombatLogEvent(...)
 		-- disabled module or test mode?
 		if disabled or self.testMode then return end
+
+		local timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _
+		local offset = 9
+
+		if self.WoWBuild >= 40200 then
+			_, timestamp, eventtype, _, srcGUID, srcName, srcFlags, _, dstGUID, dstName, dstFlags, _ = ...
+			offset = 13
+		elseif self.WoWBuild >= 40100 then
+			_, timestamp, eventtype, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags = ...
+			offset = 11
+		else
+			_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags = ...
+		end
 
 		-- ignored combat event?
 		if ignored_events[eventtype] and not (spellcast_events[eventtype] and self.current) then return end
@@ -3642,7 +3655,7 @@ do
 		end
 
 		if self.current and not self.current.started then
-			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, select(offset, ...))
 			self.current.started = true
 			if self.instanceType == nil then self:CheckZone() end
 			self.current.type = self.instanceType or "none"
@@ -3720,7 +3733,7 @@ do
 					end
 
 					self.current.last_action = time()
-					mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+					mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, select(offset, ...))
 				end
 			end
 		end

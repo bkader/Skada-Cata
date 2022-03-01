@@ -746,9 +746,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		local spellschool, misstype, absorbed
 
 		if eventtype == "SWING_MISSED" then
-			misstype, absorbed = ...
+			misstype, _, absorbed = ...
 		else
-			spellschool, misstype, absorbed = select(3, ...)
+			spellschool, misstype, _, absorbed = select(3, ...)
 		end
 
 		if misstype == "ABSORB" and (absorbed or 0) > 0 and dstName and shields[dstName] then
