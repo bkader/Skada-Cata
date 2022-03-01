@@ -59,11 +59,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			set.absorb = (set.absorb or 0) + absorb.amount
 			player.absorb = (player.absorb or 0) + absorb.amount
 
-			if absorb.overheal > 0 then
-				set.overabsorb = (set.overabsorb or 0) + absorb.amount
-				player.overabsorb = (player.overabsorb or 0) + absorb.amount
-			end
-
 			-- saving this to total set may become a memory hog deluxe.
 			if set == Skada.total then return end
 
@@ -71,7 +66,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			local spell = player.absorbspells and player.absorbspells[absorb.spellid]
 			if not spell then
 				player.absorbspells = player.absorbspells or {}
-				spell = {school = absorb.school, count = 1, amount = absorb.amount, overheal = absorb.overheal}
+				spell = {school = absorb.school, count = 1, amount = absorb.amount}
 				player.absorbspells[absorb.spellid] = spell
 			else
 				if not spell.school and absorb.school then
@@ -80,9 +75,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				spell.amount = (spell.amount or 0) + absorb.amount
 				if not nocount then
 					spell.count = (spell.count or 0) + 1
-				end
-				if absorb.overheal > 0 then
-					spell.overheal = (spell.overheal or 0) + absorb.overheal
 				end
 			end
 
@@ -101,14 +93,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				local actor = Skada:GetActor(set, absorb.dstGUID, absorb.dstName, absorb.dstFlags)
 				if actor then
 					spell.targets = spell.targets or {}
-					if not spell.targets[absorb.dstName] then
-						spell.targets[absorb.dstName] = {amount = absorb.amount, overheal = absorb.overheal}
-					else
-						spell.targets[absorb.dstName].amount = spell.targets[absorb.dstName].amount + absorb.amount
-						if (absorb.overheal or 0) > 0 then
-							spell.targets[absorb.dstName].overheal = (spell.targets[absorb.dstName].overheal or 0) + absorb.overheal
-						end
-					end
+					spell.targets[absorb.dstName] = (spell.targets[absorb.dstName] or 0) + absorb.amount
 				end
 			end
 		end
@@ -226,25 +211,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			local spellid, _, _, _, amount = ...
 			if amount ~= nil and shields[dstName] and shields[dstName][spellid] and shields[dstName][spellid][srcName] then
 				shields[dstName][spellid][srcName].amount = 0
-
-				if amount > 0 then
-					local s = shields[dstName][spellid][srcName]
-					absorb.playerid = s.srcGUID
-					absorb.playername = srcName
-					absorb.playerflags = s.srcFlags
-
-					absorb.dstGUID = dstGUID
-					absorb.dstName = dstName
-					absorb.dstFlags = dstFlags
-
-					absorb.spellid = s.spellid
-					absorb.school = s.school
-					absorb.amount = 0
-					absorb.overheal = amount
-
-					Skada:DispatchSets(log_absorb, absorb, true)
-					log_absorb(Skada.total, absorb, true)
-				end
 			end
 			return
 		end
@@ -357,13 +323,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 					absorb.spellid = pshield.spellid
 					absorb.school = pshield.school
-					if amount > pshield.amount then
-						absorb.amount = pshield.amount
-						absorb.overheal = amount - pshield.amount
-					else
-						absorb.amount = amount
-						absorb.overheal = max(0, pshield.amount - amount)
-					end
+					absorb.amount = amount
 
 					Skada:DispatchSets(log_absorb, absorb, true)
 					log_absorb(Skada.total, absorb, true)
@@ -396,7 +356,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				absorb.spellid = s.spellid
 				absorb.school = s.school
 				absorb.amount = amount
-				absorb.overheal = 0
 
 				Skada:DispatchSets(log_absorb, absorb)
 				log_absorb(Skada.total, absorb)
@@ -422,7 +381,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				absorb.spellid = s.spellid
 				absorb.school = s.school
 				absorb.amount = s.amount
-				absorb.overheal = 0
 
 				Skada:DispatchSets(log_absorb, absorb)
 				log_absorb(Skada.total, absorb)
@@ -508,12 +466,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			if (spell.count or 0) > 0 then
 				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
-			end
-
-			if (spell.overheal or 0) > 0 then
-				tooltip:AddLine(" ")
-				tooltip:AddDoubleLine(L["Total Healing"], Skada:FormatNumber(spell.overheal + spell.amount), 1, 1, 1)
-				tooltip:AddDoubleLine(L["Overhealing"], format("%s (%s)", Skada:FormatNumber(spell.overheal), Skada:FormatPercent(spell.overheal, spell.overheal + spell.amount)), 1, 1, 1)
 			end
 
 			if spell.min and spell.max then

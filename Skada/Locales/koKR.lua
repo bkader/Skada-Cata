@@ -728,6 +728,8 @@ L["Custom Arena Colors"] = "커스텀 아레나 색상"
 L["Enable this if you want to use custom arena teams colors."] = "사용자 정의 팀 색상을 사용하려면 이것을 활성화하십시오."
 L["Gold Team"] = "금색팀"
 L["Green Team"] = "녹색팀"
+L["Color"] = "색상"
+L["Color for %s."] = "%s의 색상입니다."
 -- notifications
 L["Opacity"] = "불투명"
 L["Notifications"] = "알림"

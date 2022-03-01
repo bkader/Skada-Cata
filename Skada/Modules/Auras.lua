@@ -525,7 +525,7 @@ Skada:AddLoadableModule("Debuffs", function(L)
 	}
 
 	-- list of spells used to queue units.
-	local queuedSpells = {[49005] = 50424}
+	local queuedSpells = {}
 
 	local aura = {}
 	local function HandleDebuff(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)

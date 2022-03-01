@@ -22,11 +22,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 	local channel_events, fofrostmourne
 
 	local ignoredspells = {
-		[1130] = true, -- Hunter's Mark (rank 1)
-		[14323] = true, -- Hunter's Mark (rank 2)
-		[14324] = true, -- Hunter's Mark (rank 3)
-		[14325] = true, -- Hunter's Mark (rank 4)
-		[53338] = true, -- Hunter's Mark (rank 5)
+		[1130] = true, -- Hunter's Mark
 		[60122] = true, -- Baby Spice
 		[56191] = true -- Shadow Jade Focusing Lens
 	}

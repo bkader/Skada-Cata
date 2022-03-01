@@ -724,6 +724,8 @@ L["Custom Arena Colors"] = "自定义竞技场颜色"
 L["Enable this if you want to use custom arena teams colors."] = "如果您想使用自定义竞技场球队颜色，请启用此功能。"
 L["Gold Team"] = "金队"
 L["Green Team"] = "绿队"
+L["Color"] = "颜色"
+L["Color for %s."] = "%s 的颜色。"
 -- notifications
 L["Opacity"] = "不透明度"
 L["Notifications"] = "通知"

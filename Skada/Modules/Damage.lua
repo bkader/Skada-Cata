@@ -29,34 +29,9 @@ Skada:AddLoadableModule("Damage", function(L)
 	-- spells on the list below are ignored when it comes
 	-- to updating player's active time.
 	local blacklist = {
-		[7294] = true, -- Retribution Aura (Rank 1)
-		[10298] = true, -- Retribution Aura (Rank 2)
-		[10299] = true, -- Retribution Aura (Rank 3)
-		[10300] = true, -- Retribution Aura (Rank 4)
-		[10301] = true, -- Retribution Aura (Rank 5)
-		[27150] = true, -- Retribution Aura (Rank 6)
-		[54043] = true, -- Retribution Aura (Rank 7)
-		[30482] = true, -- Molten Armor (Rank 1)
-		[43045] = true, -- Molten Armor (Rank 2)
-		[43046] = true, -- Molten Armor (Rank 3)
-		[324] = true, -- Lightning Shield (Rank 1)
-		[325] = true, -- Lightning Shield (Rank 2)
-		[905] = true, -- Lightning Shield (Rank 3)
-		[945] = true, -- Lightning Shield (Rank 4)
-		[8134] = true, -- Lightning Shield (Rank 5)
-		[10431] = true, -- Lightning Shield (Rank 6)
-		[10432] = true, -- Lightning Shield (Rank 7)
-		[25469] = true, -- Lightning Shield (Rank 8)
-		[25472] = true, -- Lightning Shield (Rank 9)
-		[49280] = true, -- Lightning Shield (Rank 10)
-		[49281] = true, -- Lightning Shield (Rank 11)
-		[2947] = true, -- Fire Shield (Rank 1)
-		[8316] = true, -- Fire Shield (Rank 2)
-		[8317] = true, -- Fire Shield (Rank 3)
-		[11770] = true, -- Fire Shield (Rank 4)
-		[11771] = true, -- Fire Shield (Rank 5)
-		[27269] = true, -- Fire Shield (Rank 6)
-		[47983] = true -- Fire Shield (Rank 7)
+		[7294] = true, -- Retribution Aura
+		[30482] = true, -- Molten Armor
+		[324] = true, -- Lightning Shield
 	}
 
 	-- spells on the list below are used to update player's active time

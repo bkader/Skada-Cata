@@ -731,6 +731,8 @@ L["Custom Arena Colors"] = "Couleurs d'arène personnalisées"
 L["Enable this if you want to use custom arena teams colors."] = "Activez cette option si vous souhaitez utiliser des couleurs d'équipes d'arène personnalisées."
 L["Gold Team"] = "Équipe dorée"
 L["Green Team"] = "Équipe verte"
+L["Color"] = "Couleur"
+L["Color for %s."] = "Couleur \1242 %s."
 -- notifications
 L["Opacity"] = "Opacité"
 L["Notifications"] = "Notifications"

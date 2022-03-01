@@ -732,6 +732,8 @@ L["Custom Arena Colors"] = true
 L["Enable this if you want to use custom arena teams colors."] = true
 L["Gold Team"] = true
 L["Green Team"] = true
+L["Color"] = true
+L["Color for %s."] = true
 -- notifications
 L["Opacity"] = true
 L["Notifications"] = true
