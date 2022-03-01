@@ -420,20 +420,14 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local function EnvironmentDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local envtype, amount, _, _, _, _, absorbed = ...
 		if (absorbed or 0) > 0 and dstName and shields[dstName] then
-			local spellschool = 1
+			local spellschool = 0x01
 
-			if envtype == "Falling" or envtype == "FALLING" then
-				spellschool = 1
-			elseif envtype == "Drowning" or envtype == "DROWNING" then
-				spellschool = 1
-			elseif envtype == "Fatigue" or envtype == "FATIGUE" then
-				spellschool = 1
-			elseif envtype == "Fire" or envtype == "FIRE" then
-				spellschool = 4
+			if envtype == "Fire" or envtype == "FIRE" then
+				spellschool = 0x04
 			elseif envtype == "Lava" or envtype == "LAVA" then
-				spellschool = 4
+				spellschool = 0x04
 			elseif envtype == "Slime" or envtype == "SLIME" then
-				spellschool = 8
+				spellschool = 0x08
 			end
 
 			process_absorb(timestamp, dstGUID, dstName, dstFlags, absorbed, spellschool, amount, amount > absorbed)

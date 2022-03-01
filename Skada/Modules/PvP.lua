@@ -85,9 +85,7 @@ Skada:AddLoadableModule("PVP", function(L)
 					[GetSpellInfo(46924)] = 71, -- Bladestorm
 					[GetSpellInfo(1680)] = 72, -- Whirlwind
 					[GetSpellInfo(23881)] = 72, -- Bloodthirst
-					[GetSpellInfo(47475)] = 72, -- Slam
 					[GetSpellInfo(12809)] = 73, -- Concussion Blow
-					[GetSpellInfo(47498)] = 73 -- Devastate
 				},
 				PALADIN = {
 					[GetSpellInfo(20473)] = 65, -- Holy Shock
@@ -99,7 +97,6 @@ Skada:AddLoadableModule("PVP", function(L)
 				},
 				ROGUE = {
 					[GetSpellInfo(1329)] = 259, -- Mutilate
-					[GetSpellInfo(51662)] = 259, -- Hunger For Blood
 					[GetSpellInfo(51690)] = 260, -- Killing Spree
 					[GetSpellInfo(13877)] = 260, -- Blade Flurry
 					[GetSpellInfo(13750)] = 260, -- Adrenaline Rush
@@ -124,7 +121,6 @@ Skada:AddLoadableModule("PVP", function(L)
 				MAGE = {
 					[GetSpellInfo(44425)] = 62, -- Arcane Barrage
 					[GetSpellInfo(44457)] = 63, -- Living Bomb
-					[GetSpellInfo(42859)] = 63, -- Scorch
 					[GetSpellInfo(31661)] = 63, -- Dragon's Breath
 					[GetSpellInfo(11113)] = 63, -- Blast Wave
 					[GetSpellInfo(44572)] = 64 -- Deep Freeze

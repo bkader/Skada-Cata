@@ -21,20 +21,26 @@ Skada:AddLoadableModule("Potions", function(L)
 	local potionIDs = {
 		[28494] = 22828, -- Insane Strength Potion
 		[38929] = 31677, -- Fel mana potion
-		[53909] = 40212, -- Potion of Wild Magic
-		[53908] = 40211, -- Potion of Speed
-		[53750] = 40077, -- Crazy Alchemist's Potion
-		[53761] = 40087, -- Powerful Rejuvenation Potion
 		[43185] = 33447, -- Healing Potion
 		[43186] = 33448, -- Restore Mana
+		[53750] = 40077, -- Crazy Alchemist's Potion
 		[53753] = 40081, -- Nightmare Slumber
+		[53761] = 40087, -- Powerful Rejuvenation Potion
+		[53762] = 40093, -- Indestructible
+		[53908] = 40211, -- Potion of Speed
+		[53909] = 40212, -- Potion of Wild Magic
 		[53910] = 40213, -- Arcane Protection
 		[53911] = 40214, -- Fire Protection
 		[53913] = 40215, -- Frost Protection
 		[53914] = 40216, -- Nature Protection
 		[53915] = 40217, -- Shadow Protection
-		[53762] = 40093, -- Indestructible
-		[67490] = 42545 -- Runic Mana Injector
+		[67490] = 42545, -- Runic Mana Injector
+		[78992] = 57193, -- Mighty Rejuvenation Potion
+		[78993] = 57194, -- Potion of Concentration
+		[79475] = 58090, -- Earthen Potion
+		[79476] = 58091, -- Volcanic Potion
+		[79633] = 58145, -- Potion of the Tol'vir
+		[79634] = 58146, -- Golemblood Potion
 	}
 
 	local prepotionStr, potionStr = "|c%s%s|r %s", "|T%s:14:14:1:-2:32:32:2:30:2:30|t"
