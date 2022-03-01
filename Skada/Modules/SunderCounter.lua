@@ -224,7 +224,7 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 	end
 
 	function mod:Announce(msg, guid)
-		-- only in a group
+		-- only in a group or to SELF
 		if (Skada.db.profile.modules.sunderchannel ~= "SELF" and not IsInGroup()) or not msg then return end
 
 		-- -- only on bosses!

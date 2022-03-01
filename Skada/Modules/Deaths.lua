@@ -191,53 +191,8 @@ Skada:AddLoadableModule("Deaths", function(L)
 				end
 
 				-- announce death
-				if Skada.db.profile.modules.deathannounce and IsInGroup() and not IsInPvP() then
-					local log = nil
-					for _, l in ipairs(deathlog.log) do
-						if l.amount and l.amount < 0 then
-							log = l
-							break
-						end
-					end
-					if not log then return end
-
-					local output = format(
-						"Skada: %s > %s (%s) %s",
-						log.source or L.Unknown, -- source name
-						player.name or L.Unknown, -- player name
-						log.spellid and GetSpellInfo(log.spellid) or L.Unknown, -- spell name
-						Skada:FormatNumber(0 - log.amount, 1) -- spell amount
-					)
-
-					if log.overkill or log.resisted or log.blocked or log.absorbed then
-						local extra = new()
-
-						if log.overkill then
-							extra[#extra + 1] = format("O:%s", Skada:FormatNumber(log.overkill, 1))
-						end
-						if log.resisted then
-							extra[#extra + 1] = format("R:%s", Skada:FormatNumber(log.resisted, 1))
-						end
-						if log.blocked then
-							extra[#extra + 1] = format("B:%s", Skada:FormatNumber(log.blocked, 1))
-						end
-						if log.absorbed then
-							extra[#extra + 1] = format("A:%s", Skada:FormatNumber(log.absorbed, 1))
-						end
-						if next(extra) then
-							output = format("%s [%s]", output, tconcat(extra, " - "))
-						end
-
-						extra = del(extra)
-					end
-
-					if Skada.db.profile.modules.deathchannel == "SELF" then
-						Skada:Print(output)
-					elseif Skada.db.profile.modules.deathchannel == "GUILD" then
-						Skada:SendChat(output, "GUILD", "preset", true)
-					else
-						Skada:SendChat(output, IsInRaid() and "RAID" or "PARTY", "preset", true)
-					end
+				if Skada.db.profile.modules.deathannounce then
+					mod:Announce(deathlog.log, player.name)
 				end
 			end
 		end
@@ -690,6 +645,66 @@ Skada:AddLoadableModule("Deaths", function(L)
 
 	function mod:GetSetSummary(set)
 		return tostring(set.death or 0)
+	end
+
+	function mod:Announce(logs, playername)
+		-- announce only if:
+		-- 	1. player is in a group or channel set to self.
+		-- 	2. player is not in a pvp (spam caution).
+		-- 	3. we have a valid deathlog.
+		if (Skada.db.profile.modules.deathchannel ~= "SELF" and not IsInGroup()) or IsInPvP() or not logs then
+			return
+		end
+
+		local log = nil
+		for _, l in ipairs(logs) do
+			if l.amount and l.amount < 0 then
+				log = l
+				break
+			end
+		end
+
+		if not log then return end
+
+		-- prepare the output.
+		local output = format(
+			"Skada: %s > %s (%s) %s",
+			log.source or L.Unknown, -- source name
+			playername or L.Unknown, -- player name
+			log.spellid and GetSpellInfo(log.spellid) or L.Unknown, -- spell name
+			Skada:FormatNumber(0 - log.amount, 1) -- spell amount
+		)
+
+		-- prepare any extra info.
+		if log.overkill or log.resisted or log.blocked or log.absorbed then
+			local extra = new()
+
+			if log.overkill then
+				extra[#extra + 1] = format("O:%s", Skada:FormatNumber(log.overkill, 1))
+			end
+			if log.resisted then
+				extra[#extra + 1] = format("R:%s", Skada:FormatNumber(log.resisted, 1))
+			end
+			if log.blocked then
+				extra[#extra + 1] = format("B:%s", Skada:FormatNumber(log.blocked, 1))
+			end
+			if log.absorbed then
+				extra[#extra + 1] = format("A:%s", Skada:FormatNumber(log.absorbed, 1))
+			end
+			if next(extra) then
+				output = format("%s [%s]", output, tconcat(extra, " - "))
+			end
+
+			extra = del(extra)
+		end
+
+		if Skada.db.profile.modules.deathchannel == "SELF" then
+			Skada:Print(output)
+		elseif Skada.db.profile.modules.deathchannel == "GUILD" then
+			Skada:SendChat(output, "GUILD", "preset", true)
+		else
+			Skada:SendChat(output, IsInRaid() and "RAID" or "PARTY", "preset", true)
+		end
 	end
 
 	do
