@@ -1,0 +1,797 @@
+local Skada = Skada
+Skada:AddLoadableModule("Deaths", function(L)
+	if Skada:IsDisabled("Deaths") then return end
+
+	local mod = Skada:NewModule(L["Deaths"])
+	local playermod = mod:NewModule(L["Player's deaths"])
+	local deathlogmod = mod:NewModule(L["Death log"])
+
+	local UnitHealth, UnitHealthInfo = UnitHealth, Skada.UnitHealthInfo
+	local UnitIsFeignDeath = UnitIsFeignDeath
+	local tinsert, tremove, tsort, tconcat = table.insert, table.remove, table.sort, table.concat
+	local ipairs, select = ipairs, select
+	local tostring, format, strsub = tostring, string.format, string.sub
+	local max, modf = math.max, math.modf
+	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
+	local T, wipe = Skada.Table, wipe
+	local new, del = Skada.TablePool()
+	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
+	local date, time, _ = date, time, nil
+
+	local function log_deathlog(set, data, ts, deathlog)
+		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
+		if player then
+			deathlog = deathlog or player.deathlog and player.deathlog[1]
+			if not deathlog then
+				deathlog = {time = ts, log = {}}
+				player.deathlog = player.deathlog or {}
+				player.deathlog[1] = deathlog
+			end
+
+			-- seet player maxhp if not already set
+			if not deathlog.maxhp or deathlog.maxhp == 0 then
+				deathlog.maxhp = select(3, UnitHealthInfo(player.name, player.id, "group")) or 0
+			end
+
+			tinsert(deathlog.log, 1, {
+				spellid = data.spellid,
+				school = data.spellschool,
+				source = data.srcName,
+				amount = data.amount,
+				overkill = data.overkill,
+				overheal = data.overheal,
+				resisted = data.resisted,
+				blocked = data.blocked,
+				absorbed = data.absorbed,
+				time = ts,
+				hp = select(2, UnitHealthInfo(player.name, player.id, "group"))
+			})
+
+			-- trim things and limit to deathlogevents (defaul: 14)
+			while #deathlog.log > (Skada.db.profile.modules.deathlogevents or 14) - 1 do
+				tremove(deathlog.log)
+			end
+		end
+	end
+
+	local data = {}
+
+	local function SpellDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		if event == "SWING_DAMAGE" then
+			data.spellid, data.spellschool = 6603, 0x01
+			data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed = ...
+		else
+			data.spellid, _, data.spellschool, data.amount, data.overkill, _, data.resisted, data.blocked, data.absorbed = ...
+		end
+
+		if data.amount then
+			data.srcName = srcName
+			data.playerid = dstGUID
+			data.playername = dstName
+			data.playerflags = dstFlags
+
+			data.amount = 0 - data.amount
+			data.overheal = nil
+
+			Skada:DispatchSets(log_deathlog, data, ts)
+		end
+	end
+
+	local function SpellMissed(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local misstype, amount
+
+		if event == "SWING_MISSED" then
+			data.spellid, data.spellschool = 6603, 0x01
+			misstype, amount = ...
+		else
+			data.spellid, _, data.spellschool, misstype, amount = ...
+		end
+
+		if misstype == "ABSORB" and (amount or 0) > 0 then
+			data.srcName = srcName
+			data.playerid = dstGUID
+			data.playername = dstName
+			data.playerflags = dstFlags
+
+			data.amount = 0
+			data.absorbed = amount
+
+			data.overkill = nil
+			data.resisted = nil
+			data.blocked = nil
+			data.overheal = nil
+
+			Skada:DispatchSets(log_deathlog, data, ts)
+		end
+	end
+
+	local function EnvironmentDamage(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local envtype = ...
+		local spellid, spellschool = nil, 0x01
+
+		if envtype == "Falling" or envtype == "FALLING" then
+			spellid = 3
+		elseif envtype == "Drowning" or envtype == "DROWNING" then
+			spellid = 4
+		elseif envtype == "Fatigue" or envtype == "FATIGUE" then
+			spellid = 5
+		elseif envtype == "Fire" or envtype == "FIRE" then
+			spellid, spellschool = 6, 0x04
+		elseif envtype == "Lava" or envtype == "LAVA" then
+			spellid, spellschool = 7, 0x04
+		elseif envtype == "Slime" or envtype == "SLIME" then
+			spellid, spellschool = 8, 0x08
+		end
+
+		if spellid then
+			SpellDamage(ts, event, nil, ENVIRONMENTAL_DAMAGE, nil, dstGUID, dstName, dstFlags, spellid, nil, spellschool, select(2, ...))
+		end
+	end
+
+	local function SpellHeal(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local spellid, _, spellschool, amount, overheal = ...
+
+		if amount > (Skada.db.profile.modules.deathlogthreshold or 0) then
+			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+			dstGUID, dstName = Skada:FixMyPets(dstGUID, dstName, dstFlags)
+
+			data.srcName = srcName
+
+			data.playerid = dstGUID
+			data.playername = dstName
+			data.playerflags = dstFlags
+
+			data.spellid = spellid
+			data.spellschool = spellschool
+			data.amount = max(0, amount - (overheal or 0))
+			data.overheal = overheal
+			data.overkill = nil
+			data.resisted = nil
+			data.blocked = nil
+			data.absorbed = nil
+
+			Skada:DispatchSets(log_deathlog, data, ts)
+		end
+	end
+
+	local function log_death(set, playerid, playername, playerflags, ts)
+		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
+		if player then
+			set.death = (set.death or 0) + 1
+			player.death = (player.death or 0) + 1
+
+			-- saving this to total set may become a memory hog deluxe.
+			if set == Skada.total then return end
+
+			local deathlog = player.deathlog and player.deathlog[1]
+			if deathlog then
+				deathlog.time = ((ts or 0) <= 0) and time() or ts
+
+				for i = #deathlog.log, 1, -1 do
+					local e = deathlog.log[i]
+					if (deathlog.time - e.time) >= 60 then
+						-- in certain situations, such us The Ruby Sanctum,
+						-- deathlog contain old data which are irrelevant to keep.
+						tremove(deathlog.log, i)
+					else
+						-- sometimes multiple close events arrive with the same timestamp
+						-- so we add a small correction to ensure sort stability.
+						e.time = e.time + i * 0.00001
+					end
+				end
+
+				-- no entry left? insert an unknown entry
+				if #deathlog.log == 0 then
+					tinsert(deathlog.log, {
+						amount = -deathlog.maxhp,
+						time = deathlog.time-0.00001,
+						hp = deathlog.maxhp
+					})
+				end
+
+				-- announce death
+				if Skada.db.profile.modules.deathannounce and IsInGroup() and not IsInPvP() then
+					local log = nil
+					for _, l in ipairs(deathlog.log) do
+						if l.amount and l.amount < 0 then
+							log = l
+							break
+						end
+					end
+					if not log then return end
+
+					local output = format(
+						"Skada: %s > %s (%s) %s",
+						log.source or L.Unknown, -- source name
+						player.name or L.Unknown, -- player name
+						log.spellid and GetSpellInfo(log.spellid) or L.Unknown, -- spell name
+						Skada:FormatNumber(0 - log.amount, 1) -- spell amount
+					)
+
+					if log.overkill or log.resisted or log.blocked or log.absorbed then
+						local extra = new()
+
+						if log.overkill then
+							extra[#extra + 1] = format("O:%s", Skada:FormatNumber(log.overkill, 1))
+						end
+						if log.resisted then
+							extra[#extra + 1] = format("R:%s", Skada:FormatNumber(log.resisted, 1))
+						end
+						if log.blocked then
+							extra[#extra + 1] = format("B:%s", Skada:FormatNumber(log.blocked, 1))
+						end
+						if log.absorbed then
+							extra[#extra + 1] = format("A:%s", Skada:FormatNumber(log.absorbed, 1))
+						end
+						if next(extra) then
+							output = format("%s [%s]", output, tconcat(extra, " - "))
+						end
+
+						extra = del(extra)
+					end
+
+					if Skada.db.profile.modules.deathchannel == "SELF" then
+						Skada:Print(output)
+					elseif Skada.db.profile.modules.deathchannel == "GUILD" then
+						Skada:SendChat(output, "GUILD", "preset", true)
+					else
+						Skada:SendChat(output, IsInRaid() and "RAID" or "PARTY", "preset", true)
+					end
+				end
+			end
+		end
+	end
+
+	local function UnitDied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags)
+		if not UnitIsFeignDeath(dstName) then
+			Skada:DispatchSets(log_death, dstGUID, dstName, dstFlags, ts)
+			log_death(Skada.total, dstGUID, dstName, dstFlags, ts)
+		end
+	end
+
+	local function AuraApplied(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
+		if spellid == 27827 then -- Spirit of Redemption (Holy Priest)
+			Skada:ScheduleTimer(function() UnitDied(ts + 0.01, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags) end, 0.01)
+		end
+	end
+
+	local function log_resurrect(set, playerid, playername, playerflags, srcName, spellid, ts)
+		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
+		local deathlog = player and player.deathlog and player.deathlog[1]
+		if deathlog then
+			data.spellid = spellid
+			data.srcName = srcName
+			data.playerid = player.id or playerid
+			data.playername = player.name or playername
+			data.playerflags = player.flag or playerflags
+
+			data.amount = nil
+			data.overkill = nil
+			data.overheal = nil
+			data.resisted = nil
+			data.blocked = nil
+			data.absorbed = nil
+
+			-- log resurrection.
+			log_deathlog(set, data, ts, deathlog)
+
+			-- start a new deathlog entry
+			tinsert(player.deathlog, 1, {time = ts, log = {}})
+		end
+	end
+
+	local function SpellResurrect(ts, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
+		if spellid then
+			Skada:DispatchSets(log_resurrect, dstGUID, dstName, dstFlags, srcName, spellid, ts)
+		end
+	end
+
+	-- this function was added for a more accurate death time
+	-- this is useful in case of someone's death causing others'
+	-- death. Example: Sindragosa's unchained magic.
+	local function formatdate(ts)
+		local a, b = modf(ts)
+		local d = date("%H:%M:%S", a or ts)
+		if b == 0 then
+			return d .. ".000"
+		end -- really rare to see .000
+		b = strsub(tostring(b), 3, 5)
+		return d .. "." .. b
+	end
+
+	function deathlogmod:Enter(win, id, label)
+		win.datakey = id
+		win.title = format(L["%s's death log"], win.actorname or L.Unknown)
+	end
+
+	do
+		local green = {r = 0, g = 0.82, b = 0}
+		local red = {r = green.g, g = green.r, b = green.b}
+
+		local function sort_logs(a, b)
+			return a and b and a.time > b.time
+		end
+
+		function deathlogmod:Update(win, set)
+			local player = Skada:FindPlayer(set, win.actorid, win.actorname)
+			if player and win.datakey then
+				win.title = format(L["%s's death log"], win.actorname or L.Unknown)
+
+				local deathlog
+				if player.deathlog and player.deathlog[win.datakey] then
+					deathlog = player.deathlog[win.datakey]
+				end
+				if not deathlog then return end
+
+				if win.metadata then
+					win.metadata.maxvalue = deathlog.maxhp
+				end
+
+				-- add a fake entry for the actual death
+				if win.metadata and (deathlog.time or 0) > 0 then
+					local d = win.dataset[1] or {}
+					win.dataset[1] = d
+
+					d.id = 1
+					d.time = deathlog.time
+					d.label = formatdate(deathlog.time) .. ": " .. format(L["%s dies"], player.name)
+					d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
+					d.value = 0
+					d.valuetext = ""
+				end
+
+				-- postfix
+				if #deathlog.log == 0 then
+					deathlog.log[1] = {
+						amount = deathlog.maxhp and -deathlog.maxhp or 0,
+						time = deathlog.time-0.00001,
+						hp = deathlog.maxhp or 0
+					}
+				end
+
+				tsort(deathlog.log, sort_logs)
+
+				for i = #deathlog.log, 1, -1 do
+					local log = deathlog.log[i]
+					local diff = tonumber(log.time) - tonumber(deathlog.time)
+					if diff > -60 then
+						local nr = i + 1
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
+
+						local spellname, spellicon
+						if log.spellid then
+							spellname, _, spellicon = GetSpellInfo(log.spellid)
+						else
+							spellname = L.Unknown
+							spellicon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
+						end
+
+						d.id = nr
+						d.spellid = log.spellid
+						d.label = format("%02.2fs: %s", diff, spellname)
+						d.icon = spellicon
+						d.time = log.time
+
+						-- used for tooltip
+						d.hp = log.hp or 0
+						d.amount = log.amount
+						d.source = log.source or L.Unknown
+						d.spellname = spellname
+						d.value = d.hp
+
+						local change = log.amount and log.amount ~= 0 and log.amount or log.absorbed or 0
+						if change > 0 then
+							change = "+" .. Skada:FormatNumber(change)
+							d.color = green
+						else
+							change = Skada:FormatNumber(change)
+							d.color = red
+						end
+
+						d.reportlabel = "%02.2fs: %s (%s)   %s [%s]"
+
+						if Skada.db.profile.reportlinks and log.spellid then
+							d.reportlabel = format(d.reportlabel, diff, GetSpellLink(log.spellid) or spellname, d.source, change, Skada:FormatNumber(d.value))
+						else
+							d.reportlabel = format(d.reportlabel, diff, spellname, d.source, change, Skada:FormatNumber(d.value))
+						end
+
+						local extra = new()
+
+						if (log.overkill or 0) > 0 then
+							d.overkill = log.overkill
+							extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.overkill)
+						end
+						if (log.resisted or 0) > 0 then
+							d.resisted = log.resisted
+							extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.resisted)
+						end
+						if (log.blocked or 0) > 0 then
+							d.blocked = log.blocked
+							extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blocked)
+						end
+						if (log.absorbed or 0) > 0 then
+							d.absorbed = log.absorbed
+							extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.absorbed)
+						end
+
+						if next(extra) then
+							-- change = "(|cffff0000*|r) " .. change -- uncomment for * back.
+							d.reportlabel = d.reportlabel .. " (" .. tconcat(extra, " - ") .. ")"
+						end
+
+						extra = del(extra)
+
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns.Change and change,
+							self.metadata.columns.Health and Skada:FormatNumber(d.value),
+							self.metadata.columns.Percent and Skada:FormatPercent(log.hp or 1, deathlog.maxhp or 1)
+						)
+					else
+						tremove(deathlog.log, i)
+					end
+				end
+			end
+		end
+	end
+
+	function playermod:Enter(win, id, label)
+		win.actorid, win.actorname = id, label
+		win.title = format(L["%s's deaths"], label)
+	end
+
+	function playermod:Update(win, set)
+		local player = Skada:FindPlayer(set, win.actorid)
+
+		if player then
+			win.title = format(L["%s's deaths"], player.name)
+
+			if (player.death or 0) > 0 and player.deathlog then
+				if win.metadata then
+					win.metadata.maxvalue = 0
+				end
+
+				local nr = 0
+				for i, death in ipairs(player.deathlog) do
+					nr = nr + 1
+
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = i
+					d.time = death.time
+					d.icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
+
+					for k, v in ipairs(death.log) do
+						if v.amount and v.amount < 0 and (v.spellid or v.source) then
+							if v.spellid then
+								d.label, _, d.icon = GetSpellInfo(v.spellid)
+								d.spellid = v.spellid
+								d.spellschool = v.school
+							elseif v.source then
+								d.label = v.source
+							end
+							break
+						end
+					end
+
+					d.label = d.label or L.Unknown
+
+					d.value = death.time
+					d.valuetext = formatdate(d.value)
+
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
+					end
+				end
+			end
+		end
+	end
+
+	local function fixdeathtime(timestamp, player)
+		if timestamp <= 0 and player.deathlog[1].log[1] then
+			player.deathlog[1].time = player.deathlog[1].log[1].time + 25
+			timestamp = player.deathlog[1].time
+		end
+		return timestamp
+	end
+
+	function mod:Update(win, set)
+		win.title = win.class and format("%s (%s)", L["Deaths"], L[win.class]) or L["Deaths"]
+
+		local total = set.death or 0
+		if total > 0 then
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
+
+			local nr = 0
+			for _, player in ipairs(set.players) do
+				if (not win.class or win.class == player.class) and (player.death or 0) > 0 then
+					nr = nr + 1
+
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
+
+					d.id = player.id or player.name
+					d.label = player.name
+					d.text = player.id and Skada:FormatName(player.name, player.id)
+					d.class = player.class
+					d.role = player.role
+					d.spec = player.spec
+
+					if player.deathlog then
+						d.value = fixdeathtime(player.deathlog[1].time, player)
+						d.valuetext = Skada:FormatValueCols(
+							self.metadata.columns.Survivability and Skada:FormatTime(d.value - set.starttime),
+							self.metadata.columns.Count and player.death
+						)
+					else
+						d.value = player.death
+						d.valuetext = tostring(player.death)
+					end
+
+					if win.metadata and d.value > win.metadata.maxvalue then
+						win.metadata.maxvalue = d.value
+					end
+				end
+			end
+		end
+	end
+
+	local function entry_tooltip(win, id, label, tooltip)
+		local entry = win.dataset[id]
+		if entry and entry.spellname then
+			tooltip:AddLine(L["Spell details"] .. " - " .. formatdate(entry.time))
+			tooltip:AddDoubleLine(L["Spell"], entry.spellname, 1, 1, 1, 1, 1, 1)
+
+			if entry.source then
+				tooltip:AddDoubleLine(L["Source"], entry.source, 1, 1, 1, 1, 1, 1)
+			end
+
+			if entry.hp then
+				tooltip:AddDoubleLine(HEALTH, Skada:FormatNumber(entry.hp), 1, 1, 1)
+			end
+
+			if entry.amount then
+				local amount = (entry.amount < 0) and (0 - entry.amount) or entry.amount
+				tooltip:AddDoubleLine(L["Amount"], Skada:FormatNumber(amount), 1, 1, 1)
+			end
+
+			if (entry.overkill or 0) > 0 then
+				tooltip:AddDoubleLine(L["Overkill"], Skada:FormatNumber(entry.overkill), 1, 1, 1, 1, 0.45, 0.45)
+			elseif (entry.overheal or 0) > 0 then
+				tooltip:AddDoubleLine(L["Overheal"], Skada:FormatNumber(entry.overheal), 1, 1, 1, 0.45, 1, 0.45)
+			end
+
+			if (entry.resisted or 0) > 0 then
+				tooltip:AddDoubleLine(L.RESIST, Skada:FormatNumber(entry.resisted), 1, 1, 1)
+			end
+
+			if (entry.blocked or 0) > 0 then
+				tooltip:AddDoubleLine(L.BLOCK, Skada:FormatNumber(entry.blocked), 1, 1, 1)
+			end
+
+			if (entry.absorbed or 0) > 0 then
+				tooltip:AddDoubleLine(L.ABSORB, Skada:FormatNumber(entry.absorbed), 1, 1, 1, 0.45, 1, 0.45)
+			end
+		end
+	end
+
+	function mod:OnEnable()
+		deathlogmod.metadata = {
+			ordersort = true,
+			tooltip = entry_tooltip,
+			columns = {Change = true, Health = true, Percent = true},
+			icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
+		}
+		playermod.metadata = {click1 = deathlogmod}
+		self.metadata = {
+			click1 = playermod,
+			click4 = Skada.ToggleFilter,
+			click4_label = L["Toggle Class Filter"],
+			nototalclick = {playermod},
+			columns = {Survivability = false, Count = true},
+			icon = [[Interface\Icons\ability_rogue_feigndeath]]
+		}
+
+		local flags_dst_nopets = {dst_is_interesting_nopets = true}
+
+		Skada:RegisterForCL(
+			AuraApplied,
+			"SPELL_AURA_APPLIED",
+			flags_dst_nopets
+		)
+
+		Skada:RegisterForCL(
+			SpellDamage,
+			"DAMAGE_SHIELD",
+			"DAMAGE_SPLIT",
+			"RANGE_DAMAGE",
+			"SPELL_BUILDING_DAMAGE",
+			"SPELL_DAMAGE",
+			"SPELL_EXTRA_ATTACKS",
+			"SPELL_PERIODIC_DAMAGE",
+			"SWING_DAMAGE",
+			flags_dst_nopets
+		)
+
+		Skada:RegisterForCL(
+			SpellMissed,
+			"DAMAGE_SHIELD_MISSED",
+			"RANGE_MISSED",
+			"SPELL_BUILDING_MISSED",
+			"SPELL_MISSED",
+			"SPELL_PERIODIC_MISSED",
+			"SWING_MISSED",
+			flags_dst_nopets
+		)
+
+		Skada:RegisterForCL(
+			EnvironmentDamage,
+			"ENVIRONMENTAL_DAMAGE",
+			flags_dst_nopets
+		)
+
+		Skada:RegisterForCL(
+			SpellHeal,
+			"SPELL_HEAL",
+			"SPELL_PERIODIC_HEAL",
+			flags_dst_nopets
+		)
+
+		Skada:RegisterForCL(
+			UnitDied,
+			"UNIT_DIED",
+			"UNIT_DESTROYED",
+			"UNIT_DISSIPATES",
+			flags_dst_nopets
+		)
+
+		Skada:RegisterForCL(
+			SpellResurrect,
+			"SPELL_RESURRECT",
+			flags_dst_nopets
+		)
+
+		Skada:AddMode(self)
+	end
+
+	function mod:OnDisable()
+		Skada:RemoveMode(self)
+	end
+
+	function mod:SetComplete(set)
+		T.clear(data)
+
+		-- clean deathlogs.
+		if (set.death or 0) == 0 then return end
+		for _, player in ipairs(set.players) do
+			if (player.death or 0) == 0 then
+				player.deathlog = nil
+			elseif player.deathlog then
+				while #player.deathlog > (player.death or 0) do
+					tremove(player.deathlog, 1)
+				end
+				if #player.deathlog == 0 then
+					player.deathlog = nil
+				end
+			end
+		end
+	end
+
+	function mod:AddToTooltip(set, tooltip)
+		if (set.death or 0) > 0 then
+			tooltip:AddDoubleLine(DEATHS, set.death, 1, 1, 1)
+		end
+	end
+
+	function mod:GetSetSummary(set)
+		return tostring(set.death or 0)
+	end
+
+	do
+		local options
+		local function GetOptions()
+			if not options then
+				options = {
+					type = "group",
+					name = mod.moduleName,
+					desc = format(L["Options for %s."], L["Death log"]),
+					args = {
+						header = {
+							type = "description",
+							name = mod.moduleName,
+							fontSize = "large",
+							image = [[Interface\Icons\ability_rogue_feigndeath]],
+							imageWidth = 18,
+							imageHeight = 18,
+							imageCoords = {0.05, 0.95, 0.05, 0.95},
+							width = "full",
+							order = 0
+						},
+						sep = {
+							type = "description",
+							name = " ",
+							width = "full",
+							order = 1,
+						},
+						deathlog = {
+							type = "group",
+							name = L["Death log"],
+							inline = true,
+							order = 10,
+							args = {
+								deathlogevents = {
+									type = "range",
+									name = L["Events Amount"],
+									desc = L["Set the amount of events the death log should record."],
+									min = 4,
+									max = 24,
+									step = 1,
+									order = 10
+								},
+								deathlogthreshold = {
+									type = "range",
+									name = L["Minimum Healing"],
+									desc = L["Ignore heal events that are below this threshold."],
+									min = 0,
+									max = 10000,
+									step = 1,
+									bigStep = 10,
+									order = 20
+								}
+							}
+						},
+						announce = {
+							type = "group",
+							name = L["Announce Deaths"],
+							inline = true,
+							order = 20,
+							args = {
+								anndesc = {
+									type = "description",
+									name = L["Announces information about the last hit the player took before they died."],
+									fontSize = "medium",
+									width = "full",
+									order = 10
+								},
+								deathannounce = {
+									type = "toggle",
+									name = L["Enable"],
+									order = 20
+								},
+								deathchannel = {
+									type = "select",
+									name = L["Channel"],
+									values = {AUTO = INSTANCE, SELF = L["Self"], GUILD = GUILD},
+									order = 30,
+									disabled = function()
+										return not Skada.db.profile.modules.deathannounce
+									end
+								}
+							}
+						}
+					}
+				}
+			end
+			return options
+		end
+
+		function mod:OnInitialize()
+			if Skada.db.profile.modules.deathlogevents == nil then
+				Skada.db.profile.modules.deathlogevents = 14
+			end
+			if Skada.db.profile.modules.deathlogthreshold == nil then
+				Skada.db.profile.modules.deathlogthreshold = 2000 -- default
+			end
+			if Skada.db.profile.modules.deathchannel == nil then
+				Skada.db.profile.modules.deathchannel = "AUTO"
+			end
+
+			Skada.options.args.modules.args.deathlog = GetOptions()
+		end
+	end
+end)
