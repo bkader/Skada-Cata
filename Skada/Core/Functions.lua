@@ -62,81 +62,63 @@ function Skada:RegisterClasses()
 	end
 
 	-- set classes icon file & Skada custom classes.
-	if self.AscensionCoA then
-		self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes-coa]]
+	self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
 
-		-- custom class coordinates
-		if not self.classcoords.BOSS then
-			self.classcoords.BOSS = {0, 0.125, 0.875, 1}
-			self.classcoords.MONSTER = {0.125, 0.25, 0.875, 1}
-			self.classcoords.ENEMY = {0.25, 0.375, 0.875, 1}
-			self.classcoords.PET = {0.375, 0.5, 0.875, 1}
-			self.classcoords.UNKNOWN = {0.5, 0.625, 0.875, 1}
-			self.classcoords.PLAYER = {0.625, 0.75, 0.875, 1}
-		end
-	else
-		self.classicons = [[Interface\AddOns\Skada\Media\Textures\icon-classes]]
-
-		-- custom class coordinates
-		if not self.classcoords.BOSS then
-			self.classcoords.BOSS = {0.5, 0.75, 0.5, 0.75}
-			self.classcoords.MONSTER = {0.75, 1, 0.5, 0.75}
-			self.classcoords.ENEMY = {0, 0.25, 0.75, 1}
-			self.classcoords.PET = {0.25, 0.5, 0.75, 1}
-			self.classcoords.PLAYER = {0.75, 1, 0.75, 1}
-			self.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
-		end
+	-- custom class coordinates
+	if not self.classcoords.BOSS then
+		self.classcoords.BOSS = {0.5, 0.75, 0.5, 0.75}
+		self.classcoords.MONSTER = {0.75, 1, 0.5, 0.75}
+		self.classcoords.ENEMY = {0, 0.25, 0.75, 1}
+		self.classcoords.PET = {0.25, 0.5, 0.75, 1}
+		self.classcoords.PLAYER = {0.75, 1, 0.75, 1}
+		self.classcoords.UNKNOWN = {0.5, 0.75, 0.75, 1}
 	end
 
-	-- we ignore roles & specs on Project Ascension since players
-	-- have a custom module to set their own colors & icons.
-	if not self.Ascension and not self.AscensionCoA then
-		-- role icon file and texture coordinates
-		self.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
-		self.rolecoords = {
-			LEADER = {0, 0.25, 0, 1},
-			DAMAGER = {0.25, 0.5, 0, 1},
-			TANK = {0.5, 0.75, 0, 1},
-			HEALER = {0.75, 1, 0, 1},
-			NONE = ""
-		}
+	-- role icon file and texture coordinates
+	self.roleicons = [[Interface\AddOns\Skada\Media\Textures\icon-roles]]
+	self.rolecoords = {
+		LEADER = {0, 0.25, 0, 1},
+		DAMAGER = {0.25, 0.5, 0, 1},
+		TANK = {0.5, 0.75, 0, 1},
+		HEALER = {0.75, 1, 0, 1},
+		NONE = ""
+	}
 
-		-- specialization icons
-		self.specicons = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
-		self.speccoords = {
-			[62] = {0.25, 0.375, 0.25, 0.5}, --> Mage: Arcane
-			[63] = {0.375, 0.5, 0.25, 0.5}, --> Mage: Fire
-			[64] = {0.5, 0.625, 0.25, 0.5}, --> Mage: Frost
-			[65] = {0.625, 0.75, 0.25, 0.5}, --> Paladin: Holy
-			[66] = {0.75, 0.875, 0.25, 0.5}, --> Paladin: Protection
-			[70] = {0.875, 1, 0.25, 0.5}, --> Paladin: Retribution
-			[71] = {0.5, 0.625, 0.75, 1}, --> Warrior: Arms
-			[72] = {0.625, 0.75, 0.75, 1}, --> Warrior: Fury
-			[73] = {0.75, 0.875, 0.75, 1}, --> Warrior: Protection
-			[102] = {0.375, 0.5, 0, 0.25}, --> Druid: Balance
-			[103] = {0.5, 0.625, 0, 0.25}, --> Druid: Feral
-			[104] = {0.625, 0.75, 0, 0.25}, --> Druid: Tank
-			[105] = {0.75, 0.875, 0, 0.25}, --> Druid: Restoration
-			[250] = {0, 0.125, 0, 0.25}, --> Death Knight: Blood
-			[251] = {0.125, 0.25, 0, 0.25}, --> Death Knight: Frost
-			[252] = {0.25, 0.375, 0, 0.25}, --> Death Knight: Unholy
-			[253] = {0.875, 1, 0, 0.25}, --> Hunter: Beastmastery
-			[254] = {0, 0.125, 0.25, 0.5}, --> Hunter: Marksmalship
-			[255] = {0.125, 0.25, 0.25, 0.5}, --> Hunter: Survival
-			[256] = {0, 0.125, 0.5, 0.75}, --> Priest: Discipline
-			[257] = {0.125, 0.25, 0.5, 0.75}, --> Priest: Holy
-			[258] = {0.25, 0.375, 0.5, 0.75}, --> Priest: Shadow
-			[259] = {0.375, 0.5, 0.5, 0.75}, --> Rogue: Assassination
-			[260] = {0.5, 0.625, 0.5, 0.75}, --> Rogue: Combat
-			[261] = {0.625, 0.75, 0.5, 0.75}, --> Rogue: Subtlty
-			[262] = {0.75, 0.875, 0.5, 0.75}, --> Shaman: Elemental
-			[263] = {0.875, 1, 0.5, 0.75}, --> Shaman: Enhancement
-			[264] = {0, 0.125, 0.75, 1}, --> Shaman: Restoration
-			[265] = {0.125, 0.25, 0.75, 1}, --> Warlock: Affliction
-			[266] = {0.25, 0.375, 0.75, 1}, --> Warlock: Demonology
-			[267] = {0.375, 0.5, 0.75, 1} --> Warlock: Destruction
-		}
-	end
+	-- specialization icons
+	self.specicons = [[Interface\AddOns\Skada\Media\Textures\icon-specs]]
+	self.speccoords = {
+		[62] = {0.25, 0.375, 0.25, 0.5}, --> Mage: Arcane
+		[63] = {0.375, 0.5, 0.25, 0.5}, --> Mage: Fire
+		[64] = {0.5, 0.625, 0.25, 0.5}, --> Mage: Frost
+		[65] = {0.625, 0.75, 0.25, 0.5}, --> Paladin: Holy
+		[66] = {0.75, 0.875, 0.25, 0.5}, --> Paladin: Protection
+		[70] = {0.875, 1, 0.25, 0.5}, --> Paladin: Retribution
+		[71] = {0.5, 0.625, 0.75, 1}, --> Warrior: Arms
+		[72] = {0.625, 0.75, 0.75, 1}, --> Warrior: Fury
+		[73] = {0.75, 0.875, 0.75, 1}, --> Warrior: Protection
+		[102] = {0.375, 0.5, 0, 0.25}, --> Druid: Balance
+		[103] = {0.5, 0.625, 0, 0.25}, --> Druid: Feral
+		[104] = {0.625, 0.75, 0, 0.25}, --> Druid: Tank
+		[105] = {0.75, 0.875, 0, 0.25}, --> Druid: Restoration
+		[250] = {0, 0.125, 0, 0.25}, --> Death Knight: Blood
+		[251] = {0.125, 0.25, 0, 0.25}, --> Death Knight: Frost
+		[252] = {0.25, 0.375, 0, 0.25}, --> Death Knight: Unholy
+		[253] = {0.875, 1, 0, 0.25}, --> Hunter: Beastmastery
+		[254] = {0, 0.125, 0.25, 0.5}, --> Hunter: Marksmalship
+		[255] = {0.125, 0.25, 0.25, 0.5}, --> Hunter: Survival
+		[256] = {0, 0.125, 0.5, 0.75}, --> Priest: Discipline
+		[257] = {0.125, 0.25, 0.5, 0.75}, --> Priest: Holy
+		[258] = {0.25, 0.375, 0.5, 0.75}, --> Priest: Shadow
+		[259] = {0.375, 0.5, 0.5, 0.75}, --> Rogue: Assassination
+		[260] = {0.5, 0.625, 0.5, 0.75}, --> Rogue: Combat
+		[261] = {0.625, 0.75, 0.5, 0.75}, --> Rogue: Subtlty
+		[262] = {0.75, 0.875, 0.5, 0.75}, --> Shaman: Elemental
+		[263] = {0.875, 1, 0.5, 0.75}, --> Shaman: Enhancement
+		[264] = {0, 0.125, 0.75, 1}, --> Shaman: Restoration
+		[265] = {0.125, 0.25, 0.75, 1}, --> Warlock: Affliction
+		[266] = {0.25, 0.375, 0.75, 1}, --> Warlock: Demonology
+		[267] = {0.375, 0.5, 0.75, 1} --> Warlock: Destruction
+	}
 end
 
 function Skada:RegisterSchools()
@@ -494,29 +476,6 @@ do
 		{"Summonbot", "WARLOCK", "DAMAGER", 266}, -- Demonology Warlock
 		{"Chuggernaut", "WARRIOR", "DAMAGER", 72} -- Fury Warrior
 	}
-	local fakePlayersAscension = {
-		{"Necromancer", "NECROMANCER"},
-		{"Sun Cleric", "SUNCLERIC"},
-		{"Starcaller", "STARCALLER"},
-		{"Reaper", "REAPER"},
-		{"Tinker", "TINKER"},
-		{"Stormbringer", "STORMBRINGER"},
-		{"Knight of Xoroth", "FLESHWARDEN"},
-		{"Barbarian", "BARBARIAN"},
-		{"Cultist", "CULTIST"},
-		{"Pyromancer", "PYROMANCER"},
-		{"Ranger", "RANGER"},
-		{"Runemaster", "SPIRITMAGE"},
-		{"Demon Hunter", "DEMONHUNTER"},
-		{"Guardian", "GUARDIAN"},
-		{"Witch Hunter", "WITCHHUNTER"},
-		{"Son of Arugal", "SONOFARUGAL"},
-		{"Monk", "MONK"},
-		{"Chronomancer", "CHRONOMANCER"},
-		{"Venomancer", "PROPHET"},
-		{"Primalist", "WILDWALKER"},
-		{"Witch Doctor", "WITCHDOCTOR"}
-	}
 
 	local function GenerateFakeData()
 		wipe(fakeSet)
@@ -528,9 +487,8 @@ do
 		fakeSet.absorb = 0
 		fakeSet.players = wipe(fakeSet.players or {})
 
-		local players = Skada.AscensionCoA and fakePlayersAscension or fakePlayers
-		for i = 1, #players do
-			local name, class, role, spec = unpack(players[i])
+		for i = 1, #fakePlayers do
+			local name, class, role, spec = unpack(fakePlayers[i])
 			local damage, heal, absorb = 0, 0, 0
 
 			if role == "TANK" then

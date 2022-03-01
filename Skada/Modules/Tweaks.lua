@@ -19,7 +19,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 		Skada.BITMASK_GROUP = BITMASK_GROUP
 	end
 
-	local channel_events, considerFoF, fofrostmourne
+	local channel_events, fofrostmourne
 
 	local ignoredspells = {
 		[1130] = true, -- Hunter's Mark (rank 1)
@@ -76,7 +76,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 		function Skada:CombatLogEvent(_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 			-- The Lich King fight & Fury of Frostmourne
-			if considerFoF and (... == 72350 or select(2, ...) == fofrostmourne) then
+			if ... == 72350 or select(2, ...) == fofrostmourne then
 				-- the segment should be flagged as success.
 				if self.current and not self.current.success then
 					self.current.success = true
@@ -483,7 +483,6 @@ Skada:AddLoadableModule("Tweaks", function(L)
 				type = "toggle",
 				name = fofrostmourne,
 				desc = format(L["Enable this if you want to ignore |cffffbb00%s|r."], fofrostmourne),
-				hidden = Skada.Ascension,
 				set = SetValue,
 				order = 40
 			}
@@ -599,7 +598,6 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 		-- fury of frostmourne
 		fofrostmourne = fofrostmourne or GetSpellInfo(72351)
-		considerFoF = not (Skada.Ascension or Skada.AscensionCoA)
 
 		-- smart stop
 		if Skada.db.profile.smartstop then

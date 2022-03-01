@@ -89,8 +89,8 @@ Skada:AddLoadableModule("Sunder Counter", function(L)
 
 	local function DoubleCheckSunder()
 		if not sunder then
-			sunder, devastate = GetSpellInfo(47467), GetSpellInfo(47498)
-			sunderLink = GetSpellLink(47467)
+			sunder, devastate = GetSpellInfo(7386), GetSpellInfo(20243)
+			sunderLink = GetSpellLink(7386)
 		end
 	end
 

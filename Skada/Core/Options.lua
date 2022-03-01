@@ -168,7 +168,6 @@ Skada.defaults = {
 			["My Spells"] = true,
 			["Overhealing"] = true,
 			["Overkill"] = true,
-			["Project Ascension"] = true,
 			["PVP"] = true,
 			["Themes"] = true,
 			["Useful Damage"] = true

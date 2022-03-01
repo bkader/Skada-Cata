@@ -719,14 +719,6 @@ L["Announces how long it took to apply %d stacks of %s and announces when it dro
 L["%s dropped from %s!"] = "%s 已于 %s 过期！"
 L["%s stacks of %s applied on %s in %s sec!"] = "%4$s 秒内将 %1$s 叠 %2$s 涂抹在 %3$s 上！"
 L["My Spells"] = "我的技能"
--- project ascension
-L["Project Ascension"] = "Project Ascension"
-L["project_ascension_desc"] = "在 |cffffbb00Project Ascension|r 中，您的角色是拥有任何能力或天赋的英雄。\n\n图标和颜色被发送给组成员使用，而不是默认的图标和颜色。"
-L["Icon"] = "图标"
-L["Color"] = "颜色"
-L["Color for %s."] = "%s 的颜色。"
-L["Choose the %s that fits your character's build."] = "选择适合您角色体型的%s。"
-L["Are you sure you want clear cached icons and colors?"] = "您确定要删除缓存的图标和颜色吗？"
 -- arena
 L["Custom Arena Colors"] = "自定义竞技场颜色"
 L["Enable this if you want to use custom arena teams colors."] = "如果您想使用自定义竞技场球队颜色，请启用此功能。"

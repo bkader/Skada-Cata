@@ -723,16 +723,6 @@ L["Announces how long it took to apply %d stacks of %s and announces when it dro
 L["%s dropped from %s!"] = "%s истек %s!"
 L["%s stacks of %s applied on %s in %s sec!"] = "На %3$s нанесено %1$s стаканов %2$s за %4$s секунд!"
 L["My Spells"] = "Мои заклинания"
--- project ascension
-L["Project Ascension"] = "Project Ascension"
-L["project_ascension_desc"] = [=[В |cffffbb00Project Ascension|r ваши персонажи - бесклассовые Герои, у которых есть любые способности или таланты, доступные им.
-
-Значки и цвета отправляются членам группы для использования вместо значков и цветов по умолчанию.]=]
-L["Icon"] = "Значок"
-L["Color"] = "Цвет"
-L["Color for %s."] = "Цвет %s."
-L["Choose the %s that fits your character's build."] = "Выберите %s, соответствующий телосложению вашего персонажа."
-L["Are you sure you want clear cached icons and colors?"] = "Вы уверены, что хотите удалить кешированные значки и цвета?"
 -- arena
 L["Custom Arena Colors"] = "Пользовательские цвета арены"
 L["Enable this if you want to use custom arena teams colors."] = "Включите это, если вы хотите использовать собственные цвета команд арены."

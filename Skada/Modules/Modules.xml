@@ -40,6 +40,5 @@
 <Script file="Scroll.lua" />
 <Script file="Themes.lua" />
 <Script file="Nickname.lua" />
-<Script file="Ascension.lua" />
 <Script file="PvP.lua" />
 </Ui>

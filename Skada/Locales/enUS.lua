@@ -727,16 +727,6 @@ L["Announces how long it took to apply %d stacks of %s and announces when it dro
 L["%s dropped from %s!"] = true
 L["%s stacks of %s applied on %s in %s sec!"] = true
 L["My Spells"] = true
--- project ascension
-L["Project Ascension"] = true
-L["project_ascension_desc"] = [=[On |cffffbb00Project Ascension|r, your characters are classless Heroes that have any ability or talent within their reach.
-
-Icons and colors are sent to group members and Skada can use them instead of your character's default class icon and color.]=]
-L["Icon"] = true
-L["Color"] = true
-L["Color for %s."] = true
-L["Choose the %s that fits your character's build."] = true
-L["Are you sure you want clear cached icons and colors?"] = true
 -- arena
 L["Custom Arena Colors"] = true
 L["Enable this if you want to use custom arena teams colors."] = true

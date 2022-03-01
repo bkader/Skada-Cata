@@ -726,16 +726,6 @@ L["Announces how long it took to apply %d stacks of %s and announces when it dro
 L["%s dropped from %s!"] = "%s sur %s a expiré!"
 L["%s stacks of %s applied on %s in %s sec!"] = "%s piles \1242 %s appliquées sur %s en %s sec!"
 L["My Spells"] = "Mes sorts"
--- project ascension
-L["Project Ascension"] = "Project Ascension"
-L["project_ascension_desc"] = [=[Sur |cffffbb00Project Ascension|r, vos héros sans classe ayant à leur portée n'importe quelle capacité ou talent.
-
-Les icônes et les couleurs sont envoyées aux membres du groupe afain d'être utilisées au lieu des icônes et couleurs par défaut.]=]
-L["Icon"] = "Icône"
-L["Color"] = "Couleur"
-L["Color for %s."] = "Couleur \1242 %s."
-L["Choose the %s that fits your character's build."] = "Choix \1242 %s qui correspond au build de votre personnage."
-L["Are you sure you want clear cached icons and colors?"] = "Êtes-vous sûr de vouloir vider le cache des icônes et des couleurs?"
 -- arena
 L["Custom Arena Colors"] = "Couleurs d'arène personnalisées"
 L["Enable this if you want to use custom arena teams colors."] = "Activez cette option si vous souhaitez utiliser des couleurs d'équipes d'arène personnalisées."
