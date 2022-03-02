@@ -486,12 +486,6 @@ L["Overheal spell list"] = true
 L["%s's overheal spells"] = true
 L["%s's overhealed targets"] = true
 L["%s's overhealing on %s"] = true
-L["Healing and Overhealing"] = true
-L["Heal and overheal spells"] = true
-L["Healed and overhealed targets"] = true
-L["%s's heal and overheal spells"] = true
-L["%s's healed and overhealed targets"] = true
-L["%s's healing and overhealing on %s"] = true
 L["Absorbs"] = true
 L["Absorbed target list"] = true
 L["Absorb spell list"] = true
@@ -688,10 +682,6 @@ L["Name display"] = true
 L["Choose how names are shown on your bars."] = true
 L["Clear Cache"] = true
 L["Are you sure you want clear cached nicknames?"] = true
--- damage mitigated lines --
-L["Damage Mitigated"] = true
-L["%s's mitigated damage"] = true
-L["%s's <%s> mitigated damage"] = true
 -- overkill module lines --
 L["Overkill"] = true
 L["Overkill spell list"] = true
