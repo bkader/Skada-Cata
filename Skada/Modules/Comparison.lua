@@ -165,9 +165,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 	-- local nr = add_detail_bar(win, 0, L["Hits"], spell.count, myspell.count)
 	local function add_detail_bar(win, nr, title, value, myvalue, fmt, disabled)
 		nr = nr + 1
-
-		local d = win.dataset[nr] or {}
-		win.dataset[nr] = d
+		local d = win:nr(nr)
 
 		d.id = title
 		d.label = title
@@ -404,9 +402,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 				for spellname, spell in pairs(actor.damagespells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = spellname
 						d.spellid = spell.id
@@ -449,9 +445,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 			for spellname, spell in pairs(actor.damagespells) do
 				if spell.targets and spell.targets[win.targetname] then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = spellname
 					d.spellid = spell.id
@@ -510,9 +504,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 				for spellname, spell in pairs(myself.damagespells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = spellname
 						d.spellid = spell.id
@@ -560,9 +552,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 				for spellname, spell in pairs(spells) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = spellname
 					d.spellid = spell.id
@@ -591,9 +581,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 			-- iterate comparison actor's spells.
 			for spellname, spell in pairs(spells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellname
 				d.spellid = spell.id
@@ -626,9 +614,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 				for spellname, spell in pairs(myspells) do
 					if not spells[spellname] then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = spellname
 						d.spellid = spell.id
@@ -678,9 +664,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 				for targetname, target in pairs(targets) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = target.id or targetname
 					d.label = targetname
@@ -709,9 +693,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 			-- iterate comparison actor's targets.
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = target.id or targetname
 				d.label = targetname
@@ -744,9 +726,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 				for targetname, target in pairs(mytargets) do
 					if not targets[targetname] then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = target.id or targetname
 						d.label = targetname
@@ -789,9 +769,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 					local dps, amount = player:GetDPS()
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name

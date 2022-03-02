@@ -493,9 +493,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			for spellid, spell in pairs(actor.absorbspells) do
 				if spell.targets and spell.targets[win.targetname] then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = spellid
 					d.spellid = spellid
@@ -537,9 +535,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			local nr = 0
 			for spellid, spell in pairs(actor.absorbspells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -582,9 +578,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = target.id or targetname
 				d.label = targetname
@@ -623,9 +617,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					local aps, amount = player:GetAPS()
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -659,9 +651,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 						local aps, amount = enemy:GetAPS()
 						if amount > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -904,9 +894,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 				for spellid, spell in pairs(actor.healspells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = spellid
 						d.spellid = spellid
@@ -939,9 +927,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 				for spellid, spell in pairs(actor.absorbspells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = spellid
 						d.spellid = spellid
@@ -985,9 +971,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			if actor.healspells then
 				for spellid, spell in pairs(actor.healspells) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = spellid
 					d.spellid = spellid
@@ -1013,9 +997,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			if actor.absorbspells then
 				for spellid, spell in pairs(actor.absorbspells) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = spellid
 					d.spellid = spellid
@@ -1057,9 +1039,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			for targetname, target in pairs(targets) do
 				if target.amount > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = target.id or targetname
 					d.label = targetname
@@ -1099,9 +1079,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -1136,9 +1114,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 						if amount > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -1274,9 +1250,7 @@ Skada:AddLoadableModule("HPS", function(L)
 					local amount = player:GetAHPS()
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -1309,9 +1283,7 @@ Skada:AddLoadableModule("HPS", function(L)
 						local amount = enemy:GetHPS()
 						if amount > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -1458,9 +1430,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 			local nr = 0
 			for playername, player in pairs(cacheTable) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = player.id or playername
 				d.label = playername
@@ -1495,9 +1465,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 			local nr = 0
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid

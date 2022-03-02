@@ -192,9 +192,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 			local nr = 0
 			for spellid, spell in pairs(player.ccdonespells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -234,9 +232,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = target.id or targetname
 				d.label = targetname
@@ -270,9 +266,7 @@ Skada:AddLoadableModule("CC Done", function(L)
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.ccdone or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name
@@ -443,9 +437,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 			local nr = 0
 			for spellid, spell in pairs(player.cctakenspells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -485,9 +477,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 			local nr = 0
 			for sourcename, source in pairs(sources) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = source.id or sourcename
 				d.label = sourcename
@@ -521,9 +511,7 @@ Skada:AddLoadableModule("CC Taken", function(L)
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.cctaken or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name
@@ -728,9 +716,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 			local nr = 0
 			for spellid, spell in pairs(player.ccbreakspells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -770,9 +756,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = target.id or targetname
 				d.label = targetname
@@ -806,9 +790,7 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 			for _, player in ipairs(set.players) do
 				if (not win.class or win.class == player.class) and (player.ccbreak or 0) > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = player.id or player.name
 					d.label = player.name
