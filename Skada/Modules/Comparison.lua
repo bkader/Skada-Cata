@@ -185,7 +185,7 @@ Skada:AddLoadableModule("Comparison", function(L)
 
 		d.valuetext = FormatValueNumber(value, myvalue, fmt, disabled)
 
-		if win.metadata and d.value > win.metadata.maxvalue then
+		if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 			win.metadata.maxvalue = d.value
 		end
 
