@@ -539,18 +539,18 @@ do
 			if player.role == "HEALER" then
 				damage = coef * random(0, 1500)
 				if player.spec == 256 then
-					heal = coef * random(500, 1500)
-					absorb = coef * random(2500, 20000)
+					heal = coef * random(500, 8000)
+					absorb = coef * random(7500, 13000)
 				else
-					heal = coef * random(2500, 15000)
+					heal = coef * random(8000, 21000)
 					absorb = coef * random(0, 150)
 				end
 			elseif player.role == "TANK" then
-				damage = coef * random(1000, 10000)
+				damage = coef * random(5000, 14000)
 				heal = coef * random(500, 1500)
 				absorb = coef * random(1000, 1500)
 			else
-				damage = coef * random(8000, 18000)
+				damage = coef * random(16000, 31000)
 				heal = coef * random(150, 1500)
 			end
 
