@@ -21,12 +21,122 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	local LGT = LibStub("LibGroupTalents-1.0")
 
+	local COMBATLOG_OBJECT_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
+	local COMBATLOG_OBJECT_AFFILIATION_OUTSIDER = COMBATLOG_OBJECT_AFFILIATION_OUTSIDER or 0x00000008
+	local COMBATLOG_OBJECT_REACTION_MASK = COMBATLOG_OBJECT_REACTION_MASK or 0x000000F0
+
 	local GroupIterator = Skada.GroupIterator
 	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
 	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
 	local GetTime, band = GetTime, bit.band
 	local tsort, tContains = table.sort, tContains
 	local T = Skada.Table
+
+	local absorbspells = {
+		[48707] = 5, -- Anti-Magic Shell
+		[51052] = 10, -- Anti-Magic Zone
+		[81164] = 86400, -- Will of the Necropolis
+		[77535] = 10, -- Blood Shield
+		[62606] = 10, -- Savage Defense Proc
+		[11426] = 60, -- Ice Barrier
+		[1463] = 60, --  Mana shield
+		[543] = 30, -- Mage Ward
+		[86273] = 6, -- Illuminated Healing
+		[88063] = 6, -- Guarded by the Light
+		[96263] = 15, -- Sacred Shield
+		[31850] = 86400, -- Ardent Defender
+		[31230] = 86400, -- Cheat Death
+		[17] = 30, -- Power Word: Shield
+		[47509] = 15, -- Divine Aegis (rank 1)
+		[47511] = 15, -- Divine Aegis (rank 2)
+		[47515] = 15, -- Divine Aegis (rank 3)
+		[47753] = 15, -- Divine Aegis (rank 1)
+		[54704] = 15, -- Divine Aegis (rank 1)
+		[47788] = 10, -- Guardian Spirit
+		[62618] = 25, -- Power Word: Barrier
+		[81781] = 25, -- Power Word: Barrier
+		[7812] = 30, -- Sacrifice
+		[6229] = 30, -- Shadow Ward
+		[29674] = 86400, -- Lesser Ward of Shielding
+		[29719] = 86400, -- Greater Ward of Shielding
+		[29701] = 86400, -- Greater Shielding
+		[28538] = 120, -- Major Holy Protection Potion
+		[28537] = 120, -- Major Shadow Protection Potion
+		[28536] = 120, --  Major Arcane Protection Potion
+		[28513] = 120, -- Major Nature Protection Potion
+		[28512] = 120, -- Major Frost Protection Potion
+		[28511] = 120, -- Major Fire Protection Potion
+		[7233] = 120, -- Fire Protection Potion
+		[7239] = 120, -- Frost Protection Potion
+		[7242] = 120, -- Shadow Protection Potion
+		[7245] = 120, -- Holy Protection Potion
+		[6052] = 120, -- Nature Protection Potion
+		[53915] = 120, -- Mighty Shadow Protection Potion
+		[53914] = 120, -- Mighty Nature Protection Potion
+		[53913] = 120, -- Mighty Frost Protection Potion
+		[53911] = 120, -- Mighty Fire Protection Potion
+		[53910] = 120, -- Mighty Arcane Protection Potion
+		[17548] = 120, -- Greater Shadow Protection Potion
+		[17546] = 120, -- Greater Nature Protection Potion
+		[17545] = 120, -- Greater Holy Protection Potion
+		[17544] = 120, -- Greater Frost Protection Potion
+		[17543] = 120, -- Greater Fire Protection Potion
+		[17549] = 120, -- Greater Arcane Protection Potion
+		[28527] = 15, -- Fel Blossom
+		[29432] = 3600, -- Frozen Rune
+		[36481] = 4, -- Arcane Barrier (TK Kael'Thas) Shield
+		[57350] = 6, -- Darkmoon Card: Illusion
+		[17252] = 30, -- Mark of the Dragon Lord (LBRS epic ring)
+		[25750] = 15, -- Defiler's Talisman/Talisman of Arathor
+		[25747] = 15, -- Defiler's Talisman/Talisman of Arathor
+		[25746] = 15, -- Defiler's Talisman/Talisman of Arathor
+		[23991] = 15, -- Defiler's Talisman/Talisman of Arathor
+		[31000] = 300, -- Pendant of Shadow's End Usage
+		[30997] = 300, -- Pendant of Frozen Flame Usage
+		[31002] = 300, -- Pendant of the Null Rune
+		[30999] = 300, -- Pendant of Withering
+		[30994] = 300, -- Pendant of Thawing
+		[31000] = 300, -- Pendant of Shadow's End
+		[23506]= 20, -- Arena Grand Master
+		[12561] = 60, -- Goblin Construction Helmet
+		[31771] = 20, -- Runed Fungalcap
+		[21956] = 10, -- Mark of Resolution
+		[29506] = 20, -- The Burrower's Shell
+		[4057] = 60, -- Flame Deflector
+		[4077] = 60, -- Ice Deflector
+		[39228] = 20, -- Argussian Compass (may not be an actual absorb)
+		[27779] = 30, -- Divine Protection (Priest dungeon set 1/2)
+		[11657] = 20, -- Jang'thraze (Zul Farrak)
+		[10368] = 15, -- Uther's Light Effect
+		[37515] = 15, -- Blade Turning
+		[42137] = 86400, -- Greater Rune of Warding
+		[26467] = 30, -- Scarab Brooch
+		[27539] = 6, -- Thick Obsidian Breatplate
+		[28810] = 30, -- Faith Set Proc Armor of Faith
+		[54808] = 12, -- Noise Machine Proc Sonic Shield
+		[55019] = 12, -- Sonic Shield
+		[64413] = 8, -- Val'anyr, Hammer of Ancient Kings proc Protection of Ancient Kings
+		[105909] = 6, -- Shield of Fury
+		[105801] = 6, -- Delayed Judgement
+		[40322] = 30, -- Teron's Vengeful Spirit Ghost - Spirit Shield
+		[65874] = 15, -- Twin Val'kyr's: Shield of Darkness
+		[67257] = 15, -- Twin Val'kyr's: Shield of Darkness (300000)
+		[67256] = 15, -- Twin Val'kyr's: Shield of Darkness (700000)
+		[67258] = 15, -- Twin Val'kyr's: Shield of Darkness (1200000)
+		[65858] = 15, -- Twin Val'kyr's Shield of Lights (175000)
+		[67260] = 15, -- Twin Val'kyr's: Shield of Lights (300000)
+		[67259] = 15, -- Twin Val'kyr's: Shield of Lights (700000)
+		[67261] = 15, -- Twin Val'kyr's: Shield of Lights (1200000)
+		[65686] = 86400, -- Twin Val'kyr: Light Essence
+		[65684] = 86400, -- Twin Val'kyr: Dark Essence
+	}
+
+	-- spells iof which we don't record casts.
+	local passivespells = {
+		[31230] = true, -- Cheat Death
+		[81164] = true, -- Will of the Necropolis
+		[31850] = true, -- Ardent Defender
+	}
 
 	local shields = nil -- holds the list of players shields and other stuff
 	local shieldamounts = nil -- holds the amount shields absorbed so far
@@ -206,33 +316,90 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	local function HandleShield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local spellid, spellname, spellschool, auratype, amount, points = ...
+		if not spellid or not absorbspells[spellid] then return end
+
+		if dstGUID and amount == nil and points == nil and spellname then
+			local unit = Skada:GetUnitId(dstGUID, nil, true)
+			amount = unit and select(14, UnitBuff(unit, spellname))
+			if not amount or amount == 0 then return end
+		end
+
 		-- shield removed?
 		if eventtype == "SPELL_AURA_REMOVED" then
-			local spellid, _, _, _, amount = ...
-			if amount ~= nil and shields[dstName] and shields[dstName][spellid] and shields[dstName][spellid][srcName] then
-				shields[dstName][spellid][srcName].amount = 0
+			if shields[dstName] and shields[dstName][spellid] and shields[dstName][spellid][srcName] then
+				shields[dstName][spellid][srcName].ts = timestamp + 0.1
 			end
 			return
 		end
 
 		-- shield applied
-		local spellid, _, spellschool, _, amount = ...
-		if spellid and amount ~= nil and not tContains(ignoredSpells, spellid) and dstName then
+		if not tContains(ignoredSpells, spellid) and dstName then
 			shields[dstName] = shields[dstName] or {}
 			shields[dstName][spellid] = shields[dstName][spellid] or {}
 
 			-- log spell casts.
-			Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellid, spellschool)
+			if not passivespells[spellid] then
+				Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, spellid, spellschool)
+			end
 
 			shields[dstName][spellid][srcName] = {
 				srcGUID = srcGUID,
 				srcFlags = srcFlags,
 				spellid = spellid,
 				school = spellschool,
-				amount = amount,
-				ts = timestamp,
+				amount = amount or 0,
+				points = points,
+				ts = timestamp + absorbspells[spellid] + 0.1,
 				full = true
 			}
+		end
+	end
+
+	do
+		-- some effects aren't shields but rather special effects, such us talents.
+		-- in order to track them, we simply add them as fake shields before all.
+		-- I don't know the whole list of effects but, if you want to add yours
+		-- please do : CLASS = {[index] = {spellid, spellschool}}
+		local passiveshields = {
+			DEATHKNIGHT = {{81164, 1}},
+			PALADIN = {{31850, 1}},
+			ROGUE = {{31230, 1}}
+		}
+
+		local function CheckUnitShields(unit, owner, timestamp, curtime)
+			if not UnitIsDeadOrGhost(unit) then
+				local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
+				for i = 1, 40 do
+					local spellname, _, _, _, _, _, expires, unitCaster, _, _, spellid, _, _, amount = UnitBuff(unit, i)
+					if spellid then
+						if absorbspells[spellid] and unitCaster then
+							HandleShield(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, spellname, nil, amount)
+						end
+					else
+						break -- nothing found
+					end
+				end
+
+				-- passive shields (not for pets)
+				if owner == nil then
+					local class = select(2, UnitClass(unit))
+					if passiveshields[class] then
+						for _, spell in ipairs(passiveshields[class]) do
+							local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spell[1]), LGT:GetActiveTalentGroup(unit))
+							if points then
+								HandleShield(timestamp - 60, nil, dstGUID, dstGUID, nil, dstGUID, dstName, nil, spell[1], nil, spell[2], nil, nil, points)
+							end
+						end
+					end
+				end
+			end
+		end
+
+		function mod:CheckPreShields(event, set, timestamp)
+			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
+				GroupIterator(CheckUnitShields, timestamp, GetTime())
+			end
 		end
 	end
 
@@ -243,14 +410,14 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 		for spellid, spells in pairs(shields[dstName]) do
 			for srcName, shield in pairs(spells) do
-				if shield.ts <= timestamp and shield.amount > 0 then
+				if shield.ts > timestamp then
 					-- Light Essence vs Fire Damage
-					if spellid == 65686 and band(spellschool, 0x4) == spellschool then
+					if spellid == 65686 and band(spellschool, 0x04) == spellschool then
 						return -- don't record
 					-- Dark Essence vs Shadow Damage
 					elseif spellid == 65684 and band(spellschool, 0x20) == spellschool then
 						return -- don't record
-					-- Mage Ward vs Frost Damage
+					-- Mage Ward vs Frost, Fire or Arcane Damage
 					elseif
 						spellid == 543 and
 						band(spellschool, 0x04) ~= spellschool and -- Fire Damage
@@ -261,8 +428,8 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					-- Shadow Ward vs Shadow Damage
 					elseif spellid == 6229 and band(spellschool, 0x20) ~= spellschool then
 						-- nothing
-					-- Anti-Magic and Savage Defense vs Physical Damage
-					-- elseif (spellid == 48707 or spellid == 62600) and band(spellschool, 0x01) == spellschool then
+					-- Anti-Magic Shell vs Physical Damage
+					elseif spellid == 48707 and band(spellschool, 0x01) == spellschool then
 					-- 	-- nothing
 					else
 						shieldspopped[#shieldspopped + 1] = {
@@ -286,7 +453,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		if count <= 0 then return end
 
 		-- if the player has a single shield and it broke, we update its max absorb
-		if count == 1 and broke and shieldspopped[1].full and shieldspopped[1].full.amount then
+		if count == 1 and broke and shieldspopped[1].full and shieldspopped[1].amount then
 			local s = shieldspopped[1]
 			shieldamounts[s.srcName] = shieldamounts[s.srcName] or {}
 			if (not shieldamounts[s.srcName][s.spellid] or shieldamounts[s.srcName][s.spellid] < absorbed) and absorbed < s.amount then
@@ -299,6 +466,14 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		for _, s in ipairs(shieldspopped) do
 			if s.full and shieldamounts and shieldamounts[s.srcName] and shieldamounts[s.srcName][s.spellid] then
 				s.amount = shieldamounts[s.srcName][s.spellid]
+			elseif s.spellid == 81164 and s.points then -- Will of the Necropolis
+				local hppercent = UnitHealthInfo(dstName, dstGUID)
+				s.amount = (hppercent and hppercent <= 36) and floor(total * 0.05 * s.points) or 0
+			elseif s.spellid == 31850 and s.points then -- Ardent Defender
+				local hppercent = UnitHealthInfo(dstName, dstGUID)
+				s.amount = (hppercent and hppercent <= 36) and floor(total * 0.0667 * s.points) or 0
+			elseif s.spellid == 31230 and s.points then -- Cheat Death
+				s.amount = floor((select(3, UnitHealthInfo(dstName, dstGUID)) or 0) * 0.1)
 			end
 		end
 
@@ -434,6 +609,18 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		end
 	end
 
+	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+		local shield = shields[dstName] and shields[dstName][47753] and shields[dstName][47753][srcName]
+		if shield and shield.ts > timestamp then
+			local amount, _, _, critical = select(4, ...)
+			if critical then
+				shield.amount = max(65846, shield.amount + floor(amount * 0.3))
+				shield.ts = timestamp + 15.1
+				shield.full = true
+			end
+		end
+	end
+
 	local function playermod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
 		if not set then return end
@@ -493,7 +680,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			for spellid, spell in pairs(actor.absorbspells) do
 				if spell.targets and spell.targets[win.targetname] then
 					nr = nr + 1
-					local d = win:nr(nr)
+
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
 					d.id = spellid
 					d.spellid = spellid
@@ -535,7 +724,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			local nr = 0
 			for spellid, spell in pairs(actor.absorbspells) do
 				nr = nr + 1
-				local d = win:nr(nr)
+
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
 				d.id = spellid
 				d.spellid = spellid
@@ -578,7 +769,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
+
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
 				d.id = target.id or targetname
 				d.label = targetname
@@ -617,7 +810,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 					local aps, amount = player:GetAPS()
 					if amount > 0 then
 						nr = nr + 1
-						local d = win:nr(nr)
+
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -651,7 +846,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 						local aps, amount = enemy:GetAPS()
 						if amount > 0 then
 							nr = nr + 1
-							local d = win:nr(nr)
+
+							local d = win.dataset[nr] or {}
+							win.dataset[nr] = d
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -702,6 +899,13 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			flags_src
 		)
 
+		Skada:RegisterForCL(
+			SpellHeal,
+			"SPELL_HEAL",
+			"SPELL_PERIODIC_HEAL",
+			flags_src
+		)
+
 		local flags_dst = {dst_is_interesting_nopets = true}
 
 		Skada:RegisterForCL(
@@ -731,6 +935,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			flags_dst
 		)
 
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckPreShields")
 		Skada:AddMode(self, L["Absorbs and Healing"])
 	end
 
@@ -894,7 +1099,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 				for spellid, spell in pairs(actor.healspells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-						local d = win:nr(nr)
+
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
 						d.id = spellid
 						d.spellid = spellid
@@ -927,7 +1134,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 				for spellid, spell in pairs(actor.absorbspells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-						local d = win:nr(nr)
+
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
 						d.id = spellid
 						d.spellid = spellid
@@ -971,7 +1180,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			if actor.healspells then
 				for spellid, spell in pairs(actor.healspells) do
 					nr = nr + 1
-					local d = win:nr(nr)
+
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
 					d.id = spellid
 					d.spellid = spellid
@@ -997,7 +1208,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			if actor.absorbspells then
 				for spellid, spell in pairs(actor.absorbspells) do
 					nr = nr + 1
-					local d = win:nr(nr)
+
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
 					d.id = spellid
 					d.spellid = spellid
@@ -1039,7 +1252,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			for targetname, target in pairs(targets) do
 				if target.amount > 0 then
 					nr = nr + 1
-					local d = win:nr(nr)
+
+					local d = win.dataset[nr] or {}
+					win.dataset[nr] = d
 
 					d.id = target.id or targetname
 					d.label = targetname
@@ -1079,7 +1294,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 					if amount > 0 then
 						nr = nr + 1
-						local d = win:nr(nr)
+
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -1114,7 +1331,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 						if amount > 0 then
 							nr = nr + 1
-							local d = win:nr(nr)
+
+							local d = win.dataset[nr] or {}
+							win.dataset[nr] = d
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -1250,7 +1469,9 @@ Skada:AddLoadableModule("HPS", function(L)
 					local amount = player:GetAHPS()
 					if amount > 0 then
 						nr = nr + 1
-						local d = win:nr(nr)
+
+						local d = win.dataset[nr] or {}
+						win.dataset[nr] = d
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -1283,7 +1504,9 @@ Skada:AddLoadableModule("HPS", function(L)
 						local amount = enemy:GetHPS()
 						if amount > 0 then
 							nr = nr + 1
-							local d = win:nr(nr)
+
+							local d = win.dataset[nr] or {}
+							win.dataset[nr] = d
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -1430,7 +1653,9 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 			local nr = 0
 			for playername, player in pairs(cacheTable) do
 				nr = nr + 1
-				local d = win:nr(nr)
+
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
 				d.id = player.id or playername
 				d.label = playername
@@ -1465,7 +1690,9 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 			local nr = 0
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
-				local d = win:nr(nr)
+
+				local d = win.dataset[nr] or {}
+				win.dataset[nr] = d
 
 				d.id = spellid
 				d.spellid = spellid

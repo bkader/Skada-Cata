@@ -1326,6 +1326,21 @@ function Skada:FindPlayer(set, id, name, strict)
 	end
 end
 
+-- returns the unit id from guid (priority players and pets)
+function Skada:GetUnitId(guid, filter, strict)
+	-- pets?
+	if guid and pets[guid] and players[pets[guid].id] then
+		return players[pets[guid].id] .. "pet"
+	end
+
+	-- player?
+	if guid and players[guid] then
+		return players[guid]
+	end
+
+	return strict and nil or GetUnitIdFromGUID(guid, filter)
+end
+
 -- finds a player table or creates it if not found
 function Skada:GetPlayer(set, guid, name, flag)
 	if not (set and set.players and guid) then return end
