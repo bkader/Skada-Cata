@@ -901,7 +901,7 @@ function Window:RightClick(bar, button)
 		if #self.history > 0 then
 			self:DisplayMode(tremove(self.history))
 		elseif self.class then
-			Skada:ToggleFilter(self)
+			Skada:FilterClass(self)
 		else
 			self.class = nil
 			self:DisplayModes(self.selectedset)
@@ -1894,7 +1894,7 @@ do
 	end
 end
 
-function Skada:ToggleFilter(win, id, label)
+function Skada:FilterClass(win, id, label)
 	if win.class then
 		win:DisplayMode(win.selectedmode, nil)
 	elseif win.GetSelectedSet and id then
