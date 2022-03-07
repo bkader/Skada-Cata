@@ -41,6 +41,7 @@ do
 
 	function mod:Clean(event, set, curtime)
 		if event == "COMBAT_PLAYER_LEAVE" and set then
+			self.checked = nil
 			local maxtime = Skada:GetSetTime(set)
 			curtime = curtime or time()
 
@@ -466,8 +467,9 @@ Skada:AddLoadableModule("Buffs", function(L)
 		end
 
 		function mod:CheckBuffs(event, set)
-			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped then
+			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped and not self.checked then
 				GroupIterator(CheckUnitBuffs)
+				self.checked = true
 			end
 		end
 	end

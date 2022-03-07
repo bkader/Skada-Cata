@@ -161,17 +161,17 @@ function Skada:RegisterSchools()
 	-- Two Magical Schools
 	add_school(SCHOOL_FIRE + SCHOOL_FROST, STRING_SCHOOL_FROSTFIRE, 0.5, 1, 1) -- Frostfire
 	add_school(SCHOOL_FIRE + SCHOOL_ARCANE, STRING_SCHOOL_SPELLFIRE, 1, 0.5, 1) -- Spellfire
-	add_school(SCHOOL_FIRE + SCHOOL_NATURE, STRING_SCHOOL_FIRESTORM, 0.3, 1, 0.3) -- Firestorm
+	-- add_school(SCHOOL_FIRE + SCHOOL_NATURE, STRING_SCHOOL_FIRESTORM, 0.3, 1, 0.3) -- Firestorm
 	add_school(SCHOOL_FIRE + SCHOOL_SHADOW, STRING_SCHOOL_SHADOWFLAME, 0.5, 0.5, 1) -- Shadowflame
-	add_school(SCHOOL_FIRE + SCHOOL_HOLY, STRING_SCHOOL_HOLYFIRE, 1, 0.9, 0.5) -- Holyfire
+	-- add_school(SCHOOL_FIRE + SCHOOL_HOLY, STRING_SCHOOL_HOLYFIRE, 1, 0.9, 0.5) -- Holyfire
 	add_school(SCHOOL_FROST + SCHOOL_ARCANE, STRING_SCHOOL_SPELLFROST, 1, 0.5, 1) -- Spellfrost
 	add_school(SCHOOL_FROST + SCHOOL_NATURE, STRING_SCHOOL_FROSTSTORM, 0.3, 1, 0.3) -- Froststorm
 	add_school(SCHOOL_FROST + SCHOOL_SHADOW, STRING_SCHOOL_SHADOWFROST, 0.5, 0.5, 1) -- Shadowfrost
 	add_school(SCHOOL_FROST + SCHOOL_HOLY, STRING_SCHOOL_HOLYFROST, 1, 0.9, 0.5) -- Holyfrost
 	add_school(SCHOOL_ARCANE + SCHOOL_NATURE, STRING_SCHOOL_SPELLSTORM, 0.3, 1, 0.3) -- Spellstorm
-	add_school(SCHOOL_ARCANE + SCHOOL_SHADOW, STRING_SCHOOL_SPELLSHADOW, 0.5, 0.5, 1) -- Spellshadow
-	add_school(SCHOOL_ARCANE + SCHOOL_HOLY, STRING_SCHOOL_DIVINE, 1, 0.9, 0.5) -- Divine
-	add_school(SCHOOL_NATURE + SCHOOL_SHADOW, STRING_SCHOOL_SHADOWSTORM, 0.5, 0.5, 1) -- Shadowstorm
+	-- add_school(SCHOOL_ARCANE + SCHOOL_SHADOW, STRING_SCHOOL_SPELLSHADOW, 0.5, 0.5, 1) -- Spellshadow
+	-- add_school(SCHOOL_ARCANE + SCHOOL_HOLY, STRING_SCHOOL_DIVINE, 1, 0.9, 0.5) -- Divine
+	-- add_school(SCHOOL_NATURE + SCHOOL_SHADOW, STRING_SCHOOL_SHADOWSTORM, 0.5, 0.5, 1) -- Shadowstorm
 	add_school(SCHOOL_NATURE + SCHOOL_HOLY, STRING_SCHOOL_HOLYSTORM, 1, 0.9, 0.5) -- Holystorm
 
 	-- Three or more schools (uncomment if really needed)
