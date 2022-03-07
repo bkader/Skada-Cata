@@ -2478,7 +2478,7 @@ function Skada:UpdateDisplay(force)
 						self:Print("Mode %s does not have an Update function!", win.selectedmode.moduleName)
 					end
 
-					if self.db.profile.showtotals and win.selectedmode.GetSetSummary and set.type ~= "none" then
+					if self.db.profile.showtotals and win.selectedmode.GetSetSummary and set.type and set.type ~= "none" then
 						local valuetext, total = win.selectedmode:GetSetSummary(set, win)
 						if valuetext or total then
 							local existing = nil  -- an existing bar?

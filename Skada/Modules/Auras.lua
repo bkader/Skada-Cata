@@ -40,8 +40,8 @@ do
 	end
 
 	function mod:Clean(event, set, curtime)
+		self.checked = nil
 		if event == "COMBAT_PLAYER_LEAVE" and set then
-			self.checked = nil
 			local maxtime = Skada:GetSetTime(set)
 			curtime = curtime or time()
 
