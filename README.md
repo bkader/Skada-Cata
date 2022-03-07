@@ -6,7 +6,7 @@
 
 Skada is a modular damage meter with various viewing modes, segmented fights and customizable windows. It aims to be highly efficient with memory and CPU.
 
-<p align="center"><img src="https://user-images.githubusercontent.com/4732702/156484091-a61e3158-2a6f-4a60-ae58-da65eb434cf9.png" alt="Skada Cata"></p>
+<p align="center"><img src="https://repository-images.githubusercontent.com/463920168/e2d14d12-7fe3-486f-9cd7-4d4029cb0aff" alt="Skada Cata"></p>
 
 ## IMPORTANT: How to install
 
