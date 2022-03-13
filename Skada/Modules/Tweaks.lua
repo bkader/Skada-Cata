@@ -120,7 +120,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 					local output
 
 					-- close distance?
-					if self:IsBoss(srcGUID) then
+					if self:IsBoss(srcGUID, srcName) then
 						if self:IsPet(dstGUID, dstFlags) then
 							output = format(hitformats[1], srcName, dstName or L.Unknown)
 						elseif dstName then

@@ -422,7 +422,7 @@ do
 	end
 
 	local function GetCreatureId(guid)
-		return guid and tonumber(guid:sub(9, 12), 16) or 0
+		return guid and tonumber(guid:sub(7, 10), 16) or 0
 	end
 
 	local unknownUnits = {[UKNOWNBEING] = true, [UNKNOWNOBJECT] = true}

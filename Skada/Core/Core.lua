@@ -3755,7 +3755,7 @@ do
 		-- marking set as boss fights relies only on src_is_interesting
 		if self.current and src_is_interesting and not self.current.gotboss then
 			if band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-				local isboss, bossid, bossname = self:IsBoss(dstGUID)
+				local isboss, bossid, bossname = self:IsBoss(dstGUID, dstName)
 				if isboss then
 					self.current.mobname = bossname or dstName
 					self.current.gotboss = bossid or true
