@@ -460,7 +460,7 @@ Skada:AddLoadableModule("Damage", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
 			for spellname, spell in pairs(actor.damagespells) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -480,6 +480,7 @@ Skada:AddLoadableModule("Damage", function(L)
 				d.value = Skada.db.profile.absdamage and spell.total or spell.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
@@ -509,7 +510,7 @@ Skada:AddLoadableModule("Damage", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -523,6 +524,7 @@ Skada:AddLoadableModule("Damage", function(L)
 				d.value = Skada.db.profile.absdamage and target.total or target.amount
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
@@ -673,7 +675,7 @@ Skada:AddLoadableModule("Damage", function(L)
 					win.metadata.maxvalue = 0
 				end
 
-				local nr = 0
+				local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
 				for spellname, spell in pairs(actor.damagespells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
@@ -699,6 +701,7 @@ Skada:AddLoadableModule("Damage", function(L)
 
 						d.valuetext = Skada:FormatValueCols(
 							mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+							actortime and Skada:FormatNumber(d.value / actortime),
 							mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
@@ -1084,7 +1087,8 @@ Skada:AddLoadableModule("Damage Done By Spell", function(L)
 						class = player.class,
 						role = player.role,
 						spec = player.spec,
-						amount = player.damagespells[win.spellname].amount
+						amount = player.damagespells[win.spellname].amount,
+						time = mod.metadata.columns.DPS and player:GetTime()
 					}
 					if Skada.db.profile.absdamage then
 						cacheTable[player.name].amount = player.damagespells[win.spellname].total
@@ -1114,6 +1118,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(L)
 					d.value = player.amount
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						player.time and Skada:FormatNumber(d.value / player.time),
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
@@ -1154,7 +1159,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(L)
 			win.metadata.maxvalue = 0
 		end
 
-		local nr = 0
+		local settime, nr = mod.metadata.columns.DPS and set:GetTime(), 0
 		for spellname, spell in pairs(cacheTable) do
 			nr = nr + 1
 			local d = win:nr(nr)
@@ -1168,6 +1173,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(L)
 			d.value = spell.amount
 			d.valuetext = Skada:FormatValueCols(
 				self.metadata.columns.Damage and Skada:FormatNumber(d.value),
+				settime and Skada:FormatNumber(d.value / settime),
 				self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 			)
 
@@ -1182,7 +1188,7 @@ Skada:AddLoadableModule("Damage Done By Spell", function(L)
 		self.metadata = {
 			showspots = true,
 			click1 = sourcemod,
-			columns = {Damage = true, Percent = true},
+			columns = {Damage = true, DPS = false, Percent = true},
 			icon = [[Interface\Icons\spell_nature_lightning]]
 		}
 		Skada:AddMode(self, L["Damage Done"])
@@ -1227,7 +1233,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
 			for spellname, spell in pairs(actor.damagespells) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -1252,6 +1258,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
@@ -1280,7 +1287,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
 				local d = win:nr(nr)
@@ -1298,6 +1305,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 
 				d.valuetext = Skada:FormatValueCols(
 					mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+					actortime and Skada:FormatNumber(d.value / actortime),
 					mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 				)
 
@@ -1326,7 +1334,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
 			for sourcename, source in pairs(sources) do
 				local amount = source.amount or 0
 				if Skada.db.profile.absdamage and source.total then
@@ -1350,6 +1358,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 					d.value = amount
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						actortime and Skada:FormatNumber(d.value / actortime),
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
@@ -1499,7 +1508,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
 			for spellname, spell in pairs(actor.damagespells) do
 				if (spell.overkill or 0) > 0 then
 					nr = nr + 1
@@ -1521,6 +1530,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 					d.value = spell.overkill
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						actortime and Skada:FormatNumber(d.value / actortime),
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
@@ -1550,7 +1560,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				if (target.overkill or 0) > 0 then
 					nr = nr + 1
@@ -1565,6 +1575,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 					d.value = target.overkill
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						actortime and Skada:FormatNumber(d.value / actortime),
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
@@ -1596,7 +1607,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 				win.metadata.maxvalue = 0
 			end
 
-			local nr = 0
+			local actortime, nr = mod.metadata.columns.DPS and actor:GetTime(), 0
 			for spellname, spell in pairs(actor.damagespells) do
 				if spell.targets and spell.targets[win.targetname] and (spell.targets[win.targetname].overkill or 0) > 0 then
 					nr = nr + 1
@@ -1618,6 +1629,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 					d.value = spell.targets[win.targetname].overkill
 					d.valuetext = Skada:FormatValueCols(
 						mod.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						actortime and Skada:FormatNumber(d.value /actortime),
 						mod.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
@@ -1660,6 +1672,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 					d.value = player.overkill
 					d.valuetext = Skada:FormatValueCols(
 						self.metadata.columns.Damage and Skada:FormatNumber(d.value),
+						self.metadata.columns.DPS and Skada:FormatNumber(d.value / max(1, player:GetTime())),
 						self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 					)
 
@@ -1687,6 +1700,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 						d.value = enemy.overkill
 						d.valuetext = Skada:FormatValueCols(
 							self.metadata.columns.Damage and Skada:FormatNumber(d.value),
+							self.metadata.columns.DPS and Skada:FormatNumber(d.value / max(1, enemy:GetTime())),
 							self.metadata.columns.Percent and Skada:FormatPercent(d.value, total)
 						)
 
@@ -1708,7 +1722,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, targetmod},
-			columns = {Damage = true, Percent = true},
+			columns = {Damage = true, DPS = false, Percent = true},
 			icon = [[Interface\Icons\spell_fire_incinerate]]
 		}
 		Skada:AddMode(self, L["Damage Done"])
