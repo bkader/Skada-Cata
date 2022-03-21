@@ -6,7 +6,6 @@ L["Memory usage is high. You may want to reset Skada, and enable one of the auto
 L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"] = true
 L["Skada: Modes"] = true
 L["Skada: Fights"] = true
-L["Error: No options selected"] = true
 L["Data Collection"] = true
 L["Enable"] = true
 L["ENABLED"] = true
@@ -746,16 +745,12 @@ L["%s vs %s: Damage on %s"] = true
 -- about
 L["About"] = true
 L["Author"] = true
-L["Category"] = true
 L["Credits"] = true
 L["Date"] = true
 L["Discord"] = true
 L["Donate"] = true
-L["Email"] = true
 L["License"] = true
-L["Localizations"] = true
 L["Revision"] = true
-L["Thanks"] = true
 L["Version"] = true
 L["Website"] = true
 -- custom class names using globals

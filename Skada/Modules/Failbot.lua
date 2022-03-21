@@ -11,9 +11,7 @@ Skada:AddLoadableModule("Fails", function(L)
 
 	local pairs, ipairs = pairs, ipairs
 	local tostring, format, tContains = tostring, string.format, tContains
-	local GetSpellInfo, UnitGUID = Skada.GetSpellInfo or GetSpellInfo, UnitGUID
-	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
-	local failevents, tankevents = LibFail:GetSupportedEvents(), LibFail:GetFailsWhereTanksDoNotFail()
+	local GetSpellInfo, UnitGUID, IsInGroup = Skada.GetSpellInfo or GetSpellInfo, UnitGUID, Skada.IsInGroup
 	local _
 
 	-- spells in the following table will be ignored.
@@ -21,7 +19,7 @@ Skada:AddLoadableModule("Fails", function(L)
 
 	local function log_fail(set, playerid, playername, spellid, event)
 		local player = Skada:FindPlayer(set, playerid, playername)
-		if player and (player.role ~= "TANK" or not tContains(tankevents, event)) then
+		if player and (player.role ~= "TANK" or not tContains(LibFail:GetFailsWhereTanksDoNotFail(), event)) then
 			player.fail = (player.fail or 0) + 1
 			set.fail = (set.fail or 0) + 1
 
@@ -175,7 +173,6 @@ Skada:AddLoadableModule("Fails", function(L)
 			icon = [[Interface\Icons\ability_creature_cursed_01]]
 		}
 
-		tankevents = tankevents or LibFail:GetFailsWhereTanksDoNotFail()
 		Skada:AddMode(self)
 	end
 
@@ -243,9 +240,7 @@ Skada:AddLoadableModule("Fails", function(L)
 		end
 
 		function mod:OnInitialize()
-			failevents = failevents or LibFail:GetSupportedEvents()
-			tankevents = tankevents or LibFail:GetFailsWhereTanksDoNotFail()
-			for _, event in ipairs(failevents) do
+			for _, event in ipairs(LibFail:GetSupportedEvents()) do
 				LibFail:RegisterCallback(event, onFail)
 			end
 
@@ -261,23 +256,12 @@ Skada:AddLoadableModule("Fails", function(L)
 	end
 
 	function mod:SetComplete(set)
-		if (set.fail or 0) == 0 or not (Skada.db.profile.modules.failsannounce and IsInGroup()) then
-			return
-		end
-
-		local channel = Skada.db.profile.modules.failschannel or "AUTO"
-		local chantype = (channel == "SELF") and "self" or "preset"
-		if channel == "AUTO" then
-			local zoneType = select(2, IsInInstance())
-			if zoneType == "pvp" or zoneType == "arena" then
-				channel = "BATTLEGROUND"
-			elseif zoneType == "party" or zoneType == "raid" then
-				channel = zoneType:upper()
-			else
-				channel = IsInRaid() and "RAID" or "PARTY"
+		if (set.fail or 0) > 0 and Skada.db.profile.modules.failsannounce then
+			local channel = Skada.db.profile.modules.failschannel or "AUTO"
+			if channel == "SELF" or channel == "GUILD" or IsInGroup() then
+				Skada:Report(channel, "preset", L["Fails"], nil, 10)
 			end
 		end
-		Skada:Report(channel, chantype, L["Fails"], nil, 10)
 	end
 
 	do

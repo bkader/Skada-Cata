@@ -23,8 +23,8 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 	local ignoredspells = {
 		[1130] = true, -- Hunter's Mark
-		[60122] = true, -- Baby Spice
-		[56191] = true -- Shadow Jade Focusing Lens
+		[56191] = true, -- Shadow Jade Focusing Lens
+		[60122] = true -- Baby Spice
 	}
 
 	---------------------------------------------------------------------------

@@ -5,7 +5,6 @@ Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 
 local GetAddOnMetadata = GetAddOnMetadata
 Skada.version = GetAddOnMetadata("Skada", "Version")
-Skada.revision = GetAddOnMetadata("Skada", "X-Revision") or "0"
 Skada.website = GetAddOnMetadata("Skada", "X-Website")
 Skada.discord = GetAddOnMetadata("Skada", "X-Discord")
 Skada.logo = [[Interface\Icons\Spell_Lightning_LightningBolt01]]
@@ -132,50 +131,38 @@ local function VerifySet(mode, set)
 	end
 end
 
--- set creation and recycling
-local CreateSet, RecycleSet
-do
-	local NewSet
-	NewSet, RecycleSet = Skada.TablePool()
-
-	-- creates a new set
-	-- @param 	setname 	the segment name
-	-- @param 	set 		the set to override/reuse
-	function CreateSet(setname, set)
-		if set then
-			Skada:Debug("CreateSet: Reuse", set.name, setname)
-			for k, _ in pairs(set) do
-				if k == "players" or (k == "enemies" and setname ~= L["Total"]) then
-					wipe(set[k])
-				else
-					set[k] = nil
-				end
-			end
-		else
-			Skada:Debug("CreateSet: New", setname)
-			set = NewSet()
-		end
-
-		-- add stuff.
-		set.name = setname
-		set.starttime = time()
-		set.time = 0
-		set.players = set.players or {}
-
-		-- only for current segment
-		if setname ~= L["Total"] then
-			set.last_action = set.last_action or set.starttime
-			set.enemies = set.enemies or {}
-		end
-
-		-- last alterations before returning.
-		for _, mode in ipairs(modes) do
-			VerifySet(mode, set)
-		end
-
-		Skada.callbacks:Fire("Skada_SetCreated", set)
-		return Skada.setPrototype:Bind(set)
+-- creates a new set
+-- @param 	setname 	the segment name
+-- @param 	set 		the set to override/reuse
+local function CreateSet(setname, set)
+	if set then
+		Skada:Debug("CreateSet: Reuse", set.name, setname)
+		setmetatable(set, nil)
+		wipe(set)
+	else
+		Skada:Debug("CreateSet: New", setname)
+		set = {}
 	end
+
+	-- add stuff.
+	set.name = setname
+	set.starttime = time()
+	set.time = 0
+	set.players = set.players or {}
+
+	-- only for current segment
+	if setname ~= L["Total"] then
+		set.last_action = set.last_action or set.starttime
+		set.enemies = set.enemies or {}
+	end
+
+	-- last alterations before returning.
+	for _, mode in ipairs(modes) do
+		VerifySet(mode, set)
+	end
+
+	Skada.callbacks:Fire("Skada_SetCreated", set)
+	return Skada.setPrototype:Bind(set)
 end
 
 -- prepares the given set name.
@@ -262,7 +249,7 @@ local function CleanSets(force)
 	-- we trim segments without touching persistent ones.
 	for i = #Skada.char.sets, 1, -1 do
 		if (force or numsets > Skada.db.profile.setstokeep) and not Skada.char.sets[i].keep then
-			RecycleSet(tremove(Skada.char.sets, i))
+			tremove(Skada.char.sets, i)
 			numsets = numsets - 1
 			maxsets = maxsets - 1
 		end
@@ -273,7 +260,7 @@ local function CleanSets(force)
 	-- the player reasonable, otherwise they'll encounter memory issues.
 	local limit = Skada.db.profile.setstokeep + (Skada.db.profile.setslimit or 10)
 	while maxsets > limit and Skada.char.sets[maxsets] do
-		RecycleSet(tremove(Skada.char.sets, maxsets))
+		tremove(Skada.char.sets, maxsets)
 		maxsets = maxsets - 1
 	end
 end
@@ -339,10 +326,6 @@ end
 -- skada reset dialog
 function Skada:ShowPopup(win, popup)
 	if Skada.testMode then return end
-	if not Skada:CanReset() then
-		self:Print(L["There is no data to reset."])
-		return
-	end
 
 	if Skada.db.profile.skippopup and not popup then
 		Skada:Reset(IsShiftKeyDown())
@@ -407,7 +390,12 @@ end
 -- reinstall the addon
 function Skada:Reinstall()
 	Skada:ConfirmDialog(L["Are you sure you want to reinstall Skada?"], function()
-		wipe(SkadaDB)
+		if SkadaDB.profiles then
+			wipe(SkadaDB.profiles)
+		end
+		if SkadaDB.profileKeys then
+			wipe(SkadaDB.profileKeys)
+		end
 		ReloadUI()
 	end, {timeout = 15, whileDead = 0})
 end
@@ -1257,12 +1245,10 @@ function Skada:DeleteSet(set, index)
 	end
 
 	if set and index then
-		local delset = tremove(self.char.sets, index)
-		self.callbacks:Fire("Skada_SetDeleted", index, delset)
-		RecycleSet(delset)
+		self.callbacks:Fire("Skada_SetDeleted", index, tremove(self.char.sets, index))
 
 		if set == self.last then
-			self.last = RecycleSet(self.last)
+			self.last = nil
 		end
 
 		-- Don't leave windows pointing to a deleted sets
@@ -2000,7 +1986,7 @@ function Skada:Command(param)
 	elseif cmd == "about" or cmd == "info" then
 		self:OpenOptions("about")
 	elseif cmd == "version" or cmd == "checkversion" then
-		self:Printf("\n|cffffbb00%s|r: %s\n|cffffbb00%s|r: %s\n|cffffbb00%s|r: %s", L["Version"], self.version, L["Revision"], self.revision, L["Date"], GetAddOnMetadata("Skada", "X-Date"))
+		self:Printf("\n|cffffbb00%s|r: %s\n|cffffbb00%s|r: %s", L["Version"], self.version, L["Date"], GetAddOnMetadata("Skada", "X-Date"))
 		CheckVersion()
 	elseif cmd == "website" or cmd == "github" then
 		self:Printf("|cffffbb00%s|r", self.website)
@@ -2217,6 +2203,22 @@ function Skada:PLAYER_ENTERING_WORLD()
 	if was_in_party == nil then
 		Skada:ScheduleTimer("GROUP_ROSTER_UPDATE", 1)
 	end
+
+	-- account-wide addon version
+	local version = ConvertVersion(self.version)
+	if version ~= self.db.global.version then
+		self.callbacks:Fire("Skada_UpdateCore", self.db.global.version, version)
+		self.db.global.version = version
+	end
+
+	-- character-specific addon version
+	if version ~= self.char.version then
+		if (version - self.char.version) >= 5 or (version - self.char.version) <= -5 then
+			self:Reset(true)
+		end
+		self.callbacks:Fire("Skada_UpdateData", self.char.version, version)
+		self.char.version = version
+	end
 end
 
 local lastCheckGroup
@@ -2277,7 +2279,7 @@ do
 	local version_count = 0
 
 	function CheckVersion()
-		Skada:SendComm(nil, nil, "VersionCheck", Skada.version, Skada.revision)
+		Skada:SendComm(nil, nil, "VersionCheck", Skada.version)
 		Skada:CancelTimer(version_timer, true)
 		version_timer = nil
 	end
@@ -2286,7 +2288,7 @@ do
 		return tonumber(type(ver) == "string" and gsub(ver, "%.", "") or ver) or 0
 	end
 
-	function Skada:OnCommVersionCheck(sender, version, revision)
+	function Skada:OnCommVersionCheck(sender, version)
 		if sender and sender ~= self.userName and version then
 			version = ConvertVersion(version)
 
@@ -2295,12 +2297,10 @@ do
 				return
 			end
 
-			revision = ConvertVersion(revision)
-			local rev = ConvertVersion(self.revision)
-			if (version > ver) or (version == ver and revision > rev) then
+			if version > ver then
 				self:Print(format(L["Skada is out of date. You can download the newest version from |cffffbb00%s|r"], self.website))
-			elseif (version < ver) or (version == ver and revision < rev) then
-				self:SendComm("WHISPER", sender, "VersionCheck", self.version, self.revision)
+			elseif version < ver then
+				self:SendComm("WHISPER", sender, "VersionCheck", self.version)
 			end
 
 			self.versionChecked = true
@@ -2408,13 +2408,7 @@ function Skada:Reset(force)
 	if force then
 		wipe(self.char.sets)
 		self.char.total = nil
-		self:Reset()
-		StaticPopup_Hide("SkadaCommonConfirmDialog")
-		self:ScheduleTimer("ReloadSettings", 3)
-		return
-	end
-
-	if not self:CanReset() then
+	elseif not self:CanReset() then
 		self:Print(L["There is no data to reset."])
 		return
 	end
@@ -2431,7 +2425,7 @@ function Skada:Reset(force)
 		self.char.total = self.total
 	end
 
-	self.last = RecycleSet(self.last)
+	self.last = nil
 
 	CleanSets(true)
 
@@ -2981,9 +2975,7 @@ end
 -------------------------------------------------------------------------------
 
 function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, padleft, padright)
-	if frame.borderFrame then return end
-
-	frame.borderFrame = CreateFrame("Frame", nil, frame)
+	frame.borderFrame = frame.borderFrame or CreateFrame("Frame", nil, frame)
 	frame.borderFrame:SetFrameLevel(0)
 	frame.borderFrame:SetPoint("TOPLEFT", frame, -thickness - (padleft or 0), thickness + (padtop or 0))
 	frame.borderFrame:SetPoint("BOTTOMRIGHT", frame, thickness + (padright or 0), -thickness - (padbottom or 0))
@@ -3050,38 +3042,17 @@ function Skada:OnInitialize()
 		self.db.profile.timemesure = 2
 	end
 
-	-- remove old improvement data.
+	-- remove old stuff.
 	if self.char.improvement then
 		self.char.improvement = nil
 	end
-
-	-- in case of future code change or database structure changes, this
-	-- code here will be used to perform any database modifications.
-	local version = ConvertVersion(self.version)
-	local revision = ConvertVersion(self.revision)
+	if self.db.global.revision or self.char.revision then
+		self.db.global.revision = nil
+		self.char.revision = nil
+	end
 
 	self.db.global.version = self.db.global.version or 0
-	self.db.global.revision = self.db.global.revision or revision
-
 	self.char.version = self.char.version or 0
-	self.char.revision = self.char.revision or revision
-
-	-- global version/revision
-	if version ~= self.db.global.version or revision ~= self.db.global.revision then
-		self.db.global.version = version
-		self.db.global.revision = revision
-		self.callbacks:Fire("Skada_UpdateCore", self.db.global.version, version, self.db.global.revision, revision)
-	end
-
-	-- character version/revision
-	if version ~= self.char.version or revision ~= self.char.revision then
-		if (version - self.char.version) ~= 0 or (revision - self.char.revision) >= 5 or (revision - self.char.revision) <= -5 then
-			self:Reset(true)
-		end
-		self.char.version = version
-		self.char.revision = revision
-		self.callbacks:Fire("Skada_UpdateData", self.char.version, version, self.char.revision, revision)
-	end
 end
 
 function Skada:OnEnable()
@@ -3681,10 +3652,10 @@ do
 		end
 
 		if self.current and not self.current.started then
-			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, select(offset, ...))
 			self.current.started = true
 			if self.instanceType == nil then self:CheckZone() end
 			self.current.type = (self.instanceType == "none" and IsInGroup()) and "group" or self.instanceType
+			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, select(offset, ...))
 		end
 
 		if self.current and self.db.profile.autostop then
