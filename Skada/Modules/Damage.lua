@@ -813,7 +813,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, targetmod},
-			columns = {Damage = true, DPS = true, Percent = true, sDPS = true, sPercent = true},
+			columns = {Damage = true, DPS = true, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_fire_firebolt]]
 		}
 
@@ -1461,7 +1461,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			nototalclick = {playermod, targetmod},
-			columns = {Damage = true, DPS = true, Percent = true, sDPS = true, sPercent = true},
+			columns = {Damage = true, DPS = true, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_shaman_stormearthfire]]
 		}
 		Skada:AddMode(self, L["Damage Done"])
