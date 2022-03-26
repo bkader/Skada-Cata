@@ -3,12 +3,14 @@ Skada:AddLoadableModule("Tweaks", function(L)
 	if Skada:IsDisabled("Tweaks") then return end
 
 	local mod = Skada:NewModule(L["Tweaks"], "AceHook-3.0")
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local ipairs, select, band, format = ipairs, select, bit.band, string.format
 	local UnitExists, UnitName, UnitClass = UnitExists, UnitName, UnitClass
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local GetTime = GetTime
+	local _
 
 	local BITMASK_GROUP = Skada.BITMASK_GROUP
 	if not BITMASK_GROUP then
@@ -21,19 +23,13 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 	local channel_events, fofrostmourne
 
-	local ignoredspells = {
-		[1130] = true, -- Hunter's Mark
-		[56191] = true, -- Shadow Jade Focusing Lens
-		[60122] = true -- Baby Spice
-	}
-
 	---------------------------------------------------------------------------
 	-- CombatLogEvent Hook
 
 	do
 		local MAX_BOSS_FRAMES = MAX_BOSS_FRAMES or 5
 		local T = Skada.Table
-		local firsthit = T.get("Skada_FirstHit")
+		local firsthit, firsthittimer = T.get("Skada_FirstHit"), nil
 		local hitformats = {"%s (%s)", "%s (|c%s%s|r)", "|c%s%s|r", "|c%s%s|r (%s)"}
 
 		-- thank you Details!
@@ -73,45 +69,39 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 		function Skada:CombatLogEvent(...)
 
-			local eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _
-			local offset = 9
+			local spellid, spellname, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _
 
 			if self.WoWBuild >= 40200 then
-				_, _, eventtype, _, srcGUID, srcName, srcFlags, _, dstGUID, dstName, dstFlags, _ = ...
-				offset = 13
+				_, _, eventtype, _, srcGUID, srcName, srcFlags, _, dstGUID, dstName, dstFlags, _, spellid, spellname = ...
 			elseif self.WoWBuild >= 40100 then
-				_, _, eventtype, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags = ...
-				offset = 11
+				_, _, eventtype, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname = ...
 			else
-				_, _, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags = ...
+				_, _, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, spellname = ...
 			end
 
 			-- The Lich King fight & Fury of Frostmourne
-			if select(offset, ...) == 72350 or select(offset + 1, ...) == fofrostmourne then
-				-- the segment should be flagged as success.
-				if self.current and not self.current.success then
-					self.current.success = true
-					self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
+			if spellname == fofrostmourne and self.current and not self.current.success then
+				self.current.success = true
+				self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
 
-					if self.tempsets then -- phases
-						for _, set in ipairs(self.tempsets) do
-							set.success = true
-							self:SendMessage("COMBAT_BOSS_DEFEATED", set)
-						end
+				if self.tempsets then -- phases
+					for _, set in ipairs(self.tempsets) do
+						set.success = true
+						self:SendMessage("COMBAT_BOSS_DEFEATED", set)
 					end
 				end
-				-- ignore the spell
-				if self.db.profile.fofrostmourne then return end
 			end
+
+			-- globally ignored spell
+			if (spellid and self.ignoredSpells[spellid]) or (spellname and self.ignoredSpells[spellname]) then return end
 
 			-- first hit
 			if
 				self.db.profile.firsthit and
 				firsthit.hitline == nil and
 				trigger_events[eventtype] and
-				srcName and
-				dstName and
-				not ignoredspells[(select(offset, ...))]
+				srcName and dstName and
+				(spellid and not ignoredSpells[spellid])
 			then
 				local output -- initial output
 
@@ -148,29 +138,36 @@ Skada:AddLoadableModule("Tweaks", function(L)
 				end
 
 				if output then
-					local spell = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or (GetSpellLink((select(offset, ...))) or GetSpellInfo((select(offset, ...))))
+					local spell = (eventtype == "SWING_DAMAGE") and GetSpellLink(6603) or GetSpellLink(spellid) or GetSpellInfo(spellid)
 					firsthit.hitline, firsthit.targetline = WhoPulled(format(L["|cffffff00First Hit|r: %s from %s"], spell or "", output))
 				end
 			end
 
 			-- use the original function
-			Skada_CombatLogEvent(self, ...)
+			Skada_CombatLogEvent(self, "TWEAKS", select(2, ...))
 		end
 
 		function mod:PrintFirstHit()
-			if firsthit.hitline then
-				Skada:Print(firsthit.hitline)
-				if firsthit.targetline then
-					Skada:Print(firsthit.targetline)
-				end
-				Skada:Debug("First Hit: Printed!")
+			if firsthit.hitline and not firsthittimer then
+				Skada:ScheduleTimer(function()
+					firsthit.hitline, firsthit.targetline = WhoPulled(firsthit.hitline)
+					Skada:Print(firsthit.hitline)
+					if firsthit.targetline then
+						Skada:Print(firsthit.targetline)
+					end
+					Skada:Debug("First Hit: Printed!")
+				end, 0.25)
 			end
 		end
 
 		function mod:ClearFirstHit()
-			if firsthit.hitline then
+			if firsthit.hitline or firsthittimer then
 				T.free("Skada_FirstHit", firsthit)
 				Skada:Debug("First Hit: Cleared!")
+				if firsthittimer then
+					Skada:CancelTimer(firsthittimer, true)
+					firsthittimer = nil
+				end
 			end
 		end
 	end
@@ -459,7 +456,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			end
 
 			-- Fury of Frostmourne
-			fofrostmourne = fofrostmourne or GetSpellInfo(72351)
+			fofrostmourne = fofrostmourne or GetSpellInfo(72350)
 
 			-- options.
 			Skada.options.args.tweaks.args.general.args.firsthit = {
@@ -601,7 +598,17 @@ Skada:AddLoadableModule("Tweaks", function(L)
 		end
 
 		-- fury of frostmourne
-		fofrostmourne = fofrostmourne or GetSpellInfo(72351)
+		fofrostmourne = fofrostmourne or GetSpellInfo(72350)
+		-- add/remove spell to ignored spell list
+		if Skada.db.profile.fofrostmourne then
+			Skada.ignoredSpells[72350] = true
+			Skada.ignoredSpells[72351] = true
+			Skada.ignoredSpells[fofrostmourne] = true
+		elseif Skada.ignoredSpells[72350] then
+			Skada.ignoredSpells[72350] = nil
+			Skada.ignoredSpells[72351] = nil
+			Skada.ignoredSpells[fofrostmourne] = nil
+		end
 
 		-- smart stop
 		if Skada.db.profile.smartstop then
@@ -630,6 +637,11 @@ Skada:AddLoadableModule("Tweaks", function(L)
 	end
 
 	function mod:OnEnable()
+		-- table of ignored spells (first hit):
+		if Skada.ignoredSpells and Skada.ignoredSpells.firsthit then
+			ignoredSpells = Skada.ignoredSpells.firsthit
+		end
+
 		self:ApplySettings()
 	end
 

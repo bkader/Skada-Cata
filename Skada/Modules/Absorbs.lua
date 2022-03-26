@@ -17,6 +17,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local playermod = mod:NewModule(L["Absorb spell list"])
 	local targetmod = mod:NewModule(L["Absorbed target list"])
 	local spellmod = targetmod:NewModule(L["Absorb spell list"])
+	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local COMBATLOG_OBJECT_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
 	local COMBATLOG_OBJECT_AFFILIATION_OUTSIDER = COMBATLOG_OBJECT_AFFILIATION_OUTSIDER or 0x00000008
@@ -25,8 +26,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local GroupIterator = Skada.GroupIterator
 	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
 	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
-	local GetTime, band = GetTime, bit.band
-	local tsort, tContains = table.sort, tContains
+	local GetTime, band, tsort = GetTime, bit.band, table.sort
 	local T = Skada.Table
 	local new, del = Skada.TablePool("kv")
 
@@ -133,9 +133,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	local shields = nil -- holds the list of players shields and other stuff
 	local absorb = {}
-
-	-- spells in the following table will be ignored.
-	local ignoredSpells = {}
 
 	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
 		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
@@ -320,7 +317,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	local function HandleShield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local spellid, spellname, spellschool, _, amount = ...
-		if not spellid or not absorbspells[spellid] or tContains(ignoredSpells, spellid) then return end
+		if not spellid or not absorbspells[spellid] or ignoredSpells[spellid] then return end
 
 		local unit = Skada:GetUnitId(dstGUID, nil, true)
 		if not unit then return end
@@ -879,6 +876,11 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckPreShields")
 		Skada:AddMode(self, L["Absorbs and Healing"])
+
+		-- table of ignored spells:
+		if Skada.ignoredSpells and Skada.ignoredSpells.absorbs then
+			ignoredSpells = Skada.ignoredSpells.absorbs
+		end
 	end
 
 	function mod:OnDisable()
