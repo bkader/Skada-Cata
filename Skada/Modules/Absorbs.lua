@@ -25,7 +25,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	local GroupIterator = Skada.GroupIterator
 	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
-	local UnitIsDeadOrGhost, UnitHealthInfo = UnitIsDeadOrGhost, Skada.UnitHealthInfo
+	local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 	local GetTime, band, tsort = GetTime, bit.band, table.sort
 	local T = Skada.Table
 	local new, del = Skada.TablePool("kv")
@@ -316,11 +316,8 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	local function HandleShield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, spellname, spellschool, _, amount = ...
+		local spellid, _, spellschool = ...
 		if not spellid or not absorbspells[spellid] or ignoredSpells[spellid] then return end
-
-		local unit = Skada:GetUnitId(dstGUID, nil, true)
-		if not unit then return end
 
 		-- create the table if it doesn't exist.
 		shields[dstName] = shields[dstName] or new()
@@ -333,16 +330,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				end
 			end
 			return
-		end
-
-		if spellid == 48707 or spellid == 51052 or spellid == 70845 then -- Anti-Magic Shell/Zone
-			amount = floor(UnitHealthMax(unit) * (spellid == 70845 and 0.2 or 0.5) + 0.5)
-			-- offset = offset + 1 -- TODO: needs review
-		elseif spellid == 31850 then -- Ardent Defender
-			amount = 0
-		elseif not amount or amount == 0 then
-			amount = select(14, UnitBuff(unit, spellname or (GetSpellInfo(spellid))))
-			if not amount or amount == 0 then return end
 		end
 
 		if eventtype == "SPELL_AURA_REFRESH" then
@@ -369,12 +356,10 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				shield.srcGUID = srcGUID
 				shield.srcName = srcName
 				shield.srcFlags = srcFlags
-				shield.amount = amount
 				shield.ts = timestamp
 
 				tinsert(shields[dstName], shield)
 			else
-				shields[dstName][index].amount = amount
 				shields[dstName][index].ts = timestamp
 			end
 
@@ -386,7 +371,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			shield.srcGUID = srcGUID
 			shield.srcName = srcName
 			shield.srcFlags = srcFlags
-			shield.amount = amount
 			shield.ts = timestamp
 
 			tinsert(shields[dstName], shield)
@@ -399,10 +383,10 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			if not UnitIsDeadOrGhost(unit) then
 				local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
 				for i = 1, 40 do
-					local _, _, _, _, _, _, expires, unitCaster, _, _, spellid, _, _, amount = UnitBuff(unit, i)
+					local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
 					if spellid then
 						if absorbspells[spellid] and unitCaster then
-							HandleShield(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid, nil, nil, nil, amount)
+							HandleShield(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
 						end
 					else
 						break -- nothing found
@@ -419,31 +403,28 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		end
 	end
 
-	local function process_absorb(dstGUID, dstName, dstFlags, absorbed, spellschool, damage)
+	local function process_shield(dstName, spellschool)
 		shields[dstName] = shields[dstName] or new()
 
-		local shield = nil
 		for _, s in ipairs(shields[dstName]) do
-			if s.spellid == 31850 then -- Ardent Defender amount
-				s.amount = floor((damage + absorbed) * 0.2)
-			end
-
 			if s.spellid == 543 then -- Mage Ward (Mage)
 				if band(spellschool, 0x10) == spellschool or band(spellschool, 0x04) == spellschool or band(spellschool, 0x40) == spellschool then
-					shield = s
-					break
+					return s
 				end
 			elseif s.spellid == 6229 then -- Shadow Ward (Warlock)
 				if band(spellschool, 0x20) == spellschool then
-					shield = s
-					break
+					return s
 				end
 			else
-				shield = s
-				break
+				return s
 			end
 		end
+	end
 
+	local function process_absorb(dstGUID, dstName, dstFlags, absorbed, spellschool, damage)
+		shields[dstName] = shields[dstName] or new()
+
+		local shield = process_shield(dstName, spellschool, absorbed + damage)
 		if shield then
 			absorb.playerid = shield.srcGUID
 			absorb.playername = shield.srcName
@@ -455,44 +436,10 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 			absorb.spellid = shield.spellid
 			absorb.school = shield.school
-
-			if shield.amount >= absorbed then
-				absorb.amount = absorbed
-				shield.amount = shield.amount - absorbed
-				absorbed = 0
-			else
-				absorb.amount = shield.amount
-				shield.amount = 0
-				absorbed = absorbed - shield.amount
-			end
+			absorb.amount = absorbed
 
 			Skada:DispatchSets(log_absorb, absorb)
 			log_absorb(Skada.total, absorb)
-
-			-- hold last shield to use as fallback
-			shields[dstName].__last = shields[dstName].__last or {}
-			shields[dstName].__last.srcGUID = shield.srcGUID
-			shields[dstName].__last.srcName = shield.srcName
-			shields[dstName].__last.srcFlags = shield.srcFlags
-			shields[dstName].__last.spellid = shield.spellid
-			shields[dstName].__last.school = shield.school
-		end
-
-		if absorbed > 0 and shields[dstName].__last then
-			absorb.playerid = shields[dstName].__last.srcGUID
-			absorb.playername = shields[dstName].__last.srcName
-			absorb.playerflags = shields[dstName].__last.srcFlags
-
-			absorb.dstGUID = dstGUID
-			absorb.dstName = dstName
-			absorb.dstFlags = dstFlags
-
-			absorb.spellid = shields[dstName].__last.spellid
-			absorb.school = shields[dstName].__last.school
-			absorb.amount = absorbed
-
-			Skada:DispatchSets(log_absorb, absorb, true)
-			log_absorb(Skada.total, absorb, true)
 		end
 	end
 
@@ -538,22 +485,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			end
 
 			process_absorb(dstGUID, dstName, dstFlags, absorbed, spellschool, amount)
-		end
-	end
-
-	local divine_aegis = nil
-	local function SpellHeal(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		if (select(7, ...)) then
-			divine_aegis = divine_aegis or GetSpellInfo(47753)
-			shields[dstName] = shields[dstName] or new()
-
-			for i, s in ipairs(shields[dstName]) do
-				if s.srcGUID == srcGUID and s.spellid == 47753 then
-					s.ts = timestamp
-					s.amount = select(14, UnitBuff(Skada:GetUnitId(dstGUID, nil, true), divine_aegis))
-					break
-				end
-			end
 		end
 	end
 
@@ -835,13 +766,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REFRESH",
 			"SPELL_AURA_REMOVED",
-			flags_src
-		)
-
-		Skada:RegisterForCL(
-			SpellHeal,
-			"SPELL_HEAL",
-			"SPELL_PERIODIC_HEAL",
 			flags_src
 		)
 
