@@ -28,7 +28,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 	local GetTime, band, tsort = GetTime, bit.band, table.sort
 	local T = Skada.Table
-	local new, del = Skada.TablePool("kv")
+	local new, del = Skada.newTable, Skada.delTable
 
 	local absorbspells = {
 		[48707] = 5, -- Anti-Magic Shell
@@ -316,22 +316,31 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	local function HandleShield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid, _, spellschool = ...
-		if not spellid or not absorbspells[spellid] or ignoredSpells[spellid] then return end
+		local spellid = ...
+		if not spellid or not absorbspells[spellid] or not dstName or ignoredSpells[spellid] then return end
 
-		-- create the table if it doesn't exist.
-		shields[dstName] = shields[dstName] or new()
+		shields = shields or T.get("Skada_Shields") -- create global shields table
 
 		if eventtype == "SPELL_AURA_REMOVED" then
-			for _, shield in ipairs(shields[dstName]) do
-				if shield.srcGUID == srcGUID and shield.spellid == spellid then
-					Skada:ScheduleTimer(RemoveShield, 0.1, dstName, srcGUID, spellid)
-					break
+			if shields[dstName] then
+				for _, shield in ipairs(shields[dstName]) do
+					if shield.srcGUID == srcGUID and shield.spellid == spellid then
+						Skada:ScheduleTimer(RemoveShield, 0.1, dstName, srcGUID, spellid)
+						break
+					end
 				end
 			end
 			return
 		end
 
+		-- complete data
+		local spellschool
+		spellid, _, spellschool = ...
+
+		-- create player's shields table
+		shields[dstName] = shields[dstName] or new()
+
+		-- shield refreshed
 		if eventtype == "SPELL_AURA_REFRESH" then
 			local index = nil
 			for i, shield in ipairs(shields[dstName]) do
@@ -821,13 +830,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		), amount
 	end
 
-	function mod:AddSetAttributes(set)
-		shields = shields or T.get("Absorbs_Shields")
-	end
-
 	function mod:SetComplete(set)
 		T.clear(absorb)
-		T.free("Absorbs_Shields", shields)
+		T.free("Skada_Shields", shields, nil, del)
 		self.checked = nil
 		-- clean absorbspells table:
 		if (set.absorb or 0) == 0 then return end

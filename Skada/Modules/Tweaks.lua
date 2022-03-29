@@ -106,7 +106,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			then
 				local output -- initial output
 
-				if band(dstFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(srcGUID, dstName) then -- boss started?
+				if band(dstFlags, BITMASK_GROUP) ~= 0 and self:IsBoss(srcGUID, srcName) then -- boss started?
 					if self:IsPet(dstGUID, dstFlags) then
 						output = format(hitformats[1], srcName, dstName or L.Unknown)
 					elseif dstName then
@@ -600,16 +600,6 @@ Skada:AddLoadableModule("Tweaks", function(L)
 
 		-- fury of frostmourne
 		fofrostmourne = fofrostmourne or GetSpellInfo(72350)
-		-- add/remove spell to ignored spell list
-		if Skada.db.profile.fofrostmourne then
-			Skada.ignoredSpells[72350] = true
-			Skada.ignoredSpells[72351] = true
-			Skada.ignoredSpells[fofrostmourne] = true
-		elseif Skada.ignoredSpells[72350] then
-			Skada.ignoredSpells[72350] = nil
-			Skada.ignoredSpells[72351] = nil
-			Skada.ignoredSpells[fofrostmourne] = nil
-		end
 
 		-- smart stop
 		if Skada.db.profile.smartstop then

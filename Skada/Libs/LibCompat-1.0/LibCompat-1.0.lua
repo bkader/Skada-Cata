@@ -138,18 +138,20 @@ do
 	end
 
 	-- clears all items in a table.
-	function Table.clear(obj)
-		if obj then
+	function Table.clear(obj, func, ...)
+		if obj and func then
 			for k in pairs(obj) do
-				obj[k] = nil
+				obj[k] = func(obj[k], ...)
 			end
+		elseif obj then
+			wipe(obj)
 		end
 		return obj
 	end
 
 	-- releases the already used lua table into the table pool
 	-- named "tag" or creates it right away.
-	function Table.free(tag, obj, noclear)
+	function Table.free(tag, obj, noclear, func, ...)
 		if not obj then return end
 
 		local pool = pools[tag]
@@ -162,7 +164,7 @@ do
 
 		if not noclear then
 			setmetatable(obj, nil)
-			obj = Table.clear(obj)
+			obj = Table.clear(obj, func, ...)
 		end
 
 		do
@@ -214,7 +216,7 @@ do
 				setmetatable(t, nil)
 				for k, v in pairs(t) do
 					if recursive and type(v) == "table" then
-						del(v, recursive)
+						del(v)
 					end
 					t[k] = nil
 				end

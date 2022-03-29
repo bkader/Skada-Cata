@@ -15,9 +15,6 @@ Skada.ignoredSpells = ignoredSpells
 
 -->> start of editable code <<--
 
--- [[ globally ignored spells ]] --
--- ignoredSpells[spellid] = true
-
 -- [[ absorbs modules ]] --
 -- ignoredSpells.absorbs = {}
 
