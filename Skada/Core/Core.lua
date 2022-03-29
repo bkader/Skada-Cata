@@ -1460,10 +1460,10 @@ function Skada:IsPlayer(guid, flag, name)
 	if guid and (players[guid] or pets[guid]) then
 		return players[guid] and 1 or false -- 1 for player, else false
 	end
-	if tonumber(flag) then
-		return (band(flag, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0)
-	end
 	if name and UnitIsPlayer(name) then
+		return true
+	end
+	if tonumber(flag) and band(flag, COMBATLOG_OBJECT_TYPE_PLAYER) ~= 0 then
 		return true
 	end
 	return false
@@ -1986,7 +1986,7 @@ function Skada:Command(param)
 	elseif cmd == "about" or cmd == "info" then
 		self:OpenOptions("about")
 	elseif cmd == "version" or cmd == "checkversion" then
-		self:Printf("\n|cffffbb00%s|r: %s\n|cffffbb00%s|r: %s", L["Version"], self.version, L["Date"], GetAddOnMetadata("Skada", "X-Date"))
+		self:Printf("|cffffbb00%s|r: %s - |cffffbb00%s|r: %s", L["Version"], self.version, L["Date"], GetAddOnMetadata("Skada", "X-Date"))
 		CheckVersion()
 	elseif cmd == "website" or cmd == "github" then
 		self:Printf("|cffffbb00%s|r", self.website)
@@ -3738,7 +3738,7 @@ do
 		-- marking set as boss fights relies only on src_is_interesting
 		if self.current and src_is_interesting and not self.current.gotboss then
 			if band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0 then
-				local isboss, bossid, bossname = self:IsBoss(dstGUID, dstName)
+				local isboss, bossid, bossname = self:IsBoss(dstGUID)
 				if isboss then
 					self.current.mobname = bossname or dstName
 					self.current.gotboss = bossid or true

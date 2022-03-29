@@ -80,20 +80,21 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			end
 
 			-- The Lich King fight & Fury of Frostmourne
-			if spellname == fofrostmourne and self.current and not self.current.success then
-				self.current.success = true
-				self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
+			if spellid == 72350 or spellname == fofrostmourne then
+				if self.current and not self.current.success then
+					self.current.success = true
+					self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
 
-				if self.tempsets then -- phases
-					for _, set in ipairs(self.tempsets) do
-						set.success = true
-						self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+					if self.tempsets then -- phases
+						for _, set in ipairs(self.tempsets) do
+							set.success = true
+							self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+						end
 					end
 				end
+				-- ignore the spell
+				if self.db.profile.fofrostmourne then return end
 			end
-
-			-- globally ignored spell
-			if (spellid and self.ignoredSpells[spellid]) or (spellname and self.ignoredSpells[spellname]) then return end
 
 			-- first hit
 			if
@@ -101,7 +102,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 				firsthit.hitline == nil and
 				trigger_events[eventtype] and
 				srcName and dstName and
-				(spellid and not ignoredSpells[spellid])
+				not ignoredSpells[spellid]
 			then
 				local output -- initial output
 
@@ -144,7 +145,7 @@ Skada:AddLoadableModule("Tweaks", function(L)
 			end
 
 			-- use the original function
-			Skada_CombatLogEvent(self, "TWEAKS", select(2, ...))
+			Skada_CombatLogEvent(self, ...)
 		end
 
 		function mod:PrintFirstHit()
