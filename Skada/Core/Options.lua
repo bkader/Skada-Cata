@@ -714,15 +714,6 @@ Skada.options = {
 	}
 }
 
--- font flags
-Skada.fontFlags = {
-	[""] = NONE,
-	["OUTLINE"] = L["Outline"],
-	["THICKOUTLINE"] = L["Thick outline"],
-	["MONOCHROME"] = L["Monochrome"],
-	["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
-}
-
 -- missed damage types
 Skada.missTypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
 
