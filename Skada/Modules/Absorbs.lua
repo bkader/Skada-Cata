@@ -461,7 +461,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			_, _, spellschool, amount, _, _, _, _, absorbed = ...
 		end
 
-		if (absorbed or 0) > 0 and dstName and shields[dstName] then
+		if (absorbed or 0) > 0 and dstName and shields and shields[dstName] then
 			process_absorb(dstGUID, dstName, dstFlags, absorbed, spellschool or 1, amount)
 		end
 	end
@@ -475,14 +475,14 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			_, _, spellschool, misstype, _, absorbed = ...
 		end
 
-		if misstype == "ABSORB" and (absorbed or 0) > 0 and dstName and shields[dstName] then
+		if misstype == "ABSORB" and (absorbed or 0) > 0 and dstName and shields and shields[dstName] then
 			process_absorb(dstGUID, dstName, dstFlags, absorbed, spellschool or 1, 0)
 		end
 	end
 
 	local function EnvironmentDamage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
 		local envtype, amount, _, _, _, _, absorbed = ...
-		if (absorbed or 0) > 0 and dstName and shields[dstName] then
+		if (absorbed or 0) > 0 and dstName and shields and shields[dstName] then
 			local spellschool = 0x01
 
 			if envtype == "Fire" or envtype == "FIRE" then
