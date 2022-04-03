@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0-Skada", 29
+local MAJOR, MINOR = "LibCompat-1.0-Skada", 30
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -20,6 +20,7 @@ local tostring, tonumber = tostring, tonumber
 local setmetatable = setmetatable
 local CreateFrame = CreateFrame
 local error = error
+local _
 
 
 local QuickDispatch
@@ -30,7 +31,9 @@ local tLength
 -------------------------------------------------------------------------------
 do
 	local GetBuildInfo = GetBuildInfo
-	lib.WoWBuild = lib.WoWBuild or select(4, GetBuildInfo())
+	if not lib.WoWBuild then
+		_, _, _, lib.WoWBuild = GetBuildInfo()
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -414,7 +417,7 @@ do
 		elseif unit and unit:find("boss") then
 			class = "BOSS"
 		elseif unit then
-			class = select(2, UnitClass(unit))
+			_, class = UnitClass(unit)
 		end
 		return class, unit
 	end
@@ -638,17 +641,40 @@ do
 		["SHAMAN"] = {262, 263, 264}
 	}
 
+	local guardianSpells = nil
+	local function GetFeralSubSpec(unit, talentGroup)
+		if not guardianSpells then -- only create it if needed.
+			guardianSpells = {
+				[16929] = 2, -- Thick Hide
+				[57880] = 1, -- Natural Reactions
+				[80313] = 0, -- Pulverize
+			}
+		end
+
+		for spellid, points in pairs(guardianSpells) do
+			local pts = LGT:UnitHasTalent(unit, GetSpellInfo(spellid), talentGroup) or 0
+			if pts <= points then
+				return 2
+			end
+		end
+
+		return 3
+	end
+
 	local function GetUnitSpec(unit, class)
 		local spec  -- start with nil
 
 		if unit and UnitExists(unit) then
-			class = class or select(2, UnitClass(unit))
+			if not class then
+				_, class = UnitClass(unit)
+			end
+
 			if class and specsTable[class] then
 				local talentGroup = LGT:GetActiveTalentGroup(unit)
 				local maxPoints, index = 0, 0
 
 				for i = 1, MAX_TALENT_TABS do
-					local pointsSpent = select(5, LGT:GetTalentTabInfo(unit, i, talentGroup))
+					local _, _, _, _, pointsSpent = LGT:GetTalentTabInfo(unit, i, talentGroup)
 					if pointsSpent ~= nil then
 						if maxPoints < pointsSpent then
 							maxPoints = pointsSpent
@@ -656,8 +682,7 @@ do
 								if i == 3 then
 									index = 4
 								elseif i == 2 then
-									local points = LGT:UnitHasTalent(unit, GetSpellInfo(57881))
-									index = (points and points > 0) and 3 or 2
+									index = GetFeralSubSpec(unit, talentGroup)
 								end
 							else
 								index = i
@@ -682,8 +707,11 @@ do
 			return role
 		end
 
+		if not class then
+			_, class = UnitClass(unit)
+		end
+
 		-- speedup things using classes.
-		class = class or select(2, UnitClass(unit))
 		if class == "HUNTER" or class == "MAGE" or class == "ROGUE" or class == "WARLOCK" then
 			return "DAMAGER"
 		end
@@ -702,7 +730,7 @@ do
 	local IsInInstance, instanceType = IsInInstance, nil
 
 	local function IsInPvP()
-		instanceType = select(2, IsInInstance())
+		_, instanceType = IsInInstance()
 		return (instanceType == "pvp" or instanceType == "arena")
 	end
 
