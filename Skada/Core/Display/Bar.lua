@@ -1840,6 +1840,7 @@ do
 			local applytheme, applywindow = nil, nil
 			local savetheme, savewindow = nil, nil
 			local deletetheme = nil
+			local skipped = {"name", "sticked", "x", "y", "point", "modeincombat", "set", "wipemode", "returnaftercombat"}
 			local list = {}
 
 			local themes = {
@@ -2138,7 +2139,7 @@ do
 										if thetheme then
 											for _, win in Skada:IterateWindows() do
 												if win.db.name == applywindow then
-													Skada.tCopy(win.db, thetheme)
+													Skada.tCopy(win.db, thetheme, skipped)
 													Skada:ApplySettings()
 													Skada:Print(L["Theme applied!"])
 												end
@@ -2189,7 +2190,7 @@ do
 										if win.db.name == savewindow then
 											Skada.db.global.themes = Skada.db.global.themes or {}
 											local theme = {}
-											Skada.tCopy(theme, win.db, "name", "sticked", "x", "y", "point", "modeincombat", "set", "wipemode", "returnaftercombat")
+											Skada.tCopy(theme, win.db, skipped)
 											theme.name = savetheme or win.db.name
 											Skada.db.global.themes[#Skada.db.global.themes + 1] = theme
 										end
