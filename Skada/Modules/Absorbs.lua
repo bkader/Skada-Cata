@@ -701,7 +701,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 						d.spec = player.spec
 
 						if Skada.forPVP and set.type == "arena" then
-							d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
+							d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 						end
 
 						d.value = amount
@@ -735,7 +735,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 							d.class = enemy.class
 							d.role = enemy.role
 							d.spec = enemy.spec
-							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+							d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = amount
 							d.valuetext = Skada:FormatValueCols(
@@ -1182,7 +1182,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 						d.spec = player.spec
 
 						if Skada.forPVP and set.type == "arena" then
-							d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
+							d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 						end
 
 						d.value = amount
@@ -1217,7 +1217,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 							d.class = enemy.class
 							d.role = enemy.role
 							d.spec = enemy.spec
-							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+							d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = amount
 							d.valuetext = Skada:FormatValueCols(
@@ -1357,7 +1357,7 @@ Skada:AddLoadableModule("HPS", function(L)
 						d.spec = player.spec
 
 						if Skada.forPVP and set.type == "arena" then
-							d.color = set.gold and Skada.classcolors.ARENA_GOLD or Skada.classcolors.ARENA_GREEN
+							d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 						end
 
 						d.value = amount
@@ -1390,7 +1390,7 @@ Skada:AddLoadableModule("HPS", function(L)
 							d.class = enemy.class
 							d.role = enemy.role
 							d.spec = enemy.spec
-							d.color = set.gold and Skada.classcolors.ARENA_GREEN or Skada.classcolors.ARENA_GOLD
+							d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = amount
 							d.valuetext = Skada:FormatValueCols(
