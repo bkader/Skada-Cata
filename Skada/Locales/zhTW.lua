@@ -703,6 +703,15 @@ L["Announces how long it took to apply %d stacks of %s and announces when it dro
 L["%s dropped from %s!"] = "%s 已於 %s 過期！"
 L["%s stacks of %s applied on %s in %s sec!"] = "%4$s 秒內將 %1$s 疊 %2$s 塗抹在 %3$s 上！"
 L["My Spells"] = "我的法術"
+-- total data options
+L["Total Segment"] = "總段" -- needs review
+L["All Segments"] = "所有段" -- needs review
+L["Raid Bosses"] = "突襲首領" -- needs review
+L["Raid Trash"] = "突襲垃圾" -- needs review
+L["Dungeon Bosses"] = "地牢首領" -- needs review
+L["Dungeon Trash"] = "地牢垃圾" -- needs review
+L.opt_tweaks_total_all_desc = "将所有段添加到总段的数据中。" -- needs review
+L.opt_tweaks_total_fmt_desc = "将带有 %s 的段添加到总段的数据中。" -- needs review
 -- arena
 L["Custom Arena Colors"] = "自定義競技場顏色"
 L["Enable this if you want to use custom arena teams colors."] = "如果您想使用自定義團隊顏色，請啟用此選項。"

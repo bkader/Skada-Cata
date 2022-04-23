@@ -707,6 +707,15 @@ L["Announces how long it took to apply %d stacks of %s and announces when it dro
 L["%s dropped from %s!"] = "%s 는 %s 에 만료!"
 L["%s stacks of %s applied on %s in %s sec!"] = "%4$s초 만에 %3$s에 %2$s %1$s중첩 적용!"
 L["My Spells"] = "내 주문"
+-- total data options
+L["Total Segment"] = "총 세그먼트" -- needs review
+L["All Segments"] = "모든 세그먼트" -- needs review
+L["Raid Bosses"] = "레이드 보스" -- needs review
+L["Raid Trash"] = "레이드 휴지통" -- needs review
+L["Dungeon Bosses"] = "던전 보스" -- needs review
+L["Dungeon Trash"] = "던전 휴지통" -- needs review
+L.opt_tweaks_total_all_desc = "모든 세그먼트는 전체 세그먼트의 데이터에 추가됩니다." -- needs review
+L.opt_tweaks_total_fmt_desc = "전체 세그먼트의 데이터에 %s가 있는 세그먼트가 추가됩니다." -- needs review
 -- arena
 L["Custom Arena Colors"] = "커스텀 아레나 색상"
 L["Enable this if you want to use custom arena teams colors."] = "사용자 정의 팀 색상을 사용하려면 이것을 활성화하십시오."

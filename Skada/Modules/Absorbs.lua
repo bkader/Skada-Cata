@@ -447,8 +447,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			absorb.school = shield.school
 			absorb.amount = absorbed
 
-			Skada:DispatchSets(log_absorb, absorb)
-			log_absorb(Skada.total, absorb)
+			Skada:DispatchSets(log_absorb, true, absorb)
 		end
 	end
 
