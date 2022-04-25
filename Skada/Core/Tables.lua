@@ -13,7 +13,7 @@ Skada.ignoredSpells = ignoredSpells
 -- entries should be like so:
 -- [spellid] = true
 
--->> start of editable code <<--
+-->> start of editable lines <<--
 
 -- [[ absorbs modules ]] --
 -- ignoredSpells.absorbs = {}
@@ -79,7 +79,7 @@ ignoredSpells.firsthit = {
 	[60122] = true, -- Baby Spice
 }
 
--->> end of editable code <<--
+-->> end of editable lines <<--
 
 -------------------------------------------------------------------------------
 -- creatureToFight
@@ -88,7 +88,7 @@ ignoredSpells.firsthit = {
 local creatureToFight = {}
 Skada.creatureToFight = creatureToFight
 
--->> start of editable code <<--
+-->> start of editable lines <<--
 
 -- [[ Icecrown Citadel ]] --
 creatureToFight[36960] = L["Icecrown Gunship Battle"] -- Kor'kron Sergeant
@@ -181,7 +181,7 @@ creatureToFight[33432] = L["Mimiron"] -- Leviathan Mk II
 creatureToFight[33651] = L["Mimiron"] -- VX-001
 creatureToFight[33670] = L["Mimiron"] -- Aerial Command Unit
 
--->> end of editable code <<--
+-->> end of editable lines <<--
 
 -------------------------------------------------------------------------------
 -- creatureToBoss
@@ -190,7 +190,7 @@ creatureToFight[33670] = L["Mimiron"] -- Aerial Command Unit
 local creatureToBoss = {}
 Skada.creatureToBoss = creatureToBoss
 
--->> start of editable code <<--
+-->> start of editable lines <<--
 
 -- [[ Icecrown Citadel ]] --
 creatureToBoss[36960] = 37215 -- Kor'kron Sergeant > Orgrim's Hammer
@@ -228,4 +228,4 @@ creatureToBoss[33432] = 33350 -- Leviathan Mk II > Mimiron
 creatureToBoss[33651] = 33350 -- VX-001 > Mimiron
 creatureToBoss[33670] = 33350 -- Aerial Command Unit > Mimiron
 
--->> end of editable code <<--
+-->> end of editable lines <<--

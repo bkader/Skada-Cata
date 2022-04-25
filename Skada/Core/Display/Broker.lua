@@ -13,25 +13,30 @@ local CloseDropDownMenus = CloseDropDownMenus
 local WrapTextInColorCode = Skada.WrapTextInColorCode
 local RGBPercToHex = Skada.RGBPercToHex
 
-local fontFlags = Skada.fontFlags or {
-	[""] = L.None,
-	["OUTLINE"] = L["Outline"],
-	["THICKOUTLINE"] = L["Thick outline"],
-	["MONOCHROME"] = L["Monochrome"],
-	["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
-}
-Skada.fontFlags = fontFlags
+local FONT_FLAGS = Skada.fontFlags
+if not FONT_FLAGS then
+	FONT_FLAGS = {
+		[""] = L.None,
+		["OUTLINE"] = L["Outline"],
+		["THICKOUTLINE"] = L["Thick outline"],
+		["MONOCHROME"] = L["Monochrome"],
+		["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
+	}
+	Skada.fontFlags = FONT_FLAGS
+end
+
+local function sortFunc(a, b)
+	if not a or a.value == nil then
+		return false
+	elseif not b or b.value == nil then
+		return true
+	else
+		return a.value > b.value
+	end
+end
 
 local function sortDataset(win)
-	tsort(win.dataset, function(a, b)
-		if not a or a.value == nil then
-			return false
-		elseif not b or b.value == nil then
-			return true
-		else
-			return a.value > b.value
-		end
-	end)
+	tsort(win.dataset, sortFunc)
 end
 
 local function formatLabel(win, data)
@@ -303,7 +308,7 @@ function mod:AddDisplayOptions(win, options)
 				type = "select",
 				name = L["Font Outline"],
 				desc = L["Sets the font outline."],
-				values = fontFlags,
+				values = FONT_FLAGS,
 				order = 30
 			},
 			barfontsize = {
