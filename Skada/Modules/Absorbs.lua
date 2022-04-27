@@ -762,10 +762,13 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod, targetmod},
 			columns = {Absorbs = true, APS = true, Percent = true, sAPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_powerwordshield]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		targetmod.nototal = true
 
 		local flags_src = {src_is_interesting_nopets = true}
 
@@ -1258,10 +1261,13 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			post_tooltip = hps_tooltip,
-			nototalclick = {playermod, targetmod},
 			columns = {Healing = true, HPS = true, Percent = true, sHPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_healingfocus]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		targetmod.nototal = true
 
 		Skada:AddFeed(L["Healing: Personal HPS"], feed_personal_hps)
 		Skada:AddFeed(L["Healing: Raid HPS"], feed_raid_hps)
@@ -1421,7 +1427,6 @@ Skada:AddLoadableModule("HPS", function(L)
 		if parentmod then
 			self.metadata.click1 = parentmod.metadata.click1
 			self.metadata.click2 = parentmod.metadata.click2
-			self.metadata.nototalclick = parentmod.metadata.nototalclick
 		end
 
 		Skada:AddMode(self, L["Absorbs and Healing"])

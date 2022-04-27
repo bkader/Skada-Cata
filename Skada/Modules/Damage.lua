@@ -820,16 +820,18 @@ Skada:AddLoadableModule("Damage", function(L)
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod, targetmod},
 			columns = {Damage = true, DPS = true, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_fire_firebolt]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		targetmod.nototal = true
 
 		local compare = Skada:GetModule(L["Comparison"], true)
 		if compare then
 			self.metadata.click3 = compare.SetActor
 			self.metadata.click3_label = L["Damage Comparison"]
-			tinsert(self.metadata.nototalclick, compare)
 		end
 
 		local flags_src_dst = {src_is_interesting = true, dst_is_not_interesting = true}
@@ -1047,7 +1049,6 @@ Skada:AddLoadableModule("DPS", function(L)
 		if parentmod then
 			self.metadata.click1 = parentmod.metadata.click1
 			self.metadata.click2 = parentmod.metadata.click2
-			self.metadata.nototalclick = parentmod.metadata.nototalclick
 			self.metadata.click4 = parentmod.metadata.click4
 			self.metadata.click4_label = parentmod.metadata.click4_label
 		end
@@ -1468,10 +1469,14 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod, targetmod},
 			columns = {Damage = true, DPS = true, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_shaman_stormearthfire]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		targetmod.nototal = true
+
 		Skada:AddMode(self, L["Damage Done"])
 	end
 
@@ -1730,10 +1735,14 @@ Skada:AddLoadableModule("Overkill", function(L)
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
-			nototalclick = {playermod, targetmod},
 			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_fire_incinerate]]
 		}
+
+		-- no total click.
+		playermod.nototal = true
+		targetmod.nototal = true
+
 		Skada:AddMode(self, L["Damage Done"])
 	end
 
