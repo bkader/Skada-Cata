@@ -721,8 +721,7 @@ L["Dungeon Trash"] = "던전 휴지통" -- needs review
 L.opt_tweaks_total_all_desc = "모든 세그먼트는 전체 세그먼트의 데이터에 추가됩니다." -- needs review
 L.opt_tweaks_total_fmt_desc = "전체 세그먼트의 데이터에 %s가 있는 세그먼트가 추가됩니다." -- needs review
 -- arena
-L["Custom Arena Colors"] = "커스텀 아레나 색상"
-L["Enable this if you want to use custom arena teams colors."] = "사용자 정의 팀 색상을 사용하려면 이것을 활성화하십시오."
+L.mod_pvp_desc = "투기장 및 전장에 대한 전문화 감지를 추가하고 같은 창에 투기장 상대를 표시합니다."
 L["Gold Team"] = "금색팀"
 L["Green Team"] = "녹색팀"
 L["Color for %s."] = "%s의 색상입니다."

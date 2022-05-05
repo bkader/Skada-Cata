@@ -718,8 +718,7 @@ L["Dungeon Trash"] = "Dungeon-M\195\188ll" -- needs review
 L.opt_tweaks_total_all_desc = "Alle Segmente werden zu den Daten des Gesamtsegments hinzugef\195\188gt." -- needs review
 L.opt_tweaks_total_fmt_desc = "Segmente mit %s werden zu den Daten des Gesamtsegments hinzugef\195\188gt." -- needs review
 -- arena
-L["Custom Arena Colors"] = "Benutzerdefinierte Arena-Farben"
-L["Enable this if you want to use custom arena teams colors."] = "Aktivieren Sie dies, wenn Sie benutzerdefinierte Teamfarben verwenden m\195\182chten."
+L.mod_pvp_desc = "F\195\188gen Sie eine Spezialisierungserkennung f\195\188r Arenen und Schlachtfelder hinzu und zeigen Sie Arenagegner im selben Fenster an."
 L["Gold Team"] = "Goldenes Team"
 L["Green Team"] = "Gr\195\188nes Team"
 L["Color for %s."] = "Farbe f\195\188r %s."

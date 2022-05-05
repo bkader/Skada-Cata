@@ -721,8 +721,7 @@ L["Dungeon Trash"] = "Trash de mazmorra" -- needs review
 L.opt_tweaks_total_all_desc = "Todos los segmentos se a\195\177aden a los datos del segmento total." -- needs review
 L.opt_tweaks_total_fmt_desc = "Los segmentos con %s se a\195\177aden a los datos del segmento total." -- needs review
 -- arena
-L["Custom Arena Colors"] = "Colores personalizados de la arena"
-L["Enable this if you want to use custom arena teams colors."] = "Habilite esta opci\195\179n si desea utilizar colores de equipos personalizados."
+L.mod_pvp_desc = "A\195\177adir detecci\195\179n de especializaci\195\179n para arenas y campos de batalla, y mostrar a los oponentes de la arena en la misma ventana."
 L["Gold Team"] = "Equipo dorado"
 L["Green Team"] = "Equipo verde"
 L["Color for %s."] = "Color para %s."

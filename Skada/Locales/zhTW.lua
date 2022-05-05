@@ -717,8 +717,7 @@ L["Dungeon Trash"] = "地牢垃圾" -- needs review
 L.opt_tweaks_total_all_desc = "将所有段添加到总段的数据中。" -- needs review
 L.opt_tweaks_total_fmt_desc = "将带有 %s 的段添加到总段的数据中。" -- needs review
 -- arena
-L["Custom Arena Colors"] = "自定義競技場顏色"
-L["Enable this if you want to use custom arena teams colors."] = "如果您想使用自定義團隊顏色，請啟用此選項。"
+L.mod_pvp_desc = "為競技場和戰場添加專業化檢測，並在同一窗口顯示競技場對手。"
 L["Gold Team"] = "金隊"
 L["Green Team"] = "綠隊"
 L["Color for %s."] = "%s 的顏色。"

@@ -75,6 +75,7 @@ ignoredSpells.debuffs = {
 -- [[ first hit ignored spells ]] --
 ignoredSpells.firsthit = {
 	[1130] = true, -- Hunter's Mark
+	[56190] = true, -- Shadow Jade Focusing Lens
 	[56191] = true, -- Shadow Jade Focusing Lens
 	[60122] = true, -- Baby Spice
 }

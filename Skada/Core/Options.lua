@@ -127,7 +127,7 @@ Skada.defaults = {
 			["My Spells"] = true,
 			["Overhealing"] = true,
 			["Overkill"] = true,
-			["PVP"] = true,
+			["Player vs. Player"] = true,
 			["Themes"] = true,
 			["Useful Damage"] = true
 		},

@@ -751,8 +751,8 @@ L["Dungeon Trash"] = true
 L.opt_tweaks_total_all_desc = "All segments are added to total segment data."
 L.opt_tweaks_total_fmt_desc = "Segments with %s are added to total segment data."
 -- arena
-L["Custom Arena Colors"] = true
-L["Enable this if you want to use custom arena teams colors."] = true
+L["Player vs. Player"] = PLAYER_V_PLAYER
+L.mod_pvp_desc = "Adds specialization detection for arenas and battlegrounds, and shows arena opponents on the same window."
 L["Gold Team"] = true
 L["Green Team"] = true
 L["Color"] = COLOR
