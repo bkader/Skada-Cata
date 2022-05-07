@@ -9,7 +9,7 @@ Skada:AddLoadableModule("Dispels", function(L)
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	-- cache frequently used globals
-	local pairs, ipairs, tostring, format = pairs, ipairs, tostring, string.format
+	local pairs, tostring, format = pairs, tostring, string.format
 	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local _
 
@@ -196,8 +196,9 @@ Skada:AddLoadableModule("Dispels", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and (player.dispel or 0) > 0 then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.dispel and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 

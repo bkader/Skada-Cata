@@ -5,8 +5,11 @@ local ACD = LibStub("AceConfigDialog-3.0")
 local ACR = LibStub("AceConfigRegistry-3.0")
 
 local fmt = string.format
-local pairs, ipairs = pairs, ipairs
-local GetAddOnMetadata = GetAddOnMetadata
+local next = next
+
+-- references: windows, modes
+local windows = nil
+local modes = nil
 
 Skada.windowdefaults = {
 	name = "Skada",
@@ -137,7 +140,6 @@ Skada.defaults = {
 
 -------------------------------------------------------------------------------
 
-local titleVersion = fmt("|T%s:18:18:0:0:32:32:2:30:2:30|t |cffffd200Skada|r |cffffffff%s|r", Skada.logo, Skada.version)
 local optionsValues = {
 	RESETOPT = {
 		L["No"], -- [1]
@@ -227,7 +229,7 @@ Skada.options = {
 							order = 20,
 							values = function()
 								local list = {}
-								for name, display in pairs(Skada.displays) do
+								for name, display in next, Skada.displays do
 									list[name] = display.name
 								end
 								return list
@@ -484,11 +486,12 @@ Skada.options = {
 							desc = L.opt_feed_desc,
 							width = "double",
 							values = function()
-								local feeds = {[""] = L.None}
-								for name, _ in Skada:IterateFeeds() do
-									feeds[name] = name
+								local list = {[""] = L.None}
+								local feeds = Skada:GetFeeds()
+								for name in next, feeds do
+									list[name] = name
 								end
-								return feeds
+								return list
 							end,
 							order = 20
 						},
@@ -742,12 +745,14 @@ Skada.options = {
 
 -- initial options for blizzard interface options
 do
+	local GetAddOnMetadata = GetAddOnMetadata
 	local initOptions
+
 	local function GetInitOptions()
 		if not initOptions then
 			initOptions = {
 				type = "group",
-				name = titleVersion,
+				name = fmt("|T%s:18:18:0:0:32:32:2:30:2:30|t |cffffd200Skada|r |cffffffff%s|r", Skada.logo, Skada.version),
 				args = {
 					open = {
 						type = "execute",
@@ -760,7 +765,9 @@ do
 			}
 
 			-- about args
-			for i, field in ipairs({"Version", "Date", "Author", "Credits", "Donate", "License", "Website", "Discord"}) do
+			local fields = {"Version", "Date", "Author", "Credits", "Donate", "License", "Website", "Discord"}
+			for i = 1, #fields do
+				local field = fields[i]
 				local meta = GetAddOnMetadata("Skada", field) or GetAddOnMetadata("Skada", "X-" .. field)
 				if meta then
 					if meta:match("^http[s]://[a-zA-Z0-9_/]-%.[a-zA-Z]") or meta:match("^[%w.]+@%w+%.%w+$") then
@@ -825,7 +832,7 @@ function Skada:AddColumnOptions(mod)
 	local cols = {type = "group", name = moduleName, inline = true, args = {}}
 
 	local order = 0
-	for colname, _ in pairs(mod.metadata.columns) do
+	for colname in next, mod.metadata.columns do
 		local c = mod.moduleName .. "_" .. colname
 
 		-- Set initial value from db if available, otherwise use mod default value.
@@ -888,6 +895,16 @@ do
 	end
 end
 
+local getScreenWidth
+do
+	local floor = math.floor
+	local GetScreenWidth = GetScreenWidth
+	function getScreenWidth()
+		return floor(GetScreenWidth())
+	end
+end
+
+local modesList = nil
 function Skada:FrameSettings(db, include_dimensions)
 	local obj = {
 		type = "group",
@@ -961,7 +978,7 @@ function Skada:FrameSettings(db, include_dimensions)
 								desc = L["The size of the texture pattern."],
 								order = 30,
 								min = 0,
-								max = floor(GetScreenWidth()),
+								max = getScreenWidth(),
 								step = 0.1,
 								bigStep = 1
 							},
@@ -1127,11 +1144,16 @@ function Skada:FrameSettings(db, include_dimensions)
 								desc = L.opt_combatmode_desc,
 								order = 10,
 								values = function()
-									local m = {[""] = L.None}
-									for _, mode in Skada:IterateModes() do
-										m[mode.moduleName] = mode.moduleName
+									if not modesList then
+										modesList = {[""] = L.None}
+										local modes = Skada:GetModes()
+										for i = 1, #modes do
+											if modes[i] then
+												modesList[modes[i].moduleName] = modes[i].moduleName
+											end
+										end
 									end
-									return m
+									return modesList
 								end
 							},
 							wipemode = {
@@ -1140,11 +1162,16 @@ function Skada:FrameSettings(db, include_dimensions)
 								desc = L.opt_wipemode_desc,
 								order = 20,
 								values = function()
-									local m = {[""] = L.None}
-									for _, mode in Skada:IterateModes() do
-										m[mode.moduleName] = mode.moduleName
+									if not modesList then
+										modesList = {[""] = L.None}
+										local modes = Skada:GetModes()
+										for i = 1, #modes do
+											if modes[i] then
+												modesList[modes[i].moduleName] = modes[i].moduleName
+											end
+										end
 									end
-									return m
+									return modesList
 								end
 							},
 							returnaftercombat = {
@@ -1176,8 +1203,10 @@ function Skada:FrameSettings(db, include_dimensions)
 			set = function(_, val)
 				db.sticky = val or nil
 				if not db.sticky then
-					for _, win in Skada:IterateWindows() do
-						if win.db.sticked and win.db.sticked[db.name] then
+					windows = Skada:GetWindows()
+					for i = 1, #windows do
+						local win = windows[i]
+						if win and win.db and win.db.sticked and win.db.sticked[db.name] then
 							win.db.sticked[db.name] = nil
 						end
 					end
@@ -1218,8 +1247,10 @@ function Skada:FrameSettings(db, include_dimensions)
 					order = 10,
 					values = function()
 						local list = {[""] = L.None}
-						for _, win in Skada:IterateWindows() do
-							if win.db.name ~= db.name and win.db.child ~= db.name and win.db.display == db.display then
+						windows = Skada:GetWindows()
+						for i = 1, #windows do
+							local win = windows[i]
+							if win and win.db and win.db.name ~= db.name and win.db.child ~= db.name and win.db.display == db.display then
 								list[win.db.name] = win.db.name
 							end
 						end
@@ -1229,7 +1260,7 @@ function Skada:FrameSettings(db, include_dimensions)
 					set = function(_, child)
 						db.child = (child == "") and nil or child
 						db.childmode = db.child and (db.childmode or 1) or nil
-						Skada:ReloadSettings()
+						Skada:ReloadSettings(db.name)
 					end
 				},
 				childmode = {
@@ -1250,7 +1281,7 @@ function Skada:FrameSettings(db, include_dimensions)
 			name = L["Width"],
 			order = 70,
 			min = 100,
-			max = floor(GetScreenWidth()),
+			max = getScreenWidth(),
 			step = 0.01,
 			bigStep = 1
 		}

@@ -1,7 +1,7 @@
 local Skada = Skada
 
 -- cache frequently used globals
-local pairs, ipairs, select, wipe = pairs, ipairs, select, wipe
+local pairs, select, wipe = pairs, select, wipe
 local format, max, floor = string.format, math.max, math.floor
 local UnitGUID, GetSpellInfo = UnitGUID, Skada.GetSpellInfo or GetSpellInfo
 local _
@@ -306,8 +306,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	local function RemoveShield(dstName, srcGUID, spellid)
 		shields[dstName] = shields[dstName] or new()
-		for i, shield in ipairs(shields[dstName]) do
-			if shield.srcGUID == srcGUID and shield.spellid == spellid then
+		for i = 1, #shields[dstName] do
+			local shield = shields[dstName][i]
+			if shield and shield.srcGUID == srcGUID and shield.spellid == spellid then
 				del(tremove(shields[dstName], i))
 				tsort(shields[dstName], ShieldsOrderPred)
 				break
@@ -323,8 +324,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 		if eventtype == "SPELL_AURA_REMOVED" then
 			if shields[dstName] then
-				for _, shield in ipairs(shields[dstName]) do
-					if shield.srcGUID == srcGUID and shield.spellid == spellid then
+				for i = 1, #shields[dstName] do
+					local shield = shields[dstName][i]
+					if shield and shield.srcGUID == srcGUID and shield.spellid == spellid then
 						Skada:ScheduleTimer(RemoveShield, 0.1, dstName, srcGUID, spellid)
 						break
 					end
@@ -343,8 +345,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		-- shield refreshed
 		if eventtype == "SPELL_AURA_REFRESH" then
 			local index = nil
-			for i, shield in ipairs(shields[dstName]) do
-				if shield.srcGUID == srcGUID and shield.spellid == spellid then
+			for i = 1, #shields[dstName] do
+				local shield = shields[dstName][i]
+				if shield and shield.srcGUID == srcGUID and shield.spellid == spellid then
 					shield.ts = timestamp
 					index = i
 
@@ -415,16 +418,17 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local function process_shield(dstName, spellschool)
 		shields[dstName] = shields[dstName] or new()
 
-		for _, s in ipairs(shields[dstName]) do
-			if s.spellid == 543 then -- Mage Ward (Mage)
+		for i = 1, #shields[dstName] do
+			local s = shields[dstName][i]
+			if s and s.spellid == 543 then -- Mage Ward (Mage)
 				if band(spellschool, 0x10) == spellschool or band(spellschool, 0x04) == spellschool or band(spellschool, 0x40) == spellschool then
 					return s
 				end
-			elseif s.spellid == 6229 then -- Shadow Ward (Warlock)
+			elseif s and s.spellid == 6229 then -- Shadow Ward (Warlock)
 				if band(spellschool, 0x20) == spellschool then
 					return s
 				end
-			else
+			elseif s then
 				return s
 			end
 		end
@@ -683,8 +687,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			local nr = 0
 
 			-- players
-			for _, player in ipairs(set.players) do
-				if not win.class or win.class == player.class then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and (not win.class or win.class == player.class) then
 					local aps, amount = player:GetAPS()
 					if amount > 0 then
 						nr = nr + 1
@@ -719,8 +724,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 			-- arena enemies
 			if Skada.forPVP and set.type == "arena" and set.enemies then
-				for _, enemy in ipairs(set.enemies) do
-					if not win.class or win.class == enemy.class then
+				for i = 1, #set.enemies do
+					local enemy = set.enemies[i]
+					if enemy and not enemy.fake and (not win.class or win.class == enemy.class) then
 						local aps, amount = enemy:GetAPS()
 						if amount > 0 then
 							nr = nr + 1
@@ -838,10 +844,11 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		self.checked = nil
 		-- clean absorbspells table:
 		if (set.absorb or 0) == 0 then return end
-		for _, p in ipairs(set.players) do
-			if p.absorb and p.absorb == 0 then
+		for i = 1, #set.players do
+			local p = set.players[i]
+			if p and p.absorb == 0 then
 				p.absorbspells = nil
-			elseif p.absorbspells then
+			elseif p and p.absorbspells then
 				for spellid, spell in pairs(p.absorbspells) do
 					if spell.amount == 0 then
 						p.absorbspells[spellid] = nil
@@ -1166,8 +1173,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 			local nr = 0
 
 			-- players
-			for _, player in ipairs(set.players) do
-				if not win.class or win.class == player.class then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and (not win.class or win.class == player.class) then
 					local hps, amount = player:GetAHPS()
 
 					if amount > 0 then
@@ -1203,8 +1211,9 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 			-- arena enemies
 			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal then
-				for _, enemy in ipairs(set.enemies) do
-					if not win.class or win.class == enemy.class then
+				for i = 1, #set.enemies do
+					local enemy = set.enemies[i]
+					if enemy and not enemy.fake and (not win.class or win.class == enemy.class) then
 						local hps, amount = enemy:GetAHPS()
 
 						if amount > 0 then
@@ -1345,8 +1354,9 @@ Skada:AddLoadableModule("HPS", function(L)
 			local nr = 0
 
 			-- players
-			for _, player in ipairs(set.players) do
-				if not win.class or win.class == player.class then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and (not win.class or win.class == player.class) then
 					local amount = player:GetAHPS()
 					if amount > 0 then
 						nr = nr + 1
@@ -1380,8 +1390,9 @@ Skada:AddLoadableModule("HPS", function(L)
 
 			-- arena enemies
 			if Skada.forPVP and set.type == "arena" and set.enemies and set.GetEnemyHeal then
-				for _, enemy in ipairs(set.enemies) do
-					if not win.class or win.class == enemy.class then
+				for i = 1, #set.enemies do
+					local enemy = set.enemies[i]
+					if enemy and not enemy.fake and (not win.class or win.class == enemy.class) then
 						local amount = enemy:GetHPS()
 						if amount > 0 then
 							nr = nr + 1
@@ -1458,8 +1469,9 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 		if total == 0 then return end
 
 		wipe(cacheTable)
-		for _, p in ipairs(set.players) do
-			local spell = (p.absorbspells and p.absorbspells[id]) or (p.healspells and p.healspells[id])
+		for i = 1, #set.players do
+			local p = set.players[i]
+			local spell = p and ((p.absorbspells and p.absorbspells[id]) or (p.healspells and p.healspells[id])) or nil
 			if spell then
 				if not cacheTable[id] then
 					cacheTable[id] = {school = spell.school, amount = spell.amount, overheal = spell.overheal}
@@ -1512,8 +1524,9 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 		wipe(cacheTable)
 		local total = 0
 
-		for _, p in ipairs(set.players) do
-			local spell = (p.absorbspells and p.absorbspells[win.spellid]) or (p.healspells and p.healspells[win.spellid])
+		for i = 1, #set.players do
+			local p = set.players[i]
+			local spell = p and ((p.absorbspells and p.absorbspells[win.spellid]) or (p.healspells and p.healspells[win.spellid])) or nil
 			if spell then
 				cacheTable[p.name] = {
 					id = p.id,
@@ -1623,8 +1636,9 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 	function setPrototype:GetAbsorbHealSpells(tbl)
 		if (self.absorb or self.heal) and self.players then
 			tbl = wipe(tbl or cacheTable)
-			for _, player in ipairs(self.players) do
-				if player.healspells then
+			for i = 1, #self.players do
+				local player = self.players[i]
+				if player and player.healspells then
 					for spellid, spell in pairs(player.healspells) do
 						if not tbl[spellid] then
 							tbl[spellid] = {school = spell.school, amount = spell.amount, overheal = spell.overheal}
@@ -1636,7 +1650,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 						end
 					end
 				end
-				if player.absorbspells then
+				if player and player.absorbspells then
 					for spellid, spell in pairs(player.absorbspells) do
 						if not tbl[spellid] then
 							tbl[spellid] = {school = spell.school, amount = spell.amount}

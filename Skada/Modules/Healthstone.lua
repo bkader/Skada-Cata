@@ -24,7 +24,6 @@ Skada:AddLoadableModule("Healthstones", function(L)
 		end
 	end
 
-	local used = {}
 	local function StoneUsed(_, eventtype, srcGUID, srcName, srcFlags, _, _, _, spellid, spellname)
 		if (spellid and stonespells[spellid]) or spellname and spellname == stonename then
 			Skada:DispatchSets(log_healthstone, true, srcGUID, srcName, srcFlags)
@@ -41,8 +40,9 @@ Skada:AddLoadableModule("Healthstones", function(L)
 			end
 
 			local nr = 0
-			for _, player in ipairs(set.players) do
-				if (not win.class or win.class == player.class) and player.healthstone then
+			for i = 1, #set.players do
+				local player = set.players[i]
+				if player and player.healthstone and (not win.class or win.class == player.class) then
 					nr = nr + 1
 					local d = win:nr(nr)
 
