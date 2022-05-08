@@ -68,7 +68,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 	end
 
 	function playermod:Update(win, set)
-		win.title = format(L["%s's resurrect spells"], win.actorname or L.Unknown)
+		win.title = format(L["%s's resurrect spells"], win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -109,7 +109,7 @@ Skada:AddLoadableModule("Resurrects", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's resurrect targets"], win.actorname or L.Unknown)
+		win.title = format(L["%s's resurrect targets"], win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)

@@ -539,11 +539,11 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 	function spellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = L["actor absorb spells"](win.actorname or L.Unknown, label)
+		win.title = L["actor absorb spells"](win.actorname or L["Unknown"], label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = L["actor absorb spells"](win.actorname or L.Unknown, win.targetname or L.Unknown)
+		win.title = L["actor absorb spells"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not set or not win.targetname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -589,7 +589,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	function playermod:Update(win, set)
-		win.title = L["actor absorb spells"](win.actorname or L.Unknown)
+		win.title = L["actor absorb spells"](win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -633,7 +633,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's absorbed targets"], win.actorname or L.Unknown)
+		win.title = format(L["%s's absorbed targets"], win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -958,11 +958,11 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 	function spellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = L["actor absorb and heal spells"](win.actorname or L.Unknown, label)
+		win.title = L["actor absorb and heal spells"](win.actorname or L["Unknown"], label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = L["actor absorb and heal spells"](win.actorname or L.Unknown, win.targetname or L.Unknown)
+		win.title = L["actor absorb and heal spells"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not set or not win.targetname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -1046,7 +1046,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 	end
 
 	function playermod:Update(win, set)
-		win.title = L["actor absorb and heal spells"](win.actorname or L.Unknown)
+		win.title = L["actor absorb and heal spells"](win.actorname or L["Unknown"])
 		if not win.actorname then return end
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
@@ -1121,7 +1121,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's absorbed and healed targets"], win.actorname or L.Unknown)
+		win.title = format(L["%s's absorbed and healed targets"], win.actorname or L["Unknown"])
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetAbsorbHeal() or 0
@@ -1517,7 +1517,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's sources"], win.spellname or L.Unknown)
+		win.title = format(L["%s's sources"], win.spellname or L["Unknown"])
 		if not (win.spellid and set) then return end
 
 		-- let's go...
