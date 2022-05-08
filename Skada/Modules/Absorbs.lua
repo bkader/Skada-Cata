@@ -17,6 +17,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local playermod = mod:NewModule(L["Absorb spell list"])
 	local targetmod = mod:NewModule(L["Absorbed target list"])
 	local spellmod = targetmod:NewModule(L["Absorb spell list"])
+	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local COMBATLOG_OBJECT_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
@@ -510,13 +511,8 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		local spell = actor and actor.absorbspells and actor.absorbspells[id]
 		if spell then
 			tooltip:AddLine(actor.name .. " - " .. label)
-			if spell.school and Skada.spellschools[spell.school] then
-				tooltip:AddLine(
-					Skada.spellschools[spell.school].name,
-					Skada.spellschools[spell.school].r,
-					Skada.spellschools[spell.school].g,
-					Skada.spellschools[spell.school].b
-				)
+			if spell.school and spellschools[spell.school] then
+				tooltip:AddLine(spellschools(spell.school))
 			end
 
 			if (spell.casts or 0) > 0 then
@@ -705,7 +701,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 						d.spec = player.spec
 
 						if Skada.forPVP and set.type == "arena" then
-							d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
+							d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 						end
 
 						d.value = amount
@@ -740,7 +736,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 							d.class = enemy.class
 							d.role = enemy.role
 							d.spec = enemy.spec
-							d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
+							d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = amount
 							d.valuetext = Skada:FormatValueCols(
@@ -873,6 +869,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 	local playermod = mod:NewModule(L["Absorbs and healing spells"])
 	local targetmod = mod:NewModule(L["Absorbed and healed targets"])
 	local spellmod = targetmod:NewModule(L["Absorbs and healing spells"])
+	local spellschools = Skada.spellschools
 
 	local function hps_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
@@ -906,13 +903,8 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 
 		if spell then
 			tooltip:AddLine(actor.name .. " - " .. label)
-			if spell.school and Skada.spellschools[spell.school] then
-				tooltip:AddLine(
-					Skada.spellschools[spell.school].name,
-					Skada.spellschools[spell.school].r,
-					Skada.spellschools[spell.school].g,
-					Skada.spellschools[spell.school].b
-				)
+			if spell.school and spellschools[spell.school] then
+				tooltip:AddLine(spellschools(spell.school))
 			end
 
 			if enemy then
@@ -1192,7 +1184,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 						d.spec = player.spec
 
 						if Skada.forPVP and set.type == "arena" then
-							d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
+							d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 						end
 
 						d.value = amount
@@ -1228,7 +1220,7 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 							d.class = enemy.class
 							d.role = enemy.role
 							d.spec = enemy.spec
-							d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
+							d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = amount
 							d.valuetext = Skada:FormatValueCols(
@@ -1372,7 +1364,7 @@ Skada:AddLoadableModule("HPS", function(L)
 						d.spec = player.spec
 
 						if Skada.forPVP and set.type == "arena" then
-							d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
+							d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 						end
 
 						d.value = amount
@@ -1406,7 +1398,7 @@ Skada:AddLoadableModule("HPS", function(L)
 							d.class = enemy.class
 							d.role = enemy.role
 							d.spec = enemy.spec
-							d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
+							d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = amount
 							d.valuetext = Skada:FormatValueCols(
@@ -1462,6 +1454,7 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 	local mod = Skada:NewModule(L["Healing Done By Spell"])
 	local spellmod = mod:NewModule(L["Healing spell sources"])
 	local cacheTable = Skada.cacheTable
+	local spellschools = Skada.spellschools
 
 	local function spell_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
@@ -1488,13 +1481,8 @@ Skada:AddLoadableModule("Healing Done By Spell", function(L)
 		local spell = cacheTable[id]
 		if spell then
 			tooltip:AddLine(GetSpellInfo(id))
-			if spell.school and Skada.spellschools[spell.school] then
-				tooltip:AddLine(
-					Skada.spellschools[spell.school].name,
-					Skada.spellschools[spell.school].r,
-					Skada.spellschools[spell.school].g,
-					Skada.spellschools[spell.school].b
-				)
+			if spell.school and spellschools[spell.school] then
+				tooltip:AddLine(spellschools(spell.school))
 			end
 
 			if (spell.casts or 0) > 0 then

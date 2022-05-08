@@ -20,6 +20,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	local tdetailmod = targetmod:NewModule(L["Damage spell list"])
 	local UnitGUID, GetTime = UnitGUID, GetTime
 	local new, del = Skada.newTable, Skada.delTable
+	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	-- damage miss types
@@ -125,7 +126,7 @@ Skada:AddLoadableModule("Damage", function(L)
 			player.damagespells[spellname] = spell
 		elseif dmg.spellid and dmg.spellid ~= spell.id then
 			if dmg.spellschool and dmg.spellschool ~= spell.school then
-				spellname = spellname .. " (" .. (Skada.spellschools[dmg.spellschool] and Skada.spellschools[dmg.spellschool].name or OTHER) .. ")"
+				spellname = spellname .. " (" .. (spellschools[dmg.spellschool] and spellschools[dmg.spellschool].name or OTHER) .. ")"
 			else
 				spellname = GetSpellInfo(dmg.spellid)
 			end
@@ -364,13 +365,8 @@ Skada:AddLoadableModule("Damage", function(L)
 		local spell = actor and actor.damagespells and actor.damagespells[enemy and id or label]
 		if spell then
 			tooltip:AddLine(actor.name .. " - " .. label)
-			if spell.school and Skada.spellschools[spell.school] then
-				tooltip:AddLine(
-					Skada.spellschools[spell.school].name,
-					Skada.spellschools[spell.school].r,
-					Skada.spellschools[spell.school].g,
-					Skada.spellschools[spell.school].b
-				)
+			if spell.school and spellschools[spell.school] then
+				tooltip:AddLine(spellschools(spell.school))
 			end
 
 			if (spell.casts or 0) > 0 then
@@ -417,13 +413,8 @@ Skada:AddLoadableModule("Damage", function(L)
 			local spell = actor.damagespells and actor.damagespells[win.spellname]
 			if spell then
 				tooltip:AddLine(actor.name .. " - " .. win.spellname)
-				if spell.school and Skada.spellschools[spell.school] then
-					tooltip:AddLine(
-						Skada.spellschools[spell.school].name,
-						Skada.spellschools[spell.school].r,
-						Skada.spellschools[spell.school].g,
-						Skada.spellschools[spell.school].b
-					)
+				if spell.school and spellschools[spell.school] then
+					tooltip:AddLine(spellschools(spell.school))
 				end
 
 				if label == L["Critical Hits"] and spell.criticalamount then
@@ -749,7 +740,7 @@ Skada:AddLoadableModule("Damage", function(L)
 						d.spec = player.spec
 
 						if Skada.forPVP and set.type == "arena" then
-							d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
+							d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 						end
 
 						d.value = amount
@@ -782,7 +773,7 @@ Skada:AddLoadableModule("Damage", function(L)
 							d.class = enemy.class
 							d.role = enemy.role
 							d.spec = enemy.spec
-							d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
+							d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = amount
 							d.valuetext = Skada:FormatValueCols(
@@ -835,6 +826,7 @@ Skada:AddLoadableModule("Damage", function(L)
 		if compare then
 			self.metadata.click3 = compare.SetActor
 			self.metadata.click3_label = L["Damage Comparison"]
+			compare.nototal = true -- no total click.
 		end
 
 		local flags_src_dst = {src_is_interesting = true, dst_is_not_interesting = true}
@@ -925,15 +917,6 @@ Skada:AddLoadableModule("Damage", function(L)
 			end
 		end
 	end
-
-	function mod:OnInitialize()
-		Skada.options.args.tweaks.args.general.args.absdamage = {
-			type = "toggle",
-			name = L["Absorbed Damage"],
-			desc = L["Enable this if you want the damage absorbed to be included in the damage done."],
-			order = 100
-		}
-	end
 end)
 
 -- ============================= --
@@ -992,7 +975,7 @@ Skada:AddLoadableModule("DPS", function(L)
 						d.spec = player.spec
 
 						if Skada.forPVP and set.type == "arena" then
-							d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
+							d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 						end
 
 						d.value = dps
@@ -1025,7 +1008,7 @@ Skada:AddLoadableModule("DPS", function(L)
 							d.class = enemy.class
 							d.role = enemy.role
 							d.spec = enemy.spec
-							d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
+							d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = dps
 							d.valuetext = Skada:FormatValueCols(
@@ -1418,7 +1401,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 						d.spec = player.spec
 
 						if Skada.forPVP and set.type == "arena" then
-							d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
+							d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 						end
 
 						d.value = amount
@@ -1452,7 +1435,7 @@ Skada:AddLoadableModule("Useful Damage", function(L)
 							d.class = enemy.class
 							d.role = enemy.role
 							d.spec = enemy.spec
-							d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
+							d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = amount
 							d.valuetext = Skada:FormatValueCols(
@@ -1692,7 +1675,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 					d.spec = player.spec
 
 					if Skada.forPVP and set.type == "arena" then
-						d.color = Skada:ClassColor(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
+						d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
 					end
 
 					d.value = player.overkill
@@ -1722,7 +1705,7 @@ Skada:AddLoadableModule("Overkill", function(L)
 						d.class = enemy.class
 						d.role = enemy.role
 						d.spec = enemy.spec
-						d.color = Skada:ClassColor(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
+						d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 						d.value = enemy.overkill
 						d.valuetext = Skada:FormatValueCols(
