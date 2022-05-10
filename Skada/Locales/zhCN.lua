@@ -719,6 +719,8 @@ L["Dungeon Bosses"] = "地牢首领" -- needs review
 L["Dungeon Trash"] = "地牢垃圾" -- needs review
 L["opt_tweaks_total_all_desc"] = "将所有段添加到总段的数据中。" -- needs review
 L["opt_tweaks_total_fmt_desc"] = "将带有 %s 的段添加到总段的数据中。" -- needs review
+L["Detailed total segment"] = "详细的总段"
+-- L["opt_tweaks_total_full_desc"] = "When enabled, Skada will record everything to the total segment, instead of total numbers (record spell details, their targets as their sources)."
 -- arena
 L["mod_pvp_desc"] = "为竞技场和战场增加了专业化检测，并在同一窗口上显示竞技场的对手。"
 L["Gold Team"] = "金队"

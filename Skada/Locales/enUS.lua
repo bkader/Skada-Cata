@@ -755,6 +755,8 @@ L["Dungeon Bosses"] = true
 L["Dungeon Trash"] = true
 L["opt_tweaks_total_all_desc"] = "All segments are added to total segment data."
 L["opt_tweaks_total_fmt_desc"] = "Segments with %s are added to total segment data."
+L["Detailed total segment"] = true
+L["opt_tweaks_total_full_desc"] = "When enabled, Skada will record everything to the total segment, instead of total numbers (record spell details, their targets as their sources)."
 -- arena
 L["Player vs. Player"] = PLAYER_V_PLAYER
 L["mod_pvp_desc"] = "Adds specialization detection for arenas and battlegrounds, and shows arena opponents on the same window."

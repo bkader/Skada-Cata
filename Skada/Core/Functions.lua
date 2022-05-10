@@ -895,6 +895,12 @@ do
 								disabled = disabled
 							}
 						}
+					},
+					totalidc = {
+						type = "toggle",
+						name = L["Detailed total segment"],
+						desc = L["opt_tweaks_total_full_desc"],
+						order = 20
 					}
 				}
 			}
@@ -904,7 +910,7 @@ do
 	end
 
 	function Skada:NoTotalClick(set, mode)
-		return (set == "total" and type(mode) == "table" and mode.nototal == true)
+		return (not self.db.profile.totalidc and set == "total" and type(mode) == "table" and mode.nototal == true)
 	end
 
 	function Skada:CanRecordTotal(set)
