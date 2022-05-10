@@ -144,11 +144,8 @@ Skada:AddLoadableModule("CC Done", function(L)
 
 			-- record the target.
 			if cc.dstName then
-				local actor = Skada:GetActor(set, cc.dstGUID, cc.dstName, cc.dstFlags)
-				if actor then
-					spell.targets = spell.targets or {}
-					spell.targets[cc.dstName] = (spell.targets[cc.dstName] or 0) + 1
-				end
+				spell.targets = spell.targets or {}
+				spell.targets[cc.dstName] = (spell.targets[cc.dstName] or 0) + 1
 			end
 		end
 	end
@@ -346,8 +343,6 @@ Skada:AddLoadableModule("CC Done", function(L)
 								tbl[name].class = actor.class
 								tbl[name].role = actor.role
 								tbl[name].spec = actor.spec
-							else
-								tbl[name].class = "UNKNOWN"
 							end
 						end
 					end
@@ -391,11 +386,8 @@ Skada:AddLoadableModule("CC Taken", function(L)
 
 			-- record the source.
 			if cc.srcName then
-				local actor = Skada:GetActor(set, cc.srcGUID, cc.srcName, cc.srcFlags)
-				if actor then
-					spell.sources = spell.sources or {}
-					spell.sources[cc.srcName] = (spell.sources[cc.srcName] or 0) + 1
-				end
+				spell.sources = spell.sources or {}
+				spell.sources[cc.srcName] = (spell.sources[cc.srcName] or 0) + 1
 			end
 		end
 	end
@@ -594,8 +586,6 @@ Skada:AddLoadableModule("CC Taken", function(L)
 								tbl[name].class = actor.class
 								tbl[name].role = actor.role
 								tbl[name].spec = actor.spec
-							else
-								tbl[name].class = "UNKNOWN"
 							end
 						end
 					end
@@ -640,11 +630,8 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 
 			-- record the target.
 			if cc.dstName then
-				local actor = Skada:GetActor(set, cc.dstGUID, cc.dstName, cc.dstFlags)
-				if actor then
-					spell.targets = spell.targets or {}
-					spell.targets[cc.dstName] = (spell.targets[cc.dstName] or 0) + 1
-				end
+				spell.targets = spell.targets or {}
+				spell.targets[cc.dstName] = (spell.targets[cc.dstName] or 0) + 1
 			end
 		end
 	end
@@ -874,8 +861,6 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 								tbl[name].class = actor.class
 								tbl[name].role = actor.role
 								tbl[name].spec = actor.spec
-							else
-								tbl[name].class = "UNKNOWN"
 							end
 						end
 					end
