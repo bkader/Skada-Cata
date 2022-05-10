@@ -1352,6 +1352,8 @@ function mod:AddDisplayOptions(win, options)
 						desc = L["opt_showself_desc"],
 						descStyle = "inline",
 						width = "double",
+						disabled = function() return Skada.db.profile.showself end,
+						hidden = function() return Skada.db.profile.showself end,
 						order = 10
 					},
 					showtotals = {

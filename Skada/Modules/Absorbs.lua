@@ -136,6 +136,8 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local absorb = {}
 
 	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
+		if not set or set == Skada.total then return end
+
 		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
 		if player and player.absorbspells and player.absorbspells[spellid] then
 			player.absorbspells[spellid].casts = (player.absorbspells[spellid].casts or 1) + 1
@@ -452,7 +454,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 			absorb.school = shield.school
 			absorb.amount = absorbed
 
-			Skada:DispatchSets(log_absorb, true, absorb)
+			Skada:DispatchSets(log_absorb, absorb)
 		end
 	end
 
