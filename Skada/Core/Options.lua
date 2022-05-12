@@ -185,7 +185,7 @@ local function GetValue(i)
 end
 
 local function SetValue(i, val)
-	Skada.db.profile[i[#i]] = val or nil
+	Skada.db.profile[i[#i]] = val
 	Skada:ApplySettings()
 
 	if i[#i] == "showtotals" then
@@ -909,7 +909,7 @@ function Skada:FrameSettings(db, include_dimensions)
 			return db[i[#i]]
 		end,
 		set = function(i, val)
-			db[i[#i]] = val or nil
+			db[i[#i]] = val
 			Skada:ApplySettings(db.name)
 		end,
 		args = {
@@ -1194,7 +1194,7 @@ function Skada:FrameSettings(db, include_dimensions)
 			desc = L["Allows the window to stick to other Skada windows."],
 			order = 30,
 			set = function(_, val)
-				db.sticky = val or nil
+				db.sticky = val
 				if not db.sticky then
 					windows = Skada:GetWindows()
 					for i = 1, #windows do
