@@ -1,7 +1,7 @@
 local Skada = Skada
 
 -- cache frequently used globals
-local pairs, select, wipe = pairs, select, wipe
+local pairs, wipe = pairs, wipe
 local format, max, floor = string.format, math.max, math.floor
 local UnitGUID, GetSpellInfo = UnitGUID, Skada.GetSpellInfo or GetSpellInfo
 local _
@@ -19,6 +19,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local spellmod = targetmod:NewModule(L["Absorb spell list"])
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local COMBATLOG_OBJECT_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
 	local COMBATLOG_OBJECT_AFFILIATION_OUTSIDER = COMBATLOG_OBJECT_AFFILIATION_OUTSIDER or 0x00000008
@@ -154,7 +155,9 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 		local player = Skada:GetPlayer(set, absorb.playerid, absorb.playername)
 		if player then
-			Skada:AddActiveTime(player, (player.role ~= "DAMAGER" and not nocount))
+			if player.role ~= "DAMAGER" and not nocount then
+				Skada:AddActiveTime(player, not passiveSpells[absorb.spellid])
+			end
 
 			-- add absorbs amount
 			set.absorb = (set.absorb or 0) + absorb.amount
@@ -833,8 +836,13 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		Skada:AddMode(self, L["Absorbs and Healing"])
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.absorbs then
-			ignoredSpells = Skada.ignoredSpells.absorbs
+		if Skada.ignoredSpells then
+			if Skada.ignoredSpells.absorbs then
+				ignoredSpells = Skada.ignoredSpells.absorbs
+			end
+			if Skada.ignoredSpells.activeTime then
+				passiveSpells = Skada.ignoredSpells.activeTime
+			end
 		end
 	end
 

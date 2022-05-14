@@ -80,6 +80,13 @@ ignoredSpells.firsthit = {
 	[60122] = true, -- Baby Spice
 }
 
+-- [[ no active time spells ]] --
+ignoredSpells.activeTime = {
+	[7294] = true, -- Retribution Aura
+	[26364] = true, -- Lightning Shield
+	[34913] = true, -- Molten Armor
+}
+
 -->> end of editable lines <<--
 
 -------------------------------------------------------------------------------

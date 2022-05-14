@@ -767,6 +767,7 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 	local spellmod = mod:NewModule(L["Damage spell list"])
 	local spelltargetmod = spellmod:NewModule(L["Damage spell targets"])
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_damage(set, dmg)
 		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
@@ -776,8 +777,8 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 		local e = Skada:GetEnemy(set, dmg.enemyname, dmg.enemyid, dmg.enemyflags, true)
 		if e then
-			if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] then
-				Skada:AddActiveTime(e, e.role ~= "HEALER" and dmg.amount > 0)
+			if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] and e.role ~= "HEALER" then
+				Skada:AddActiveTime(e, dmg.amount > 0 and dmg.spellid and not passiveSpells[dmg.spellid])
 			end
 
 			set.edamage = (set.edamage or 0) + dmg.amount
@@ -1163,9 +1164,14 @@ Skada:AddLoadableModule("Enemy Damage Done", function(L)
 
 		Skada:AddMode(self, L["Enemies"])
 
-		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.damagetaken then
-			ignoredSpells = Skada.ignoredSpells.damagetaken
+		-- table of ignored damage/time spells:
+		if Skada.ignoredSpells then
+			if Skada.ignoredSpells.damagetaken then
+				ignoredSpells = Skada.ignoredSpells.damagetaken
+			end
+			if Skada.ignoredSpells.activeTime then
+				passiveSpells = Skada.ignoredSpells.activeTime
+			end
 		end
 	end
 
@@ -1275,6 +1281,7 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 	local targetmod = mod:NewModule(L["Healed target list"])
 	local spellmod = mod:NewModule(L["Healing spell list"])
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local function log_heal(set, data)
 		if not set or (set == Skada.total and not Skada.db.profile.totalidc) then return end
@@ -1283,8 +1290,8 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 
 		local e = Skada:GetEnemy(set, data.enemyname, data.enemyid, data.enemyflags, true)
 		if e then
-			if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] then
-				Skada:AddActiveTime(e, e.role == "HEALER" and data.amount > 0)
+			if (set.type == "arena" or set.type == "pvp") and e.class and Skada.validclass[e.class] and e.role == "HEALER" then
+				Skada:AddActiveTime(e, data.amount > 0 and data.spellid and not passiveSpells[data.spellid])
 			end
 
 			set.eheal = (set.eheal or 0) + data.amount
@@ -1476,9 +1483,14 @@ Skada:AddLoadableModule("Enemy Healing Done", function(L)
 
 		Skada:AddMode(self, L["Enemies"])
 
-		-- table of ignored spells:
-		if Skada.ignoredSpells and Skada.ignoredSpells.heals then
-			ignoredSpells = Skada.ignoredSpells.heals
+		-- table of ignored heal/time spells:
+		if Skada.ignoredSpells then
+			if Skada.ignoredSpells.heals then
+				ignoredSpells = Skada.ignoredSpells.heals
+			end
+			if Skada.ignoredSpells.activeTime then
+				passiveSpells = Skada.ignoredSpells.activeTime
+			end
 		end
 	end
 

@@ -457,6 +457,8 @@ do
 					res3 = [[Interface\Icons\INV_Weapon_Bow_07]]
 				elseif spellid == 6603 then
 					res1, res3 = L["Melee"], [[Interface\Icons\INV_Sword_04]]
+				elseif spellid == 3026 then
+					res3 = [[Interface\Icons\Spell_Shadow_Soulgem]]
 				end
 			end
 		end

@@ -22,6 +22,7 @@ Skada:AddLoadableModule("Damage", function(L)
 	local new, del = Skada.newTable, Skada.delTable
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	-- damage miss types
 	local missTypes = Skada.missTypes
@@ -29,14 +30,6 @@ Skada:AddLoadableModule("Damage", function(L)
 		missTypes = {"ABSORB", "BLOCK", "DEFLECT", "DODGE", "EVADE", "IMMUNE", "MISS", "PARRY", "REFLECT", "RESIST"}
 		Skada.missTypes = missTypes
 	end
-
-	-- spells on the list below are ignored when it comes
-	-- to updating player's active time.
-	local blacklist = {
-		[7294] = true, -- Retribution Aura
-		[30482] = true, -- Molten Armor
-		[324] = true, -- Lightning Shield
-	}
 
 	-- spells on the list below are used to update player's active time
 	-- no matter their role or damage amount, since pets aren't considered.
@@ -95,10 +88,10 @@ Skada:AddLoadableModule("Damage", function(L)
 		if not player then return end
 
 		-- update activity
-		if whitelist[dmg.spellid] ~= nil then
+		if whitelist[dmg.spellid] ~= nil and not dmg.petname then
 			Skada:AddActiveTime(player, (dmg.amount > 0), tonumber(whitelist[dmg.spellid]))
 		elseif player.role ~= "HEALER" and not dmg.petname then
-			Skada:AddActiveTime(player, (dmg.amount > 0 and not blacklist[dmg.spellid]))
+			Skada:AddActiveTime(player, (dmg.amount > 0 and not passiveSpells[dmg.spellid]))
 		end
 
 		-- add absorbed damage to total damage
