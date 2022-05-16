@@ -119,7 +119,7 @@ end
 Skada:AddLoadableModule("CC Done", function(L)
 	if Skada:IsDisabled("CC Done") then return end
 
-	local mod = Skada:NewModule(L["CC Done"])
+	local mod = Skada:NewModule("CC Done")
 	local playermod = mod:NewModule(L["Crowd Control Spells"])
 	local targetmod = mod:NewModule(L["Crowd Control Targets"])
 
@@ -359,7 +359,7 @@ end)
 Skada:AddLoadableModule("CC Taken", function(L)
 	if Skada:IsDisabled("CC Taken") then return end
 
-	local mod = Skada:NewModule(L["CC Taken"])
+	local mod = Skada:NewModule("CC Taken")
 	local playermod = mod:NewModule(L["Crowd Control Spells"])
 	local sourcemod = mod:NewModule(L["Crowd Control Sources"])
 
@@ -602,7 +602,7 @@ end)
 Skada:AddLoadableModule("CC Breaks", function(L)
 	if Skada:IsDisabled("CC Breaks") then return end
 
-	local mod = Skada:NewModule(L["CC Breaks"])
+	local mod = Skada:NewModule("CC Breaks")
 	local playermod = mod:NewModule(L["Crowd Control Spells"])
 	local targetmod = mod:NewModule(L["Crowd Control Targets"])
 

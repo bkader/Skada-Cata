@@ -2,7 +2,7 @@ local Skada = Skada
 Skada:AddLoadableModule("Parry-Haste", function(L)
 	if Skada:IsDisabled("Parry-Haste") then return end
 
-	local mod = Skada:NewModule(L["Parry-Haste"])
+	local mod = Skada:NewModule("Parry-Haste")
 	local targetmod = mod:NewModule(L["Parry target list"])
 
 	local pairs, tostring, format = pairs, tostring, string.format
