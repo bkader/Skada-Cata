@@ -44,6 +44,7 @@ Skada:AddLoadableModule("Threat", function(L)
 					d.icon = aggroIcon
 					d.color = aggroColor
 					d.ignore = true
+					d.changed = nil
 
 					d.class = nil
 					d.role = nil
@@ -96,6 +97,7 @@ Skada:AddLoadableModule("Threat", function(L)
 						d.icon = nil
 						d.color = nil
 						d.ignore = nil
+						d.changed = nil
 
 						d.class = player.class
 						d.role = player.role
@@ -107,6 +109,7 @@ Skada:AddLoadableModule("Threat", function(L)
 								d.value = threatvalue + 410065408
 								d.threat = threatvalue + 410065408
 								d.color = negativeColor
+								d.changed = true
 							else
 								d.value = threatvalue
 								d.threat = threatvalue
