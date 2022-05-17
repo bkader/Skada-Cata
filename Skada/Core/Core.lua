@@ -1970,28 +1970,30 @@ do
 					end
 				end
 
-				if type(md.click1) == "function" then
-					t:AddLine(format(L["Click for \124cff00ff00%s\124r"], md.click1_label or L["Unknown"]))
-				elseif md.click1 and not self:NoTotalClick(win.selectedset, md.click1) then
-					t:AddLine(format(L["Click for \124cff00ff00%s\124r"], md.click1_label or md.click1.localeName))
-				end
+				if not self.testMode then
+					if type(md.click1) == "function" then
+						t:AddLine(format(L["Click for \124cff00ff00%s\124r"], md.click1_label or L["Unknown"]))
+					elseif md.click1 and not self:NoTotalClick(win.selectedset, md.click1) then
+						t:AddLine(format(L["Click for \124cff00ff00%s\124r"], md.click1_label or md.click1.localeName))
+					end
 
-				if type(md.click2) == "function" then
-					t:AddLine(format(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label or L["Unknown"]))
-				elseif md.click2 and not self:NoTotalClick(win.selectedset, md.click2) then
-					t:AddLine(format(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label or md.click2.localeName))
-				end
+					if type(md.click2) == "function" then
+						t:AddLine(format(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label or L["Unknown"]))
+					elseif md.click2 and not self:NoTotalClick(win.selectedset, md.click2) then
+						t:AddLine(format(L["Shift-Click for \124cff00ff00%s\124r"], md.click2_label or md.click2.localeName))
+					end
 
-				if type(md.click3) == "function" then
-					t:AddLine(format(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label or L["Unknown"]))
-				elseif md.click3 and not self:NoTotalClick(win.selectedset, md.click3) then
-					t:AddLine(format(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label or md.click3.localeName))
-				end
+					if type(md.click3) == "function" then
+						t:AddLine(format(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label or L["Unknown"]))
+					elseif md.click3 and not self:NoTotalClick(win.selectedset, md.click3) then
+						t:AddLine(format(L["Control-Click for \124cff00ff00%s\124r"], md.click3_label or md.click3.localeName))
+					end
 
-				if type(md.click4) == "function" then
-					t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or L["Unknown"]))
-				elseif md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
-					t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or md.click4.localeName))
+					if type(md.click4) == "function" then
+						t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or L["Unknown"]))
+					elseif md.click4 and not self:NoTotalClick(win.selectedset, md.click4) then
+						t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], md.click4_label or md.click4.localeName))
+					end
 				end
 
 				t:Show()
@@ -2348,7 +2350,7 @@ local lastCheckGroup
 function Skada:CheckGroup()
 	-- throttle group check.
 	local checkTime = GetTime()
-	if lastCheckGroup and (checkTime - lastCheckGroup) <= 0.25 then
+	if lastCheckGroup and (checkTime - lastCheckGroup) <= 0.5 then
 		return
 	end
 	lastCheckGroup = checkTime
