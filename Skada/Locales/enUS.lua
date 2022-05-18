@@ -490,6 +490,8 @@ L["opt_threat_hideempty_desc"] = "Hide window entirely if there are no bars."
 L["Test Warnings"] = true
 L["TPS"] = true
 L["Threat: Personal Threat"] = true
+L["%d%% Threat"] = THREAT_TOOLTIP
+L["High Threat"] = COMBAT_THREAT_INCREASE_1
 -- Absorbs & Healing Module --
 L["Healing"] = true
 L["Healing Done"] = true

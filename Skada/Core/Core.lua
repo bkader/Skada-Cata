@@ -3837,10 +3837,7 @@ do
 		end
 	end
 
-	function Skada:CombatLogEvent(...)
-		-- disabled module or test mode?
-		if disabled or self.testMode then return end
-
+	function Skada:CombatLogGetCurrentEventInfo(...)
 		local timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _
 		local offset = 9
 
@@ -3853,6 +3850,15 @@ do
 		else
 			_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags = ...
 		end
+
+		return timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, offset
+	end
+
+	function Skada:CombatLogEvent(...)
+		-- disabled module or test mode?
+		if disabled or self.testMode then return end
+
+		local timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, offset = self:CombatLogGetCurrentEventInfo(...)
 
 		-- ignored combat event?
 		if ignored_events[eventtype] and not (spellcast_events[eventtype] and self.current) then return end
