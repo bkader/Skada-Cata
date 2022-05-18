@@ -232,7 +232,7 @@ Skada.options = {
 							values = function()
 								local list = {}
 								for name, display in next, Skada.displays do
-									list[name] = display.name
+									list[name] = display.localeName
 								end
 								return list
 							end,
@@ -893,8 +893,10 @@ local getScreenWidth
 do
 	local floor = math.floor
 	local GetScreenWidth = GetScreenWidth
+	local screenWidth = nil
 	function getScreenWidth()
-		return floor(GetScreenWidth())
+		screenWidth = screenWidth or floor(GetScreenWidth() / 20) * 20
+		return screenWidth
 	end
 end
 
