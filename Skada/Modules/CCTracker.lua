@@ -323,7 +323,8 @@ Skada:AddLoadableModule("CC Done", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return tostring(set.ccdone or 0), set.ccdone or 0
+		local ccdone = set.ccdone or 0
+		return tostring(ccdone), ccdone
 	end
 
 	function playerPrototype:GetCCDoneTargets(tbl)
@@ -566,7 +567,8 @@ Skada:AddLoadableModule("CC Taken", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return tostring(set.cctaken or 0), set.cctaken or 0
+		local cctaken = set.cctaken or 0
+		return tostring(cctaken), cctaken
 	end
 
 	function playerPrototype:GetCCTakenSources(tbl)
@@ -841,7 +843,8 @@ Skada:AddLoadableModule("CC Breaks", function(L)
 	end
 
 	function mod:GetSetSummary(set)
-		return tostring(set.ccbreak or 0), set.ccbreak or 0
+		local ccbreak = set.ccbreak or 0
+		return tostring(ccbreak), ccbreak
 	end
 
 	function playerPrototype:GetCCBreakTargets(tbl)
