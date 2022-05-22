@@ -29,8 +29,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
 	local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 	local GetTime, band, tsort = GetTime, bit.band, table.sort
-	local T = Skada.Table
-	local new, del = Skada.newTable, Skada.delTable
+	local T, new, del = Skada.Table, Skada.newTable, Skada.delTable
 
 	local absorbspells = {
 		[48707] = 5, -- Anti-Magic Shell

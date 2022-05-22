@@ -357,23 +357,17 @@ do
 	-- checks if the provided guid is a boss
 	-- returns a boolean, boss id and boss name
 	function Skada:IsBoss(guid, name)
-		local id = self.GetCreatureId(guid)
+		local id = self:IsCreature(guid) and self.GetCreatureId(guid) or 0
 
 		if LBI.BossIDs[id] or creatureToFight[id] or creatureToBoss[id] then
-			-- should fix id?
-			if creatureToBoss[id] and creatureToBoss[id] ~= true then
-				id = creatureToBoss[id]
+			if creatureToFight[id] then
+				return true, nil, creatureToFight[id]
 			end
 
-			-- should fix name?
-			if creatureToFight[id] and name ~= creatureToFight[id] then
-				name = creatureToFight[id]
-			end
-
-			return true, id, name
+			return true, creatureToBoss[id] or id, name
 		end
 
-		return false, (self:IsCreature(guid) and id or 0), name
+		return false, id, name
 	end
 end
 
@@ -1106,7 +1100,6 @@ end
 -- addon communication
 
 do
-	local IsInInstance = IsInInstance
 	local UnitIsConnected = UnitIsConnected
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 
@@ -1117,7 +1110,6 @@ do
 			channel = IsInRaid() and "RAID" or "PARTY"
 
 			-- check arena/battlegrounds
-			_, self.instanceType = IsInInstance()
 			if self.instanceType == "pvp" or self.instanceType == "arena" then
 				channel = "BATTLEGROUND"
 			end
