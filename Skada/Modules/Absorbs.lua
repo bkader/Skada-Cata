@@ -155,7 +155,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 		local player = Skada:GetPlayer(set, absorb.playerid, absorb.playername)
 		if player then
 			if player.role ~= "DAMAGER" and not nocount then
-				Skada:AddActiveTime(player, not passiveSpells[absorb.spellid])
+				Skada:AddActiveTime(set, player, not passiveSpells[absorb.spellid])
 			end
 
 			-- add absorbs amount
@@ -411,7 +411,7 @@ Skada:AddLoadableModule("Absorbs", function(L)
 
 		function mod:CheckPreShields(event, set, timestamp)
 			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped and not self.checked then
-				GroupIterator(CheckUnitShields, timestamp, GetTime())
+				GroupIterator(CheckUnitShields, timestamp, set.last_time or GetTime())
 				self.checked = true
 			end
 		end
@@ -534,6 +534,14 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
 			end
 
+			if spell.max then
+				if not separator then
+					tooltip:AddLine(" ")
+					separator = true
+				end
+				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 1, 1, 1)
+			end
+
 			if average then
 				if not separator then
 					tooltip:AddLine(" ")
@@ -541,14 +549,6 @@ Skada:AddLoadableModule("Absorbs", function(L)
 				end
 
 				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(average), 1, 1, 1)
-			end
-
-			if spell.max then
-				if not separator then
-					tooltip:AddLine(" ")
-					separator = true
-				end
-				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 1, 1, 1)
 			end
 		end
 	end
@@ -969,15 +969,6 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
 			end
 
-			if average then
-				if not separator then
-					tooltip:AddLine(" ")
-					separator = true
-				end
-
-				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(average), 1, 1, 1)
-			end
-
 			if spell.max then
 				if not separator then
 					tooltip:AddLine(" ")
@@ -989,6 +980,15 @@ Skada:AddLoadableModule("Absorbs and Healing", function(L)
 					spellmax = spell.criticalmax
 				end
 				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
+			end
+
+			if average then
+				if not separator then
+					tooltip:AddLine(" ")
+					separator = true
+				end
+
+				tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(average), 1, 1, 1)
 			end
 		end
 	end

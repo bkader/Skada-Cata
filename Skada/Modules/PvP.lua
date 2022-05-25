@@ -210,7 +210,7 @@ Skada:AddLoadableModule("Player vs. Player", "mod_pvp_desc", function(L)
 		end
 	end
 
-	function mod:GetEnemy(_, enemy)
+	function mod:GetEnemy(_, enemy, set)
 		if enemy and not enemy.fake and enemy.class and Skada.validclass[enemy.class] then
 			if enemy.spec == nil then
 				enemy.spec = specsCache[enemy.id]
@@ -225,7 +225,7 @@ Skada:AddLoadableModule("Player vs. Player", "mod_pvp_desc", function(L)
 			end
 
 			if enemy.last == nil then
-				enemy.last = GetTime()
+				enemy.last = set.last_time or GetTime()
 			end
 		end
 	end
