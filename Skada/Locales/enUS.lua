@@ -11,6 +11,8 @@ L["Enable"] = ENABLE
 L["ENABLED"] = true
 L["Disable"] = DISABLE
 L["DISABLED"] = true
+L["Enable All"] = true
+L["Disable All"] = true
 L["Stopping for wipe."] = true
 L["Usage:"] = true
 -- profiles
@@ -811,6 +813,7 @@ L["PET"] = PET
 L["PLAYER"] = PLAYER
 L["UNKNOWN"] = UNKNOWN
 -- some bosses entries
+L["World Boss"] = true
 L["Acidmaw"] = true
 L["Auriaya"] = true
 L["Blood Prince Council"] = true

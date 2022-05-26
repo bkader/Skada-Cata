@@ -1,5 +1,5 @@
 --[[ Translators: NGL#7282 / Barsoom#0484 ]] --
-local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "ruRU", false)
+local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "ruRU")
 if not L then return end
 
 L["A damage meter."] = "Измеритель урона."
@@ -10,6 +10,8 @@ L["Skada: Fights"] = "Skada: Бои"
 L["Data Collection"] = "Сбор данных"
 L["ENABLED"] = "ВКЛЮЧЕН"
 L["DISABLED"] = "ВЫКЛЮЧЕН"
+L["Enable All"] = "Включить все"
+L["Disable All"] = "Отключить все"
 L["Stopping for wipe."] = "Остановка из-за протирать."
 L["Usage:"] = "Использовать:"
 -- profiles
@@ -759,6 +761,7 @@ L["License"] = "Лицензия"
 L["Version"] = "Версия"
 L["Website"] = "Сайт"
 -- some bosses entries
+L["World Boss"] = "Босс вне подземелья"
 L["Acidmaw"] = "Кислотная Утроба"
 L["Auriaya"] = "Ауриайя"
 L["Blood Prince Council"] = "Совет Принцев Крови"

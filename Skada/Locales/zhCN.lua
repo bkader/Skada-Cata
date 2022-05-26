@@ -1,5 +1,5 @@
 --[[ Translator: meatgaga#9470 ]] --
-local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "zhCN", false)
+local L = LibStub("AceLocale-3.0"):NewLocale("Skada", "zhCN")
 if not L then return end
 
 L["A damage meter."] = "伤害统计器"
@@ -10,6 +10,8 @@ L["Skada: Fights"] = "Skada：战斗"
 L["Data Collection"] = "数据收集"
 L["ENABLED"] = "已启用"
 L["DISABLED"] = "已禁用"
+L["Enable All"] = "全部启用"
+L["Disable All"] = "禁用所有"
 L["Stopping for wipe."] = "因擦拭而停止。"
 L["Usage:"] = "利用："
 -- profiles
@@ -755,6 +757,7 @@ L["License"] = "许可"
 L["Version"] = "版本"
 L["Website"] = "网站"
 -- some bosses entries
+L["World Boss"] = "世界首领"
 L["Acidmaw"] = "酸喉"
 L["Auriaya"] = "欧尔莉亚"
 L["Blood Prince Council"] = "鲜血王子议会"
