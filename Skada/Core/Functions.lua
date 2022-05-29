@@ -504,7 +504,6 @@ do
 		wipe(fakeSet)
 		fakeSet.name = "Fake Fight"
 		fakeSet.starttime = time() - 120
-		fakeSet.endtime = time()
 		fakeSet.damage = 0
 		fakeSet.heal = 0
 		fakeSet.absorb = 0
@@ -552,6 +551,8 @@ do
 	end
 
 	local function RandomizeFakeData(set, coef)
+		set.time = time() - set.starttime
+
 		for i = 1, #set.players do
 			local player = playerPrototype:Bind(set.players[i], set)
 			if player then
@@ -1110,7 +1111,7 @@ do
 			channel = IsInRaid() and "RAID" or "PARTY"
 
 			-- check arena/battlegrounds
-			if self.instanceType == "pvp" or self.instanceType == "arena" then
+			if self.insType == "pvp" or self.insType == "arena" then
 				channel = "BATTLEGROUND"
 			end
 		end
