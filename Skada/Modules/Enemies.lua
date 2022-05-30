@@ -35,27 +35,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L)
 	local customUnits = {}
 
 	local function GetRaidDiff()
-		if not instanceDiff then
-			local _, instanceType, difficulty, _, _, dynamicDiff, isDynamic = GetInstanceInfo()
-			if instanceType == "raid" and isDynamic then
-				if difficulty == 1 or difficulty == 3 then -- 10man raid
-					instanceDiff = (dynamicDiff == 0) and "10n" or ((dynamicDiff == 1) and "10h" or "unknown")
-				elseif difficulty == 2 or difficulty == 4 then -- 25main raid
-					instanceDiff = (dynamicDiff == 0) and "25n" or ((dynamicDiff == 1) and "25h" or "unknown")
-				end
-			else
-				local insDiff = GetInstanceDifficulty()
-				if insDiff == 1 then
-					instanceDiff = "10n"
-				elseif insDiff == 2 then
-					instanceDiff = "25n"
-				elseif insDiff == 3 then
-					instanceDiff = "10h"
-				elseif insDiff == 4 then
-					instanceDiff = "25h"
-				end
-			end
-		end
+		instanceDiff = instanceDiff or Skada:GetInstanceDiff()
 		return instanceDiff
 	end
 
