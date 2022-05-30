@@ -185,19 +185,20 @@ local optionsValues = {
 local newdisplay = "bar"
 local newwindow = nil
 
-local function GetValue(i)
-	return Skada.db.profile[i[#i]]
+local function GetValue(info)
+	return Skada.db.profile[info[#info]]
 end
 
-local function SetValue(i, val)
-	Skada.db.profile[i[#i]] = val
+local function SetValue(info, value)
+	local key = info[#info]
+	Skada.db.profile[key] = value
 	Skada:ApplySettings()
 
-	if i[#i] == "showtotals" then
+	if key == "showtotals" then
 		Skada:Wipe()
 		Skada:UpdateDisplay(true)
-	elseif i[#i] == "syncoff" then
-		Skada:SetupNetwork(val ~= true)
+	elseif key == "syncoff" then
+		Skada:SetupNetwork(value ~= true)
 	end
 end
 
@@ -225,9 +226,9 @@ Skada.options = {
 							desc = L["Enter the name for the new window."],
 							order = 10,
 							get = function() return newwindow end,
-							set = function(_, val)
-								if val and val:trim() ~= "" then
-									newwindow = val
+							set = function(_, value)
+								if value and value:trim() ~= "" then
+									newwindow = value
 								end
 							end
 						},
@@ -335,8 +336,8 @@ Skada.options = {
 							name = L["Hide in combat"],
 							desc = L["Hides Skada's window when in combat."],
 							order = 80,
-							set = function(_, val)
-								Skada.db.profile.hidecombat = val or nil
+							set = function(_, value)
+								Skada.db.profile.hidecombat = value or nil
 								if Skada.db.profile.hidecombat then
 									Skada.db.profile.showcombat = nil
 								end
@@ -348,8 +349,8 @@ Skada.options = {
 							name = L["Show in combat"],
 							desc = L["Shows Skada's window when in combat."],
 							order = 90,
-							set = function(_, val)
-								Skada.db.profile.showcombat = val or nil
+							set = function(_, value)
+								Skada.db.profile.showcombat = value or nil
 								if Skada.db.profile.showcombat then
 									Skada.db.profile.hidecombat = nil
 								end
@@ -617,11 +618,11 @@ Skada.options = {
 			name = L["Data Resets"],
 			desc = fmt(L["Options for %s."], L["Data Resets"]),
 			order = 40,
-			get = function(i)
-				return Skada.db.profile.reset[i[#i]]
+			get = function(info)
+				return Skada.db.profile.reset[info[#info]]
 			end,
-			set = function(i, val)
-				Skada.db.profile.reset[i[#i]] = val
+			set = function(info, value)
+				Skada.db.profile.reset[info[#info]] = value
 			end,
 			args = {
 				instance = {
@@ -672,11 +673,11 @@ Skada.options = {
 			desc = fmt(L["Options for %s."], L["Modules"]),
 			order = 50,
 			width = "double",
-			get = function(i)
-				return Skada.db.profile.modules[i[#i]]
+			get = function(info)
+				return Skada.db.profile.modules[info[#info]]
 			end,
-			set = function(i, val)
-				Skada.db.profile.modules[i[#i]] = val or nil
+			set = function(info, value)
+				Skada.db.profile.modules[info[#info]] = value or nil
 				Skada:ApplySettings()
 			end,
 			args = {
@@ -699,11 +700,11 @@ Skada.options = {
 					name = L["Tick the modules you want to disable."],
 					inline = true,
 					order = 30,
-					get = function(i)
-						return Skada.db.profile.modulesBlocked[i[#i]]
+					get = function(info)
+						return Skada.db.profile.modulesBlocked[info[#info]]
 					end,
-					set = function(i, val)
-						Skada.db.profile.modulesBlocked[i[#i]] = val
+					set = function(info, value)
+						Skada.db.profile.modulesBlocked[info[#info]] = value
 						Skada.options.args.modules.args.apply.disabled = nil
 					end,
 					args = {}
@@ -802,7 +803,7 @@ do
 			}
 
 			-- about args
-			local fields = {"Version", "Date", "Author", "Credits", "Donate", "License", "Website", "Discord"}
+			local fields = {"Version", "Date", "Author", "Credits", "License", "Website", "Discord"}
 			for i = 1, #fields do
 				local field = fields[i]
 				local meta = GetAddOnMetadata("Skada", field) or GetAddOnMetadata("Skada", "X-" .. field)
@@ -876,13 +877,13 @@ do
 			type = "group",
 			name = moduleName,
 			inline = true,
-			get = function(i)
-				return mod.metadata.columns[i[#i]]
+			get = function(info)
+				return mod.metadata.columns[info[#info]]
 			end,
-			set = function(i, val)
-				local colname = i[#i]
-				mod.metadata.columns[colname] = val
-				db[mod.name .. "_" .. colname] = val
+			set = function(info, value)
+				local colname = info[#info]
+				mod.metadata.columns[colname] = value
+				db[mod.name .. "_" .. colname] = value
 				Skada:UpdateDisplay(true)
 			end,
 			args = {}
@@ -934,11 +935,11 @@ function Skada:FrameSettings(db, include_dimensions)
 		desc = format(L["Options for %s."], L["Window"]),
 		childGroups = "tab",
 		order = 30,
-		get = function(i)
-			return db[i[#i]]
+		get = function(info)
+			return db[info[#info]]
 		end,
-		set = function(i, val)
-			db[i[#i]] = val
+		set = function(info, value)
+			db[info[#info]] = value
 			Skada:ApplySettings(db.name)
 		end,
 		args = {
@@ -964,11 +965,11 @@ function Skada:FrameSettings(db, include_dimensions)
 						name = L["Background"],
 						inline = true,
 						order = 20,
-						get = function(i)
-							return db.background[i[#i]]
+						get = function(info)
+							return db.background[info[#info]]
 						end,
-						set = function(i, val)
-							db.background[i[#i]] = val
+						set = function(info, value)
+							db.background[info[#info]] = value
 							Skada:ApplySettings(db.name)
 						end,
 						args = {
@@ -1024,11 +1025,11 @@ function Skada:FrameSettings(db, include_dimensions)
 						name = L["Border"],
 						inline = true,
 						order = 30,
-						get = function(i)
-							return db.background[i[#i]]
+						get = function(info)
+							return db.background[info[#info]]
 						end,
-						set = function(i, val)
-							db.background[i[#i]] = val
+						set = function(info, value)
+							db.background[info[#info]] = value
 							Skada:ApplySettings(db.name)
 						end,
 						args = {
@@ -1222,8 +1223,8 @@ function Skada:FrameSettings(db, include_dimensions)
 			name = L["Sticky Window"],
 			desc = L["Allows the window to stick to other Skada windows."],
 			order = 30,
-			set = function(_, val)
-				db.sticky = val
+			set = function(_, value)
+				db.sticky = value
 				if not db.sticky then
 					windows = Skada:GetWindows()
 					for i = 1, #windows do

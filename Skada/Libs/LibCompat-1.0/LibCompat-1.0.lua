@@ -20,7 +20,6 @@ local setmetatable = setmetatable
 local error = error
 local _
 
-
 local QuickDispatch
 local IsInGroup, IsInRaid
 local GetUnitIdFromGUID
@@ -519,33 +518,26 @@ end
 
 do
 	local classColorsTable, classCoordsTable
-	local classColors = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
-
-	-- the functions below are for internal usage only
-	local function __fillClassColorsTable()
-		classColorsTable = {}
-		for class, tbl in pairs(classColors) do
-			classColorsTable[class] = tbl
-			classColorsTable[class].colorStr = RGBPercToHex(tbl.r, tbl.g, tbl.b, true)
-			classColorsTable[class].className = LOCALIZED_CLASS_NAMES_MALE[class] or UNKNOWN
-		end
-	end
-
-	-- fills class coordinates table
-	local function __fillClassCoordsTable()
-		classCoordsTable = {}
-		for class, coords in pairs(CLASS_ICON_TCOORDS) do
-			classCoordsTable[class] = classCoordsTable[class] or coords
-		end
-	end
 
 	local function GetClassColorsTable()
+		-- fill class colors table.
 		if classColorsTable == nil then
-			__fillClassColorsTable()
+			classColorsTable = {}
+			for class, tbl in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
+				classColorsTable[class] = tbl
+				classColorsTable[class].colorStr = RGBPercToHex(tbl.r, tbl.g, tbl.b, true)
+				classColorsTable[class].className = LOCALIZED_CLASS_NAMES_MALE[class] or UNKNOWN
+			end
 		end
+
+		-- fill class coords table
 		if classCoordsTable == nil then
-			__fillClassCoordsTable()
+			classCoordsTable = {}
+			for class, coords in pairs(CLASS_ICON_TCOORDS) do
+				classCoordsTable[class] = classCoordsTable[class] or coords
+			end
 		end
+
 		return classColorsTable, classCoordsTable
 	end
 

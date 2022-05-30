@@ -235,13 +235,16 @@ function Skada:RegisterSchools()
 	self.spellschools = self.spellschools or {}
 
 	-- handles adding spell schools
+	local order = {}
 	local function add_school(key, name, r, g, b)
 		if key and name and not self.spellschools[key] then
 			self.spellschools[key] = {r = r or 1, g = g or 1, b = b or 1, name = name:match("%((.+)%)") or name}
+			order[#order + 1] = key
 		end
 	end
 
 	-- main school
+	local SCHOOL_NONE = SCHOOL_MASK_NONE or 0x00 -- None
 	local SCHOOL_PHYSICAL = SCHOOL_MASK_PHYSICAL or 0x01 -- Physical
 	local SCHOOL_HOLY = SCHOOL_MASK_HOLY or 0x02 -- Holy
 	local SCHOOL_FIRE = SCHOOL_MASK_FIRE or 0x04 -- Fire
@@ -251,6 +254,7 @@ function Skada:RegisterSchools()
 	local SCHOOL_ARCANE = SCHOOL_MASK_ARCANE or 0x40 -- Arcane
 
 	-- Single Schools
+	add_school(SCHOOL_NONE, STRING_SCHOOL_UNKNOWN, 1, 1, 1) -- Unknown
 	add_school(SCHOOL_PHYSICAL, STRING_SCHOOL_PHYSICAL, 1, 1, 0) -- Physical
 	add_school(SCHOOL_HOLY, STRING_SCHOOL_HOLY, 1, 0.9, 0.5) -- Holy
 	add_school(SCHOOL_FIRE, STRING_SCHOOL_FIRE, 1, 0.5, 0) -- Fire
@@ -259,42 +263,61 @@ function Skada:RegisterSchools()
 	add_school(SCHOOL_SHADOW, STRING_SCHOOL_SHADOW, 0.5, 0.5, 1) -- Shadow
 	add_school(SCHOOL_ARCANE, STRING_SCHOOL_ARCANE, 1, 0.5, 1) -- Arcane
 
-	-- Physical and a Magical
-	add_school(SCHOOL_PHYSICAL + SCHOOL_FIRE, STRING_SCHOOL_FLAMESTRIKE, 1, 0.5, 0) -- Flamestrike
-	add_school(SCHOOL_PHYSICAL + SCHOOL_FROST, STRING_SCHOOL_FROSTSTRIKE, 0.5, 1, 1) -- Froststrike
-	add_school(SCHOOL_PHYSICAL + SCHOOL_ARCANE, STRING_SCHOOL_SPELLSTRIKE, 1, 0.5, 1) -- Spellstrike
-	add_school(SCHOOL_PHYSICAL + SCHOOL_NATURE, STRING_SCHOOL_STORMSTRIKE, 0.3, 1, 0.3) -- Stormstrike
-	add_school(SCHOOL_PHYSICAL + SCHOOL_SHADOW, STRING_SCHOOL_SHADOWSTRIKE, 0.5, 0.5, 1) -- Shadowstrike
-	add_school(SCHOOL_PHYSICAL + SCHOOL_HOLY, STRING_SCHOOL_HOLYSTRIKE, 1, 0.9, 0.5) -- Holystrike
-
-	-- Two Magical Schools
-	add_school(SCHOOL_FIRE + SCHOOL_FROST, STRING_SCHOOL_FROSTFIRE, 0.5, 1, 1) -- Frostfire
-	add_school(SCHOOL_FIRE + SCHOOL_ARCANE, STRING_SCHOOL_SPELLFIRE, 1, 0.5, 1) -- Spellfire
-	-- add_school(SCHOOL_FIRE + SCHOOL_NATURE, STRING_SCHOOL_FIRESTORM, 0.3, 1, 0.3) -- Firestorm
-	add_school(SCHOOL_FIRE + SCHOOL_SHADOW, STRING_SCHOOL_SHADOWFLAME, 0.5, 0.5, 1) -- Shadowflame
-	-- add_school(SCHOOL_FIRE + SCHOOL_HOLY, STRING_SCHOOL_HOLYFIRE, 1, 0.9, 0.5) -- Holyfire
-	add_school(SCHOOL_FROST + SCHOOL_ARCANE, STRING_SCHOOL_SPELLFROST, 1, 0.5, 1) -- Spellfrost
-	add_school(SCHOOL_FROST + SCHOOL_NATURE, STRING_SCHOOL_FROSTSTORM, 0.3, 1, 0.3) -- Froststorm
-	add_school(SCHOOL_FROST + SCHOOL_SHADOW, STRING_SCHOOL_SHADOWFROST, 0.5, 0.5, 1) -- Shadowfrost
-	add_school(SCHOOL_FROST + SCHOOL_HOLY, STRING_SCHOOL_HOLYFROST, 1, 0.9, 0.5) -- Holyfrost
-	add_school(SCHOOL_ARCANE + SCHOOL_NATURE, STRING_SCHOOL_SPELLSTORM, 0.3, 1, 0.3) -- Spellstorm
-	-- add_school(SCHOOL_ARCANE + SCHOOL_SHADOW, STRING_SCHOOL_SPELLSHADOW, 0.5, 0.5, 1) -- Spellshadow
-	-- add_school(SCHOOL_ARCANE + SCHOOL_HOLY, STRING_SCHOOL_DIVINE, 1, 0.9, 0.5) -- Divine
-	-- add_school(SCHOOL_NATURE + SCHOOL_SHADOW, STRING_SCHOOL_SHADOWSTORM, 0.5, 0.5, 1) -- Shadowstorm
-	add_school(SCHOOL_NATURE + SCHOOL_HOLY, STRING_SCHOOL_HOLYSTORM, 1, 0.9, 0.5) -- Holystorm
-
-	-- Three or more schools (uncomment if really needed)
-	-- add_school(SCHOOL_FIRE + SCHOOL_FROST + SCHOOL_NATURE, STRING_SCHOOL_ELEMENTAL, 0.3, 1, 0.3) -- Elemental
-	-- add_school(SCHOOL_FIRE + SCHOOL_FROST + SCHOOL_ARCANE + SCHOOL_NATURE + SCHOOL_SHADOW, STRING_SCHOOL_CHROMATIC, 0.5, 0.5, 1) -- Chromatic
-	-- add_school(SCHOOL_FIRE + SCHOOL_FROST + SCHOOL_ARCANE + SCHOOL_NATURE + SCHOOL_SHADOW + SCHOOL_HOLY, STRING_SCHOOL_MAGIC, 1, 0.9, 0.5) -- Magic
-
-	setmetatable(self.spellschools, {__call = function(t, school)
-		if school and t[school] then
-			return t[school].name, t[school].r, t[school].g, t[school].b
+	-- reference to CombatLog_String_SchoolString
+	local colorFunc = CombatLog_Color_ColorArrayBySchool
+	local function GetSchoolName(key)
+		if not nameFunc then -- late availability
+			nameFunc = CombatLog_String_SchoolString
 		end
-		return L["Unknown"], 1, 1, 1
-	end})
-	-- add_school(SCHOOL_PHYSICAL + SCHOOL_FIRE + SCHOOL_FROST + SCHOOL_ARCANE + SCHOOL_NATURE + SCHOOL_SHADOW + SCHOOL_HOLY, STRING_SCHOOL_CHAOS, 0.5, 0.5, 1) -- Chaos
+
+		local name = nameFunc(key)
+		local isnone = (name == STRING_SCHOOL_UNKNOWN)
+		return name:match("%((.+)%)") or name, isnone
+	end
+
+	-- reference to COMBATLOG_DEFAULT_COLORS.schoolColoring
+	local colorTable = COMBATLOG_DEFAULT_COLORS and COMBATLOG_DEFAULT_COLORS.schoolColoring
+	local function GetSchoolColor(key)
+		if not colorTable then -- late availability
+			colorTable = COMBATLOG_DEFAULT_COLORS and COMBATLOG_DEFAULT_COLORS.schoolColoring
+		end
+
+		local r, g, b = 1.0, 1.0, 1.0
+
+		if colorTable and colorTable[key] then
+			r = colorTable[key].r or r
+			g = colorTable[key].g or g
+			b = colorTable[key].b or b
+		elseif colorTable then
+			for i = #order, 1, -1 do
+				local k = order[i]
+				if band(key, k) == k then
+					r = colorTable[k].r or r
+					g = colorTable[k].g or g
+					b = colorTable[k].b or b
+					break
+				end
+			end
+		end
+
+		return r, g, b
+	end
+
+	setmetatable(self.spellschools, {
+		__index = function(t, key)
+			local name, isnone = GetSchoolName(key)
+			if not isnone then
+				local r, g, b = GetSchoolColor(key)
+				t[key] = {name = name, r = r, g = g, b = b}
+				return t[key]
+			end
+			return t[0x00] -- unknown
+		end,
+		__call = function(t, key)
+			local school = t[key]
+			return school.name, school.r, school.g, school.b
+		end
+	})
 end
 
 -------------------------------------------------------------------------------
