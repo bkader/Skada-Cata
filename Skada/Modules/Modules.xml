@@ -28,7 +28,7 @@
 <Script file="Deaths.lua" />
 <Script file="Dispels.lua" />
 <Script file="Failbot.lua" />
-<!-- <Script file="Healthstone.lua" /> -->
+<Script file="Healthstone.lua" />
 <Script file="Interrupts.lua" />
 <Script file="MySpells.lua" />
 <Script file="Parry.lua" />
