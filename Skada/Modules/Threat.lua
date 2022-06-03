@@ -333,8 +333,8 @@ Skada:RegisterModule("Threat", function(L, P)
 			-- Raid Warnings
 			[2] = function(text, r, g, b)
 				if r or g or b then
-					local c = "|cff" .. format("%02x%02x%02x", (r or 0) * 255, (g or 0) * 255, (b or 0) * 255)
-					text = c .. text .. "|r"
+					local c = "\124cff" .. format("%02x%02x%02x", (r or 0) * 255, (g or 0) * 255, (b or 0) * 255)
+					text = c .. text .. "\124r"
 				end
 				RaidNotice_AddMessage(RaidWarningFrame, text, white)
 			end,
