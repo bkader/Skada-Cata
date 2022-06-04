@@ -116,7 +116,7 @@ end
 -- ======= --
 -- CC Done --
 -- ======= --
-Skada:RegisterModule("CC Done", function(L, P)
+Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 	if Skada:IsDisabled("CC Done") then return end
 
 	local mod = Skada:NewModule("CC Done")
@@ -329,12 +329,13 @@ Skada:RegisterModule("CC Done", function(L, P)
 
 	function playerPrototype:GetCCDoneTargets(tbl)
 		if self.ccdonespells then
-			tbl = wipe(tbl or Skada.cacheTable)
+			tbl = clear(tbl or C)
 			for _, spell in pairs(self.ccdonespells) do
 				if spell.targets then
 					for name, count in pairs(spell.targets) do
 						if not tbl[name] then
-							tbl[name] = {count = count}
+							tbl[name] = new()
+							tbl[name].count = count
 						else
 							tbl[name].count = tbl[name].count + count
 						end
@@ -357,7 +358,7 @@ end)
 -- ======== --
 -- CC Taken --
 -- ======== --
-Skada:RegisterModule("CC Taken", function(L, P)
+Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 	if Skada:IsDisabled("CC Taken") then return end
 
 	local mod = Skada:NewModule("CC Taken")
@@ -573,12 +574,13 @@ Skada:RegisterModule("CC Taken", function(L, P)
 
 	function playerPrototype:GetCCTakenSources(tbl)
 		if self.cctakenspells then
-			tbl = wipe(tbl or Skada.cacheTable)
+			tbl = clear(tbl or C)
 			for _, spell in pairs(self.cctakenspells) do
 				if spell.sources then
 					for name, count in pairs(spell.sources) do
 						if not tbl[name] then
-							tbl[name] = {count = count}
+							tbl[name] = new()
+							tbl[name].count = count
 						else
 							tbl[name].count = tbl[name].count + count
 						end
@@ -601,7 +603,7 @@ end)
 -- =========== --
 -- CC Breakers --
 -- =========== --
-Skada:RegisterModule("CC Breaks", function(L, P)
+Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 	if Skada:IsDisabled("CC Breaks") then return end
 
 	local mod = Skada:NewModule("CC Breaks")
@@ -849,12 +851,13 @@ Skada:RegisterModule("CC Breaks", function(L, P)
 
 	function playerPrototype:GetCCBreakTargets(tbl)
 		if self.ccbreakspells then
-			tbl = wipe(tbl or Skada.cacheTable)
+			tbl = clear(tbl or C)
 			for _, spell in pairs(self.ccbreakspells) do
 				if spell.targets then
 					for name, count in pairs(spell.targets) do
 						if not tbl[name] then
-							tbl[name] = {count = count}
+							tbl[name] = new()
+							tbl[name].count = count
 						else
 							tbl[name].count = tbl[name].count + count
 						end

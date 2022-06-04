@@ -1,8 +1,7 @@
 local Skada = Skada
 
 -- cache frequently used globals
-local pairs, wipe = pairs, wipe
-local format, max, floor = string.format, math.max, math.floor
+local pairs, format, max, floor = pairs, string.format, math.max, math.floor
 local UnitGUID, GetSpellInfo = UnitGUID, Skada.GetSpellInfo or GetSpellInfo
 local _
 
@@ -10,7 +9,7 @@ local _
 -- Absorbs module --
 -- ============== --
 
-Skada:RegisterModule("Absorbs", function(L, P)
+Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 	if Skada:IsDisabled("Absorbs") then return end
 
 	local mod = Skada:NewModule("Absorbs")
@@ -29,7 +28,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
 	local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 	local GetTime, band, tsort = GetTime, bit.band, table.sort
-	local T, new, del = Skada.Table, Skada.newTable, Skada.delTable
+	local T = Skada.Table
 
 	local absorbspells = {
 		[48707] = 5, -- Anti-Magic Shell
@@ -575,9 +574,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			for spellid, spell in pairs(actor.absorbspells) do
 				if spell.targets and spell.targets[win.targetname] then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = spellid
 					d.spellid = spellid
@@ -620,9 +617,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			local actortime, nr = mod.metadata.columns.sAPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.absorbspells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -666,9 +661,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			local actortime, nr = mod.metadata.columns.sAPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = target.id or targetname
 				d.label = targetname
@@ -709,9 +702,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 					local aps, amount = player:GetAPS()
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -746,9 +737,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 						local aps, amount = enemy:GetAPS()
 						if amount > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -1016,9 +1005,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 				for spellid, spell in pairs(actor.healspells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = spellid
 						d.spellid = spellid
@@ -1052,9 +1039,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 				for spellid, spell in pairs(actor.absorbspells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = spellid
 						d.spellid = spellid
@@ -1099,9 +1084,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 			if actor.healspells then
 				for spellid, spell in pairs(actor.healspells) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = spellid
 					d.spellid = spellid
@@ -1128,9 +1111,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 			if actor.absorbspells then
 				for spellid, spell in pairs(actor.absorbspells) do
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = spellid
 					d.spellid = spellid
@@ -1173,9 +1154,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 			for targetname, target in pairs(targets) do
 				if target.amount > 0 then
 					nr = nr + 1
-
-					local d = win.dataset[nr] or {}
-					win.dataset[nr] = d
+					local d = win:nr(nr)
 
 					d.id = target.id or targetname
 					d.label = targetname
@@ -1217,9 +1196,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -1255,9 +1232,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 						if amount > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -1397,9 +1372,7 @@ Skada:RegisterModule("HPS", function(L, P)
 					local amount = player:GetAHPS()
 					if amount > 0 then
 						nr = nr + 1
-
-						local d = win.dataset[nr] or {}
-						win.dataset[nr] = d
+						local d = win:nr(nr)
 
 						d.id = player.id or player.name
 						d.label = player.name
@@ -1433,9 +1406,7 @@ Skada:RegisterModule("HPS", function(L, P)
 						local amount = enemy:GetHPS()
 						if amount > 0 then
 							nr = nr + 1
-
-							local d = win.dataset[nr] or {}
-							win.dataset[nr] = d
+							local d = win:nr(nr)
 
 							d.id = enemy.id or enemy.name
 							d.label = enemy.name
@@ -1493,12 +1464,11 @@ end)
 -- Healing done by spell --
 -- ===================== --
 
-Skada:RegisterModule("Healing Done By Spell", function(L)
+Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear)
 	if Skada:IsDisabled("Healing", "Absorbs", "Healing Done By Spell") then return end
 
 	local mod = Skada:NewModule("Healing Done By Spell")
 	local spellmod = mod:NewModule("Healing spell sources")
-	local cacheTable = Skada.cacheTable
 	local spellschools = Skada.spellschools
 
 	local function player_tooltip(win, id, label, tooltip)
@@ -1540,24 +1510,27 @@ Skada:RegisterModule("Healing Done By Spell", function(L)
 		local total = set and set:GetAbsorbHeal() or 0
 		if total == 0 then return end
 
-		wipe(cacheTable)
+		clear(C)
 		for i = 1, #set.players do
 			local p = set.players[i]
 			local spell = p and ((p.absorbspells and p.absorbspells[id]) or (p.healspells and p.healspells[id])) or nil
 			if spell then
-				if not cacheTable[id] then
-					cacheTable[id] = {school = spell.school, amount = spell.amount, overheal = spell.overheal}
-					cacheTable[id].isabsorb = (p.absorbspells and p.absorbspells[id])
+				if not C[id] then
+					C[id] = new()
+					C[id].school = spell.school
+					C[id].amount = spell.amount
+					C[id].overheal = spell.overheal
+					C[id].isabsorb = (p.absorbspells and p.absorbspells[id])
 				else
-					cacheTable[id].amount = cacheTable[id].amount + spell.amount
+					C[id].amount = C[id].amount + spell.amount
 					if spell.overheal then
-						cacheTable[id].overheal = (cacheTable[id].overheal or 0) + spell.overheal
+						C[id].overheal = (C[id].overheal or 0) + spell.overheal
 					end
 				end
 			end
 		end
 
-		local spell = cacheTable[id]
+		local spell = C[id]
 		if spell then
 			tooltip:AddLine(GetSpellInfo(id))
 			if spell.school and spellschools[spell.school] then
@@ -1588,21 +1561,19 @@ Skada:RegisterModule("Healing Done By Spell", function(L)
 		if not (win.spellid and set) then return end
 
 		-- let's go...
-		wipe(cacheTable)
-		local total = 0
+		local players, total = clear(C), 0
 
 		for i = 1, #set.players do
 			local p = set.players[i]
 			local spell = p and ((p.absorbspells and p.absorbspells[win.spellid]) or (p.healspells and p.healspells[win.spellid])) or nil
 			if spell then
-				cacheTable[p.name] = {
-					id = p.id,
-					class = p.class,
-					role = p.role,
-					spec = p.spec,
-					amount = spell.amount,
-					time = mod.metadata.columns.sHPS and p:GetTime()
-				}
+				players[p.name] = new()
+				players[p.name].id = p.id
+				players[p.name].class = p.class
+				players[p.name].role = p.role
+				players[p.name].spec = p.spec
+				players[p.name].amount = spell.amount
+				players[p.name].time = mod.metadata.columns.sHPS and p:GetTime()
 				-- calculate the total.
 				total = total + spell.amount
 			end
@@ -1614,11 +1585,9 @@ Skada:RegisterModule("Healing Done By Spell", function(L)
 			end
 
 			local nr = 0
-			for playername, player in pairs(cacheTable) do
+			for playername, player in pairs(players) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = player.id or playername
 				d.label = playername
@@ -1654,9 +1623,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L)
 			local settime, nr = self.metadata.columns.HPS and set:GetTime(), 0
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
-
-				local d = win.dataset[nr] or {}
-				win.dataset[nr] = d
+				local d = win:nr(nr)
 
 				d.id = spellid
 				d.spellid = spellid
@@ -1702,13 +1669,16 @@ Skada:RegisterModule("Healing Done By Spell", function(L)
 
 	function setPrototype:GetAbsorbHealSpells(tbl)
 		if (self.absorb or self.heal) and self.players then
-			tbl = wipe(tbl or cacheTable)
+			tbl = clear(tbl or C)
 			for i = 1, #self.players do
 				local player = self.players[i]
 				if player and player.healspells then
 					for spellid, spell in pairs(player.healspells) do
 						if not tbl[spellid] then
-							tbl[spellid] = {school = spell.school, amount = spell.amount, overheal = spell.overheal}
+							tbl[spellid] = new()
+							tbl[spellid].school = spell.school
+							tbl[spellid].amount = spell.amount
+							tbl[spellid].overheal = spell.overheal
 						else
 							tbl[spellid].amount = tbl[spellid].amount + spell.amount
 							if spell.overheal then
@@ -1720,7 +1690,9 @@ Skada:RegisterModule("Healing Done By Spell", function(L)
 				if player and player.absorbspells then
 					for spellid, spell in pairs(player.absorbspells) do
 						if not tbl[spellid] then
-							tbl[spellid] = {school = spell.school, amount = spell.amount}
+							tbl[spellid] = new()
+							tbl[spellid].school = spell.school
+							tbl[spellid].amount = spell.amount
 						else
 							tbl[spellid].amount = tbl[spellid].amount + spell.amount
 						end
