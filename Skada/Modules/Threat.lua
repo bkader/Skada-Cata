@@ -228,7 +228,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 			end
 		end
 
-		function mod:SetComplete(set)
+		function mod:CombatLeave()
 			tankThreat, tankValue = nil, nil
 			T.free("Threat_Table", threatTable, nil, del)
 			self.unitID, self.unitName = nil, nil
@@ -581,6 +581,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 
 			Skada.RegisterBucketEvent(self, {"UNIT_THREAT_LIST_UPDATE", "UNIT_THREAT_SITUATION_UPDATE", "PLAYER_TARGET_CHANGED"}, 0.05, "SetUnit")
 			Skada.RegisterCallback(self, "Skada_ApplySettings", "ApplySettings")
+			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 
 			Skada:AddFeed(L["Threat: Personal Threat"], add_threat_feed)
 			Skada:AddMode(self)
@@ -590,6 +591,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 	function mod:OnDisable()
 		Skada.UnregisterAllBuckets(self)
 		Skada.UnregisterAllCallbacks(self)
+		Skada.UnregisterAllMessages(self)
 
 		Skada:RemoveFeed(L["Threat: Personal Threat"])
 		Skada:RemoveMode(self)

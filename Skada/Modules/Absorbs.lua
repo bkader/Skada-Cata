@@ -408,11 +408,17 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			end
 		end
 
-		function mod:CheckPreShields(event, set, timestamp)
-			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped and not self.checked then
+		function mod:CombatEnter(_, set, timestamp)
+			if set and not set.stopped and not self.checked then
 				GroupIterator(CheckUnitShields, timestamp, set.last_time or GetTime())
 				self.checked = true
 			end
+		end
+
+		function mod:CombatLeave()
+			T.clear(absorb)
+			T.free("Skada_Shields", shields, nil, del)
+			self.checked = nil
 		end
 	end
 
@@ -820,7 +826,8 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			flags_dst
 		)
 
-		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckPreShields")
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Absorbs and Healing"])
 
 		-- table of ignored spells:
@@ -849,9 +856,6 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 	end
 
 	function mod:SetComplete(set)
-		T.clear(absorb)
-		T.free("Skada_Shields", shields, nil, del)
-		self.checked = nil
 		-- clean absorbspells table:
 		if not set.absorb or set.absorb == 0 then return end
 		for i = 1, #set.players do

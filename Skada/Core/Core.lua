@@ -224,12 +224,6 @@ local function ProcessSet(set, curtime, mobname)
 	set.started, set.stopped = nil, nil
 	set.gotboss = set.gotboss or nil -- remove false
 
-	-- trigger events.
-	Skada:SendMessage("COMBAT_PLAYER_LEAVE", set, curtime)
-	if set.gotboss then
-		Skada:SendMessage("COMBAT_ENCOUNTER_END", set, curtime)
-	end
-
 	if not Skada.db.profile.onlykeepbosses or set.gotboss then
 		set.mobname = mobname or set.mobname -- override name
 		if set.mobname ~= nil and curtime - set.starttime >= (Skada.db.profile.minsetlength or 5) then
@@ -245,7 +239,7 @@ local function ProcessSet(set, curtime, mobname)
 			end
 
 			-- do you want to do something?
-			Skada.callbacks:Fire("Skada_SetCompleted", set)
+			Skada.callbacks:Fire("Skada_SetComplete", set, curtime)
 
 			tinsert(Skada.char.sets, 1, set)
 			Skada:Debug("Segment Saved:", set.name)
@@ -295,24 +289,6 @@ local function FindMode(name)
 		local mode = modes[i]
 		if mode and (mode.moduleName == name or mode.localeName == name) then
 			return mode
-		end
-	end
-end
-
--- called on boss defeat
-local function BossDefeated()
-	if Skada.current and not Skada.current.success then
-		Skada.current.success = true
-		Skada:SendMessage("COMBAT_BOSS_DEFEATED", Skada.current)
-
-		if Skada.tempsets then
-			for i = 1, #Skada.tempsets do
-				local set = Skada.tempsets[i]
-				if set and not set.success then
-					set.success = true
-					Skada:SendMessage("COMBAT_BOSS_DEFEATED", set)
-				end
-			end
 		end
 	end
 end
@@ -3267,22 +3243,42 @@ function Skada:OnEnable()
 	self:ScheduleTimer("CheckMemory", 3)
 end
 
+-- called on boss defeat
+function Skada:BossDefeated()
+	if self.current and not self.current.success then
+		self.current.success = true
+
+		-- phase segments.
+		if self.tempsets then
+			for i = 1, #self.tempsets do
+				local set = self.tempsets[i]
+				if set and not set.success then
+					set.success = true
+				end
+			end
+		end
+
+		self:Debug("COMBAT_BOSS_DEFEATED: Skada")
+		self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
+	end
+end
+
 function Skada:BigWigs(_, _, event, message)
 	if event == "bosskill" and message and self.current and self.current.gotboss then
 		if find(lower(message), lower(self.current.mobname)) ~= nil and not self.current.success then
-			self:Debug("COMBAT_BOSS_DEFEATED: BigWigs")
 			self.current.success = true
-			self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
 
 			if self.tempsets then -- phases
 				for i = 1, #self.tempsets do
 					local set = self.tempsets[i]
 					if set and not set.success then
 						set.success = true
-						self:SendMessage("COMBAT_BOSS_DEFEATED", set)
 					end
 				end
 			end
+
+			self:Debug("COMBAT_BOSS_DEFEATED: BigWigs")
+			self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
 		end
 	end
 end
@@ -3291,12 +3287,9 @@ function Skada:DBM(_, mod, wipe)
 	if not wipe and mod and mod.combatInfo then
 		local set = self.current or self.last -- just in case DBM was late.
 		if set and not set.success and mod.combatInfo.name and (not set.mobname or find(lower(set.mobname), lower(mod.combatInfo.name)) ~= nil) then
-			self:Debug("COMBAT_BOSS_DEFEATED: DBM")
-
 			set.success = true
 			set.gotboss = set.gotboss or mod.combatInfo.creatureId or true
 			set.mobname = (not set.mobname or set.mobname == L["Unknown"]) and mod.combatInfo.name or set.mobname
-			self:SendMessage("COMBAT_BOSS_DEFEATED", set)
 
 			if self.tempsets then -- phases
 				for i = 1, #self.tempsets do
@@ -3305,10 +3298,12 @@ function Skada:DBM(_, mod, wipe)
 						s.success = true
 						s.gotboss = s.gotboss or mod.combatInfo.creatureId or true
 						s.mobname = (not s.mobname or s.mobname == L["Unknown"]) and mod.combatInfo.name or s.mobname
-						self:SendMessage("COMBAT_BOSS_DEFEATED", s)
 					end
 				end
 			end
+
+			self:Debug("COMBAT_BOSS_DEFEATED: DBM")
+			self:SendMessage("COMBAT_BOSS_DEFEATED", set)
 		end
 	end
 end
@@ -3328,7 +3323,6 @@ end
 -- this can be used to clear combat log and garbage.
 -- note that "collect" isn't used because it blocks all execution for too long.
 function Skada:CleanGarbage()
-	CombatLogClearEntries()
 	if self.db.profile.memorycheck and not InCombatLockdown() then
 		collectgarbage("collect")
 		self:Debug("CleanGarbage")
@@ -3490,9 +3484,17 @@ function Skada:EndSegment()
 	if not self.current then return end
 	self:ClearQueueUnits()
 
+	-- trigger events.
 	local curtime = time()
+	Skada:SendMessage("COMBAT_PLAYER_LEAVE", self.current, curtime)
+	if self.current.gotboss then
+		Skada:SendMessage("COMBAT_ENCOUNTER_END", self.current, curtime)
+	end
+
+	-- process segment
 	ProcessSet(self.current, curtime)
 
+	-- process phase segments
 	if self.tempsets then
 		for i = 1, #self.tempsets do
 			ProcessSet(self.tempsets[i], curtime, self.current.name)
@@ -3725,7 +3727,7 @@ do
 			-- register events.
 			for _, event in ipairs(args) do
 				combatlog_events[event] = combatlog_events[event] or {}
-				combatlog_events[event][#combatlog_events[event] + 1] = {func = callback, flags = flags}
+				combatlog_events[event][callback] = flags
 			end
 		end
 	end
@@ -3909,11 +3911,10 @@ do
 					end
 				end
 
-				for i = 1, #combatlog_events[eventtype] do
-					local mod = combatlog_events[eventtype][i]
+				for func, flags in next, combatlog_events[eventtype] do
 					local fail = false
 
-					if mod.flags.src_is_interesting_nopets then
+					if flags.src_is_interesting_nopets then
 						local src_is_interesting_nopets = (band(srcFlags, BITMASK_GROUP) ~= 0 and band(srcFlags, BITMASK_PETS) == 0) or players[srcGUID]
 
 						if src_is_interesting_nopets then
@@ -3923,7 +3924,7 @@ do
 						end
 					end
 
-					if not fail and mod.flags.dst_is_interesting_nopets then
+					if not fail and flags.dst_is_interesting_nopets then
 						local dst_is_interesting_nopets = (band(dstFlags, BITMASK_GROUP) ~= 0 and band(dstFlags, BITMASK_PETS) == 0) or players[dstGUID]
 						if dst_is_interesting_nopets then
 							dst_is_interesting = true
@@ -3932,22 +3933,22 @@ do
 						end
 					end
 
-					if not fail and mod.flags.src_is_interesting or mod.flags.src_is_not_interesting then
+					if not fail and flags.src_is_interesting or flags.src_is_not_interesting then
 						if not src_is_interesting then
 							src_is_interesting = band(srcFlags, BITMASK_GROUP) ~= 0 or (band(srcFlags, BITMASK_PETS) ~= 0 and pets[srcGUID]) or players[srcGUID] or self:IsQueuedUnit(srcGUID)
 						end
 
-						if (mod.flags.src_is_interesting and not src_is_interesting) or (mod.flags.src_is_not_interesting and src_is_interesting) then
+						if (flags.src_is_interesting and not src_is_interesting) or (flags.src_is_not_interesting and src_is_interesting) then
 							fail = true
 						end
 					end
 
-					if not fail and mod.flags.dst_is_interesting or mod.flags.dst_is_not_interesting then
+					if not fail and flags.dst_is_interesting or flags.dst_is_not_interesting then
 						if not dst_is_interesting then
 							dst_is_interesting = band(dstFlags, BITMASK_GROUP) ~= 0 or (band(dstFlags, BITMASK_PETS) ~= 0 and pets[dstGUID]) or players[dstGUID]
 						end
 
-						if (mod.flags.dst_is_interesting and not dst_is_interesting) or (mod.flags.dst_is_not_interesting and dst_is_interesting) then
+						if (flags.dst_is_interesting and not dst_is_interesting) or (flags.dst_is_not_interesting and dst_is_interesting) then
 							fail = true
 						end
 					end
@@ -3965,7 +3966,7 @@ do
 							end
 						end
 
-						mod.func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, select(offset, ...))
+						func(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, select(offset, ...))
 					end
 				end
 			end
@@ -4001,7 +4002,7 @@ do
 				end
 			-- default boss defeated event? (no DBM/BigWigs)
 			elseif (eventtype == "UNIT_DIED" or eventtype == "UNIT_DESTROYED") and self.current.gotboss == GetCreatureId(dstGUID) then
-				self:ScheduleTimer(BossDefeated, self.db.profile.updatefrequency or 0.5)
+				self:ScheduleTimer("BossDefeated", self.db.profile.updatefrequency or 0.5)
 			end
 		end
 	end

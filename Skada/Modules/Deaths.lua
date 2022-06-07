@@ -685,7 +685,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			columns = {Change = true, Health = true, Percent = true},
 			icon = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
 		}
-		playermod.metadata = {click1 = playermod}
+		playermod.metadata = {click1 = deathlogmod}
 		self.metadata = {
 			click1 = playermod,
 			click4 = Skada.FilterClass,
@@ -767,16 +767,20 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			{src_is_interesting = true, dst_is_not_interesting = true}
 		)
 
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self)
 	end
 
 	function mod:OnDisable()
+		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 
-	function mod:SetComplete(set)
+	function mod:CombatLeave()
 		wipe(data)
+	end
 
+	function mod:SetComplete(set)
 		-- clean deathlogs.
 		for i = 1, #set.players do
 			local player = set.players[i]
@@ -951,12 +955,10 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 									P.modules.alternativedeaths = nil
 									mod.Update = Def_Update
 									mod.metadata.click1 = playermod
-									playermod.metadata.click1 = deathlogmod
 								else
 									P.modules.alternativedeaths = true
 									mod.Update = Alt_Update
 									mod.metadata.click1 = deathlogmod
-									playermod.metadata.click1 = nil
 								end
 
 								mod:Reload()
