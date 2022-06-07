@@ -6,6 +6,7 @@ local ACR = LibStub("AceConfigRegistry-3.0")
 
 local min, max = math.min, math.max
 local next, fmt = next, format or string.format
+local del = Skada.delTable
 
 -- references: windows, modes
 local windows = nil
@@ -557,6 +558,11 @@ Skada.options = {
 							end,
 							order = 20
 						},
+						setscount = {
+							type = "header",
+							name = function() return fmt("%s: \124cffffffff%d\r", L["All Segments"], Skada.maxsets) end,
+							order = 200
+						},
 						setstokeep = {
 							type = "range",
 							name = L["Segments to keep"],
@@ -575,6 +581,12 @@ Skada.options = {
 							step = 1,
 							order = 220
 						},
+						empty_1 = {
+							type = "description",
+							name = " ",
+							width = "full",
+							order =  300
+						},
 						updatefrequency = {
 							type = "range",
 							name = L["Update frequency"],
@@ -592,6 +604,12 @@ Skada.options = {
 							max = 30,
 							step = 1,
 							order = 320
+						},
+						empty_2 = {
+							type = "description",
+							name = " ",
+							width = "full",
+							order =  400
 						},
 						memorycheck = {
 							type = "toggle",
@@ -1237,7 +1255,7 @@ function Skada:FrameSettings(db, include_dimensions)
 								win.db.sticked[db.name] = nil
 							end
 							if next(win.db.sticked) == nil then
-								win.db.sticked = nil
+								win.db.sticked = del(win.db.sticked)
 							end
 						end
 					end

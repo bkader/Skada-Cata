@@ -1,5 +1,5 @@
 local Skada = Skada
-Skada:RegisterModule("Threat", function(L, P)
+Skada:RegisterModule("Threat", function(L, P, _, _, new, del)
 	if Skada:IsDisabled("Threat") then return end
 
 	local mod = Skada:NewModule("Threat")
@@ -66,7 +66,11 @@ Skada:RegisterModule("Threat", function(L, P)
 				local player = threatTable and threatTable[guid]
 
 				if not player then
-					player = {id = guid, unit = unit, name = UnitName(unit)}
+					player = new()
+					player.id = guid
+					player.unit = unit
+					player.name = UnitName(unit)
+
 					if owner ~= nil then
 						player.name = player.name .. " (" .. UnitName(owner) .. ")"
 						player.class = "PET"
@@ -226,7 +230,7 @@ Skada:RegisterModule("Threat", function(L, P)
 
 		function mod:SetComplete(set)
 			tankThreat, tankValue = nil, nil
-			T.free("Threat_Table", threatTable)
+			T.free("Threat_Table", threatTable, nil, del)
 			self.unitID, self.unitName = nil, nil
 		end
 	end
@@ -319,6 +323,8 @@ Skada:RegisterModule("Threat", function(L, P)
 		local CombatText_StandardScroll = CombatText_StandardScroll
 		local RaidNotice_AddMessage = RaidNotice_AddMessage
 		local UIErrorsFrame = UIErrorsFrame
+		local WrapTextInColorCode = Skada.WrapTextInColorCode
+		local RGBPercToHex = Skada.RGBPercToHex
 		local white = HIGHLIGHT_FONT_COLOR
 
 		local handlers = {
@@ -333,8 +339,7 @@ Skada:RegisterModule("Threat", function(L, P)
 			-- Raid Warnings
 			[2] = function(text, r, g, b)
 				if r or g or b then
-					local c = "\124cff" .. format("%02x%02x%02x", (r or 0) * 255, (g or 0) * 255, (b or 0) * 255)
-					text = c .. text .. "\124r"
+					text = WrapTextInColorCode(text, RGBPercToHex(r or 0, g or 0, b or 0, true))
 				end
 				RaidNotice_AddMessage(RaidWarningFrame, text, white)
 			end,
