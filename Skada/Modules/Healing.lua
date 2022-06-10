@@ -516,7 +516,8 @@ Skada:RegisterModule("Healing", function(L, P, _, _, _, del)
 		if (set.heal and set.heal > 0) or (set.overheal and set.overheal > 0) then
 			for i = 1, #set.players do
 				local p = set.players[i]
-				if p and p.heal and (p.heal + p.overheal) == 0 then
+				if p and ((p.heal and (p.heal + p.overheal) == 0) or (not p.heal and p.healspells)) then
+					p.heal, p.overheal = nil, nil
 					p.healspells = del(p.healspells, true)
 				elseif p and p.healspells then
 					for spellid, spell in pairs(p.healspells) do
