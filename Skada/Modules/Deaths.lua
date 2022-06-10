@@ -45,7 +45,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 		local player = Skada:GetPlayer(set, data.playerid, data.playername, data.playerflags)
 		if player then
 			local deathlog = player.deathlog and player.deathlog[1]
-			if not deathlog or (deathlog.timeStr and not override) then
+			if not deathlog or (deathlog.timeod and not override) then
 				deathlog = {log = new()}
 				player.deathlog = player.deathlog or {}
 				tinsert(player.deathlog, 1, deathlog)
@@ -224,7 +224,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			local deathlog = player.deathlog and player.deathlog[1]
 			if deathlog then
 				deathlog.time = set.last_time or GetTime()
-				deathlog.timeStr = date("%H:%M:%S", set.last_action or time())
+				deathlog.timeod = set.last_action or time()
 
 				for i = #deathlog.log, 1, -1 do
 					local e = deathlog.log[i]
@@ -339,7 +339,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 				-- 1. remove "datakey" from ended logs.
 				-- 2. postfix empty table
 				-- 3. add a fake entry for the actual death
-				if deathlog.timeStr then
+				if deathlog.timeod then
 					win.datakey = nil -- [1]
 
 					if #deathlog.log == 0 then -- [2]
@@ -355,7 +355,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						local d = win:nr(nr)
 
 						d.id = nr
-						d.label = deathlog.timeStr
+						d.label = date("%H:%M:%S", deathlog.timeod)
 						d.icon = [[Interface\Icons\Ability_Rogue_FeignDeath]]
 						d.color = nil
 						d.value = 0
@@ -416,7 +416,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 						d.color = color
 
 						-- only format report for ended logs
-						if deathlog.timeStr ~= nil then
+						if deathlog.timeod ~= nil then
 							d.reportlabel = "%02.2fs: %s (%s)   %s [%s]"
 
 							if P.reportlinks and log.spellid then
@@ -503,7 +503,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 				local curtime, nr = set.last_time or GetTime(), 0
 				for i = 1, #player.deathlog do
 					local death = player.deathlog[i]
-					if death and (death.timeStr or WATCH) then
+					if death and (death.timeod or WATCH) then
 						nr = nr + 1
 						local d = win:nr(nr)
 
@@ -520,7 +520,14 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 
 						d.label = d.label or L["Unknown"]
 						d.value = death.time or curtime
-						d.valuetext = death.timeStr or "..."
+						if death.timeod then
+							d.valuetext = Skada:FormatValueCols(
+								mod.metadata.columns.Time and date("%H:%M:%S", death.timeod),
+								mod.metadata.columns.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
+							)
+						else
+							d.valuetext = "..."
+						end
 
 						if win.metadata and d.value > win.metadata.maxvalue then
 							win.metadata.maxvalue = d.value
@@ -590,7 +597,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 					local num = #p.deathlog
 					for j = 1, num do
 						local death = p.deathlog[j]
-						if death and (death.timeStr or WATCH) then
+						if death and (death.timeod or WATCH) then
 							nr = nr + 1
 							local d = win:nr(nr)
 
@@ -601,14 +608,17 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 							d.role = p.role
 							d.spec = p.spec
 
-							if death.timeStr then
-								d.value = death.time
-								d.valuetext = death.timeStr
+							if death.timeod then
 								d.color = WATCH and GRAY_FONT_COLOR or nil
+								d.value = death.time
+								d.valuetext = Skada:FormatValueCols(
+									self.metadata.columns.Time and date("%H:%M:%S", death.timeod),
+									self.metadata.columns.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
+								)
 							else
+								d.color = nil
 								d.value = curtime or GetTime()
 								d.valuetext = "..."
-								d.color = nil
 							end
 
 							if num ~= 1 then
@@ -690,6 +700,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 			click1 = playermod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
+			columns = {Time = true, Survivability = false},
 			icon = [[Interface\Icons\ability_rogue_feigndeath]]
 		}
 
@@ -955,10 +966,12 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, new, del)
 									P.modules.alternativedeaths = nil
 									mod.Update = Def_Update
 									mod.metadata.click1 = playermod
+									playermod.metadata.click1 = deathlogmod
 								else
 									P.modules.alternativedeaths = true
 									mod.Update = Alt_Update
 									mod.metadata.click1 = deathlogmod
+									playermod.metadata.click1 = nil
 								end
 
 								mod:Reload()
