@@ -1377,13 +1377,9 @@ Skada:RegisterModule("Healing Taken", function(L, _, _, _, new, _, clear)
 								for name, target in pairs(spell.targets) do
 									if not tbl[name] then
 										tbl[name] = new()
-										tbl[name].amount = target.amount
-										tbl[name].overheal = target.overheal
+										tbl[name].amount = target
 									else
-										tbl[name].amount = tbl[name].amount + target.amount
-										if target.overheal then
-											tbl[name].overheal = (tbl[name].overheal or 0) + target.overheal
-										end
+										tbl[name].amount = tbl[name].amount + target
 									end
 									if not tbl[name].class or not tbl[name].time then
 										local actor = self:GetActor(name)
