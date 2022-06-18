@@ -33,35 +33,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 
 	-- spells on the list below are used to update player's active time
 	-- no matter their role or damage amount, since pets aren't considered.
-	local whitelist = {
-		-- The Oculus
-		[49840] = true, -- Shock Lance (Amber Drake)
-		[50232] = true, -- Searing Wrath (Ruby Drake)
-		[50341] = true, -- Touch the Nightmare (Emerald Drake)
-		[50344] = true, -- Dream Funnel (Emerald Drake)
-		-- Eye of Eternity: Wyrmrest Skytalon
-		[56091] = true, -- Flame Spike
-		[56092] = true, -- Engulf in Flames
-		-- Naxxramas: Instructor Razuvious
-		[61696] = true, -- Blood Strike (Death Knight Understudy)
-		-- Ulduar - Flame Leviathan
-		[62306] = true, -- Salvaged Demolisher: Hurl Boulder
-		[62308] = true, -- Salvaged Demolisher: Ram
-		[62490] = true, -- Salvaged Demolisher: Hurl Pyrite Barrel
-		[62634] = true, -- Salvaged Demolisher Mechanic Seat: Mortar
-		[64979] = true, -- Salvaged Demolisher Mechanic Seat: Anti-Air Rocket
-		[62345] = true, -- Salvaged Siege Engine: Ram
-		[62346] = true, -- Salvaged Siege Engine: Steam Rush
-		[62522] = true, -- Salvaged Siege Engine: Electroshock
-		[62358] = true, -- Salvaged Siege Turret: Fire Cannon
-		[62359] = true, -- Salvaged Siege Turret: Anti-Air Rocket
-		[62974] = true, -- Salvaged Chopper: Sonic Horn
-		-- Icecrown Citadel
-		[69399] = true, -- Cannon Blast (Gunship Battle Cannons)
-		[70175] = true, -- Incinerating Blast (Gunship Battle Cannons)
-		[70539] = 5.5, -- Regurgitated Ooze (Mutated Abomination)
-		[70542] = true -- Mutated Slash (Mutated Abomination)
-	}
+	local whitelist = {}
 
 	local function log_spellcast(set, playerid, playername, playerflags, spellname, spellschool)
 		if not set or (set == Skada.total and not P.totalidc) then return end
@@ -645,6 +617,10 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 			if resisted > 0 then
 				nr = add_detail_bar(win, nr, L["RESIST"], resisted, total, true, true)
 			end
+
+			if spell.glance and spell.glance > 0 then
+				nr = add_detail_bar(win, nr, L["Glancing"], spell.glance, total, true, true)
+			end
 		end
 	end
 
@@ -907,6 +883,40 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 				p.damagespells = del(p.damagespells, true)
 			end
 		end
+	end
+
+	function mod:OnInitialize()
+		-- The Oculus
+		whitelist[49840] = true -- Shock Lance (Amber Drake)
+		whitelist[50232] = true -- Searing Wrath (Ruby Drake)
+		whitelist[50341] = true -- Touch the Nightmare (Emerald Drake)
+		whitelist[50344] = true -- Dream Funnel (Emerald Drake)
+
+		-- Eye of Eternity: Wyrmrest Skytalon
+		whitelist[56091] = true -- Flame Spike
+		whitelist[56092] = true -- Engulf in Flames
+
+		-- Naxxramas: Instructor Razuvious
+		whitelist[61696] = true -- Blood Strike (Death Knight Understudy)
+
+		-- Ulduar - Flame Leviathan
+		whitelist[62306] = true -- Salvaged Demolisher: Hurl Boulder
+		whitelist[62308] = true -- Salvaged Demolisher: Ram
+		whitelist[62490] = true -- Salvaged Demolisher: Hurl Pyrite Barrel
+		whitelist[62634] = true -- Salvaged Demolisher Mechanic Seat: Mortar
+		whitelist[64979] = true -- Salvaged Demolisher Mechanic Seat: Anti-Air Rocket
+		whitelist[62345] = true -- Salvaged Siege Engine: Ram
+		whitelist[62346] = true -- Salvaged Siege Engine: Steam Rush
+		whitelist[62522] = true -- Salvaged Siege Engine: Electroshock
+		whitelist[62358] = true -- Salvaged Siege Turret: Fire Cannon
+		whitelist[62359] = true -- Salvaged Siege Turret: Anti-Air Rocket
+		whitelist[62974] = true -- Salvaged Chopper: Sonic Horn
+
+		-- Icecrown Citadel
+		whitelist[69399] = true -- Cannon Blast (Gunship Battle Cannons)
+		whitelist[70175] = true -- Incinerating Blast (Gunship Battle Cannons)
+		whitelist[70539] = 5.5 -- Regurgitated Ooze (Mutated Abomination)
+		whitelist[70542] = true -- Mutated Slash (Mutated Abomination)
 	end
 end)
 
