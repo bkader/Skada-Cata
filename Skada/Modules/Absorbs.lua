@@ -1008,7 +1008,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 						d.label, _, d.icon = GetSpellInfo(spellid)
 
 						if spell.ishot then
-							d.text = d.label .. L["HoT"]
+							d.label = format("%s%s", d.label, L["HoT"])
 						end
 
 						if enemy then
@@ -1087,7 +1087,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 					d.label, _, d.icon = GetSpellInfo(spellid)
 
 					if spell.ishot then
-						d.text = d.label .. L["HoT"]
+						d.label = format("%s%s", d.label, L["HoT"])
 					end
 
 					d.value = spell.amount
@@ -1626,7 +1626,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 				d.label, _, d.icon = GetSpellInfo(spellid)
 
 				if spell.ishot then
-					d.text = d.label .. L["HoT"]
+					d.label = format("%s%s", d.label, L["HoT"])
 				end
 
 				d.value = spell.amount
@@ -1671,6 +1671,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 					for spellid, spell in pairs(player.healspells) do
 						if not tbl[spellid] then
 							tbl[spellid] = new()
+							tbl[spellid].ishot = spell.ishot
 							tbl[spellid].school = spell.school
 							tbl[spellid].amount = spell.amount
 							tbl[spellid].overheal = spell.overheal
