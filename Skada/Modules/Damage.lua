@@ -420,7 +420,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		win.title = L["actor damage"](win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetDamage() or 0
 
 		if total > 0 and actor.damagespells then
@@ -431,19 +431,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for spellname, spell in pairs(actor.damagespells) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellname
-				d.spellschool = spell.school
-
-				if enemy then
-					d.spellid = spellname
-					d.label, _, d.icon = GetSpellInfo(spellname)
-				else
-					d.spellid = spell.id
-					d.label = spellname
-					_, _, d.icon = GetSpellInfo(spell.id)
-				end
+				local d = win:spell(nr, spellname, spell)
 
 				d.value = P.absdamage and spell.total or spell.amount
 				d.valuetext = Skada:FormatValueCols(
@@ -479,13 +467,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = target.id or targetname
-				d.label = targetname
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
+				local d = win:actor(nr, target, true, targetname)
 
 				d.value = P.absdamage and target.total or target.amount
 				d.valuetext = Skada:FormatValueCols(
@@ -587,7 +569,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		local actor = set and set:GetPlayer(win.actorid, win.actorname)
 		local spell = actor and actor.damagespells and actor.damagespells[win.spellname]
 		if spell then
-			local absorbed = spell.total and spell.total - spell.amount or 0
+			local absorbed = spell.total and (spell.total - spell.amount) or 0
 			local blocked = spell.blocked or 0
 			local resisted = spell.resisted or 0
 			local total = spell.amount + absorbed + blocked + resisted
@@ -633,7 +615,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 		win.title = L["actor damage"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not set or not win.targetname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local targets = actor and actor:GetDamageTargets()
 		if not targets or not targets[win.targetname] then return end
 
@@ -651,20 +633,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 			for spellname, spell in pairs(actor.damagespells) do
 				if spell.targets and spell.targets[win.targetname] then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					if enemy then
-						d.spellid = spellname
-						d.label, _, d.icon = GetSpellInfo(spellname)
-						d.id = d.label
-					else
-						d.id = spellname
-						d.spellid = spell.id
-						d.label = spellname
-						_, _, d.icon = GetSpellInfo(spell.id)
-					end
-
-					d.spellschool = spell.school
+					local d = win:spell(nr, spellname, spell)
 
 					d.value = spell.targets[win.targetname].amount
 					if P.absdamage and spell.targets[win.targetname].total then
@@ -704,14 +673,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 					local dps, amount = player:GetDPS()
 					if amount > 0 then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = player.id or player.name
-						d.label = player.name
-						d.text = player.id and Skada:FormatName(player.name, player.id)
-						d.class = player.class
-						d.role = player.role
-						d.spec = player.spec
+						local d = win:actor(nr, player)
 
 						if Skada.forPVP and set.type == "arena" then
 							d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
@@ -739,14 +701,7 @@ Skada:RegisterModule("Damage", function(L, P, _, _, new, del)
 						local dps, amount = enemy:GetDPS()
 						if amount > 0 then
 							nr = nr + 1
-							local d = win:nr(nr)
-
-							d.id = enemy.id or enemy.name
-							d.label = enemy.name
-							d.text = nil
-							d.class = enemy.class
-							d.role = enemy.role
-							d.spec = enemy.spec
+							local d = win:actor(nr, enemy, true)
 							d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = amount
@@ -966,14 +921,7 @@ Skada:RegisterModule("DPS", function(L, P)
 
 					if dps > 0 then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = player.id or player.name
-						d.label = player.name
-						d.text = player.id and Skada:FormatName(player.name, player.id)
-						d.class = player.class
-						d.role = player.role
-						d.spec = player.spec
+						local d = win:actor(nr, player)
 
 						if Skada.forPVP and set.type == "arena" then
 							d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
@@ -1001,14 +949,7 @@ Skada:RegisterModule("DPS", function(L, P)
 
 						if dps > 0 then
 							nr = nr + 1
-							local d = win:nr(nr)
-
-							d.id = enemy.id or enemy.name
-							d.label = enemy.name
-							d.text = nil
-							d.class = enemy.class
-							d.role = enemy.role
-							d.spec = enemy.spec
+							local d = win:actor(nr, enemy, true)
 							d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = dps
@@ -1139,14 +1080,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C, new, _, clear)
 				local nr = 0
 				for playername, player in pairs(sources) do
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = player.id or playername
-					d.label = playername
-					d.text = player.id and Skada:FormatName(playername, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+					local d = win:actor(nr, player, nil, playername)
 
 					d.value = player.amount
 					d.valuetext = Skada:FormatValueCols(
@@ -1196,13 +1130,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C, new, _, clear)
 		local settime, nr = self.metadata.columns.DPS and set:GetTime(), 0
 		for spellname, spell in pairs(spells) do
 			nr = nr + 1
-			local d = win:nr(nr)
-
-			d.id = spellname
-			d.spellid = spell.id
-			d.label = spellname
-			_, _, d.icon = GetSpellInfo(spell.id)
-			d.spellschool = spell.school
+			local d = win:spell(nr, spellname, spell)
 
 			d.value = spell.amount
 			d.valuetext = Skada:FormatValueCols(
@@ -1259,7 +1187,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 		win.title = L["actor damage"](win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetDamage(true) or 0
 
 		if total > 0 and actor.damagespells then
@@ -1270,20 +1198,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for spellname, spell in pairs(actor.damagespells) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				if enemy then
-					d.spellid = spellname
-					d.label, _, d.icon = GetSpellInfo(spellname)
-					d.id = d.label
-				else
-					d.id = spellname
-					d.spellid = spell.id
-					d.label = spellname
-					_, _, d.icon = GetSpellInfo(spell.id)
-				end
-
-				d.spellschool = spell.school
+				local d = win:spell(nr, spellname, spell)
 
 				d.value = P.absdamage and spell.total or spell.amount
 				if spell.overkill then
@@ -1324,13 +1239,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 			local actortime, nr = mod.metadata.columns.sDPS and actor:GetTime(), 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = target.id or targetname
-				d.label = targetname
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
+				local d = win:actor(nr, target, true, targetname)
 
 				d.value = P.absdamage and target.total or target.amount
 				if target.overkill then
@@ -1380,14 +1289,8 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 
 				if amount > 0 then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = source.id or sourcename
-					d.label = sourcename
+					local d = win:actor(nr, source, true, sourcename)
 					d.text = (source.id and enemy) and Skada:FormatName(sourcename, source.id)
-					d.class = source.class
-					d.role = source.role
-					d.spec = source.spec
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueCols(
@@ -1423,14 +1326,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 
 					if amount > 0 then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = player.id or player.name
-						d.label = player.name
-						d.text = player.id and Skada:FormatName(player.name, player.id)
-						d.class = player.class
-						d.role = player.role
-						d.spec = player.spec
+						local d = win:actor(nr, player)
 
 						if Skada.forPVP and set.type == "arena" then
 							d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
@@ -1459,14 +1355,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 
 						if amount > 0 then
 							nr = nr + 1
-							local d = win:nr(nr)
-
-							d.id = enemy.id or enemy.name
-							d.label = enemy.name
-							d.text = nil
-							d.class = enemy.class
-							d.role = enemy.role
-							d.spec = enemy.spec
+							local d = win:actor(nr, enemy, true)
 							d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 							d.value = amount
@@ -1542,7 +1431,7 @@ Skada:RegisterModule("Overkill", function(L)
 		win.title = format(L["%s's overkill spells"], win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.overkill or 0
 		if total > 0 and actor.damagespells then
 			if win.metadata then
@@ -1553,20 +1442,7 @@ Skada:RegisterModule("Overkill", function(L)
 			for spellname, spell in pairs(actor.damagespells) do
 				if spell.overkill and spell.overkill > 0 then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					if enemy then
-						d.spellid = spellname
-						d.label, _, d.icon = GetSpellInfo(spellname)
-						d.id = d.label
-					else
-						d.id = spellname
-						d.spellid = spell.id
-						d.label = spellname
-						_, _, d.icon = GetSpellInfo(spell.id)
-					end
-
-					d.spellschool = spell.school
+					local d = win:spell(nr, spellname, spell)
 
 					d.value = spell.overkill
 					d.valuetext = Skada:FormatValueCols(
@@ -1605,13 +1481,7 @@ Skada:RegisterModule("Overkill", function(L)
 			for targetname, target in pairs(targets) do
 				if target.overkill and target.overkill > 0 then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = target.id or targetname
-					d.label = targetname
-					d.class = target.class
-					d.role = target.role
-					d.spec = target.spec
+					local d = win:actor(nr, target, true, targetname)
 
 					d.value = target.overkill
 					d.valuetext = Skada:FormatValueCols(
@@ -1637,7 +1507,7 @@ Skada:RegisterModule("Overkill", function(L)
 		win.title = format(L["%s's overkill spells"], win.actorname or L["Unknown"])
 		if not set or not win.targetname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		if not actor or not actor.overkill or actor.overkill == 0 then return end
 
 		local targets = actor:GetDamageTargets()
@@ -1652,20 +1522,7 @@ Skada:RegisterModule("Overkill", function(L)
 			for spellname, spell in pairs(actor.damagespells) do
 				if spell.targets and spell.targets[win.targetname] and spell.targets[win.targetname].overkill and spell.targets[win.targetname].overkill > 0 then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					if enemy then
-						d.spellid = spellname
-						d.label, _, d.icon = GetSpellInfo(spellname)
-						d.id = d.label
-					else
-						d.id = spellname
-						d.spellid = spell.id
-						d.label = spellname
-						_, _, d.icon = GetSpellInfo(spell.id)
-					end
-
-					d.spellschool = spell.school
+					local d = win:spell(nr, spellname, spell)
 
 					d.value = spell.targets[win.targetname].overkill
 					d.valuetext = Skada:FormatValueCols(
@@ -1698,14 +1555,7 @@ Skada:RegisterModule("Overkill", function(L)
 				local player = set.players[i]
 				if player and player.overkill and (not win.class or win.class == player.class) then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = player.id or player.name
-					d.label = player.name
-					d.text = player.id and Skada:FormatName(player.name, player.id)
-					d.class = player.class
-					d.role = player.role
-					d.spec = player.spec
+					local d = win:actor(nr, player)
 
 					if Skada.forPVP and set.type == "arena" then
 						d.color = Skada.classcolors(set.gold and "ARENA_GOLD" or "ARENA_GREEN")
@@ -1730,14 +1580,7 @@ Skada:RegisterModule("Overkill", function(L)
 					local enemy = set.enemies[i]
 					if enemy and not enemy.fake and enemy.overkill and (not win.class or win.class == enemy.class) then
 						nr = nr + 1
-						local d = win:nr(nr)
-
-						d.id = enemy.id or enemy.name
-						d.label = enemy.name
-						d.text = nil
-						d.class = enemy.class
-						d.role = enemy.role
-						d.spec = enemy.spec
+						local d = win:actor(nr, enemy, true)
 						d.color = Skada.classcolors(set.gold and "ARENA_GREEN" or "ARENA_GOLD")
 
 						d.value = enemy.overkill

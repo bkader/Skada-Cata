@@ -25,7 +25,7 @@ do
 	function mod:OnEnable()
 		if not Skada:IsDisabled("Buffs") or not Skada:IsDisabled("Debuffs") then
 			spellschools = spellschools or Skada.spellschools
-			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "Clean")
+			Skada.RegisterCallback(self, "Skada_SetComplete", "Clean")
 
 			-- add functions to segment prototype
 			local cache, new, clear = Skada.cacheTable, Skada.newTable, Skada.clearTable
@@ -63,11 +63,11 @@ do
 	end
 
 	function mod:OnDisable()
-		Skada.UnregisterAllMessages(self)
+		Skada.UnregisterAllCallbacks(self)
 	end
 
-	function mod:Clean(event, set, curtime)
-		if event == "COMBAT_PLAYER_LEAVE" and set then
+	function mod:Clean(_, set, curtime)
+		if set then
 			local maxtime = Skada:GetSetTime(set)
 			curtime = curtime or set.last_action or time()
 
@@ -223,14 +223,7 @@ do
 						local auracount, aurauptime = CountAuras(player.auras, atype)
 						if auracount > 0 and aurauptime > 0 then
 							nr = nr + 1
-							local d = win:nr(nr)
-
-							d.id = player.id or player.name
-							d.label = player.name
-							d.text = player.id and Skada:FormatName(player.name, player.id)
-							d.class = player.class
-							d.role = player.role
-							d.spec = player.spec
+							local d = win:actor(nr, player)
 
 							local maxtime = floor(player:GetTime())
 							d.value = min(floor(aurauptime / auracount), maxtime)
@@ -265,12 +258,7 @@ do
 			for spellid, spell in pairs(player.auras) do
 				if spell.type == atype and spell.uptime > 0 then
 					nr = nr + 1
-					local d = win:nr(nr)
-
-					d.id = spellid
-					d.spellid = spellid
-					d.label, _, d.icon = GetSpellInfo(spellid)
-					d.spellschool = spell.school
+					local d = win:spell(nr, spellid, spell)
 
 					d.value = min(maxtime, spell.uptime)
 					d.valuetext = Skada:FormatValueCols(
@@ -399,14 +387,7 @@ Skada:RegisterModule("Buffs", function(L, P)
 			local nr = 0
 			for playername, player in pairs(players) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = player.id or playername
-				d.label = playername
-				d.text = player.id and Skada:FormatName(playername, player.id)
-				d.class = player.class
-				d.role = player.role
-				d.spec = player.spec
+				local d = win:actor(nr, player, nil, playername)
 
 				d.value = player.uptime
 				d.valuetext = Skada:FormatValueCols(
@@ -453,11 +434,15 @@ Skada:RegisterModule("Buffs", function(L, P)
 			end
 		end
 
-		function mod:CheckBuffs(event, set)
+		function mod:CombatEnter(event, set)
 			if event == "COMBAT_PLAYER_ENTER" and set and not set.stopped and not self.checked then
 				GroupIterator(CheckUnitBuffs)
 				self.checked = true
 			end
+		end
+
+		function mod:CombatLeave()
+			self.checked = nil
 		end
 	end
 
@@ -504,8 +489,8 @@ Skada:RegisterModule("Buffs", function(L, P)
 			{dst_is_interesting = true}
 		)
 
-		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CheckBuffs")
-		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", function() mod.checked = nil end)
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Buffs and Debuffs"])
 
 		-- table of ignored spells:
@@ -594,12 +579,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 			local nr = 0
 			for spellid, aura in pairs(auras) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = spellid
-				d.spellid = spellid
-				d.label, _, d.icon = GetSpellInfo(spellid)
-				d.spellschool = aura.school
+				local d = win:spell(nr, spellid, aura)
 
 				d.value = aura.uptime
 				d.valuetext = Skada:FormatValueCols(
@@ -636,13 +616,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = target.id or targetname
-				d.label = targetname
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
+				local d = win:actor(nr, target, true, targetname)
 
 				d.value = target.uptime
 				d.valuetext = Skada:FormatValueCols(
@@ -673,14 +647,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 			local aura = player and player.auras and player.auras[win.spellid]
 			if aura then
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = player.id
-				d.label = player.name
-				d.text = player.id and Skada:FormatName(player.name, player.id)
-				d.class = player.class
-				d.role = player.role
-				d.spec = player.spec
+				local d = win:actor(nr, player)
 
 				d.value = aura.uptime
 				d.valuetext = Skada:FormatValueCols(
@@ -712,13 +679,7 @@ Skada:RegisterModule("Debuffs", function(L, _, _, C, new, _, clear)
 			local nr = 0
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
-				local d = win:nr(nr)
-
-				d.id = target.id or targetname
-				d.label = targetname
-				d.class = target.class
-				d.role = target.role
-				d.spec = target.spec
+				local d = win:actor(nr, target, true, targetname)
 
 				d.value = target.uptime
 				d.valuetext = Skada:FormatValueCols(
