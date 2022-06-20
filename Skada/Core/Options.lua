@@ -1534,7 +1534,7 @@ do
 		end
 
 		function Share:Send(profileStr, target)
-			Skada:SendComm("WHISPER", target, CONST_COMM_PROFILE, profileStr)
+			Skada:SendComm("PURR", target, CONST_COMM_PROFILE, profileStr)
 		end
 
 		args.advanced = {
