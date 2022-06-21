@@ -265,7 +265,7 @@ function Skada:RegisterSchools()
 
 	-- reference to CombatLog_String_SchoolString
 	local colorFunc = CombatLog_Color_ColorArrayBySchool
-	local function GetSchoolName(key)
+	local function get_school_name(key)
 		if not nameFunc then -- late availability
 			nameFunc = CombatLog_String_SchoolString
 		end
@@ -277,7 +277,7 @@ function Skada:RegisterSchools()
 
 	-- reference to COMBATLOG_DEFAULT_COLORS.schoolColoring
 	local colorTable = COMBATLOG_DEFAULT_COLORS and COMBATLOG_DEFAULT_COLORS.schoolColoring
-	local function GetSchoolColor(key)
+	local function get_school_color(key)
 		if not colorTable then -- late availability
 			colorTable = COMBATLOG_DEFAULT_COLORS and COMBATLOG_DEFAULT_COLORS.schoolColoring
 		end
@@ -305,9 +305,9 @@ function Skada:RegisterSchools()
 
 	setmetatable(self.spellschools, {
 		__index = function(t, key)
-			local name, isnone = GetSchoolName(key)
+			local name, isnone = get_school_name(key)
 			if not isnone then
-				local r, g, b = GetSchoolColor(key)
+				local r, g, b = get_school_color(key)
 				t[key] = {name = name, r = r, g = g, b = b}
 				return t[key]
 			end
@@ -536,7 +536,7 @@ do
 		{"Chuggernaut", "WARRIOR", "DAMAGER", 72} -- Fury Warrior
 	}
 
-	local function GenerateFakeData()
+	local function generate_fake_data()
 		wipe(fakeSet)
 		fakeSet.name = "Fake Fight"
 		fakeSet.starttime = time() - 120
@@ -586,7 +586,7 @@ do
 		return setPrototype:Bind(fakeSet)
 	end
 
-	local function RandomizeFakeData(set, coef)
+	local function randomize_fake_data(set, coef)
 		set.time = time() - set.starttime
 
 		for i = 1, #set.players do
@@ -647,9 +647,9 @@ do
 		end
 
 		self:Wipe()
-		self.current = GenerateFakeData()
+		self.current = generate_fake_data()
 		updateTimer = self:ScheduleRepeatingTimer(function()
-			RandomizeFakeData(self.current, self.db.profile.updatefrequency or 0.25)
+			randomize_fake_data(self.current, self.db.profile.updatefrequency or 0.25)
 			self:UpdateDisplay(true)
 		end, self.db.profile.updatefrequency or 0.25)
 	end
@@ -1150,7 +1150,7 @@ do
 	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 	local collectgarbage = collectgarbage
 
-	local function CreateProgress()
+	local function create_progress_window()
 		local frame = CreateFrame("Frame", "SkadaProgressWindow", UIParent)
 		frame:SetFrameStrata("TOOLTIP")
 
@@ -1230,8 +1230,8 @@ do
 		return frame
 	end
 
-	local function ShowProgress(self, sent, total)
-		local progress = self.ProgressWindow or CreateProgress()
+	local function show_progress_window(self, sent, total)
+		local progress = self.ProgressWindow or create_progress_window()
 		self.ProgressWindow = progress
 		if not progress:IsShown() then
 			progress.total = total
@@ -1249,7 +1249,7 @@ do
 	end
 
 	-- "PURR" is a special key to whisper with progress window.
-	local function SendCommMessage(self, channel, target, ...)
+	local function send_comm_message(self, channel, target, ...)
 		if target == self.userName then
 			return -- to yourself? really...
 		elseif channel ~= "WHISPER" and channel ~= "PURR" and not IsInGroup() then
@@ -1269,13 +1269,13 @@ do
 		end
 
 		if channel == "PURR" then
-			self:SendCommMessage("Skada", self:Serialize(nil, nil, ...), "WHISPER", target, "NORMAL", ShowProgress, self)
+			self:SendCommMessage("Skada", self:Serialize(nil, nil, ...), "WHISPER", target, "NORMAL", show_progress_window, self)
 		elseif channel then
 			self:SendCommMessage("Skada", self:Serialize(nil, nil, ...), channel, target)
 		end
 	end
 
-	local function DispatchComm(sender, ok, const, ...)
+	local function dispatch_comm(sender, ok, const, ...)
 		if ok and Skada.comms and type(const) == "string" and Skada.comms[const] then
 			for self, funcs in pairs(Skada.comms[const]) do
 				for func in pairs(funcs) do
@@ -1289,16 +1289,16 @@ do
 		end
 	end
 
-	local function OnCommReceived(self, prefix, message, channel, sender)
+	local function on_comm_received(self, prefix, message, channel, sender)
 		if prefix == "Skada" and channel and sender and sender ~= self.userName then
-			DispatchComm(sender, self:Deserialize(message))
+			dispatch_comm(sender, self:Deserialize(message))
 		end
 	end
 
 	function Skada:RegisterComms(enable)
 		if enable then
-			self.SendComm = SendCommMessage
-			self.OnCommReceived = OnCommReceived
+			self.SendComm = send_comm_message
+			self.OnCommReceived = on_comm_received
 			self:RegisterComm("Skada")
 			self:AddComm("VersionCheck")
 		else
