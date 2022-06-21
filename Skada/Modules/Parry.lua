@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Parry-Haste", function(L, P)
-	if Skada:IsDisabled("Parry-Haste") then return end
-
 	local mod = Skada:NewModule("Parry-Haste")
 	local targetmod = mod:NewModule("Parry target list")
 

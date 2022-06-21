@@ -1,7 +1,5 @@
 local Skada = Skada
 Skada:RegisterModule("Healthstones", function(L)
-	if Skada:IsDisabled("Healthstones") then return end
-
 	local mod = Skada:NewModule("Healthstones")
 	local stonespell = 6262
 	local stonename = GetSpellInfo(stonespell)
