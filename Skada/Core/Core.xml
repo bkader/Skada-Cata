@@ -11,4 +11,5 @@
 	<Script file="Display\Bar.lua"/>
 	<Script file="Display\Inline.lua"/>
 	<Script file="Display\Broker.lua"/>
+	<Script file="Display\Legacy.lua"/>
 </Ui>
