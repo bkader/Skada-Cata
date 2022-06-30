@@ -878,8 +878,6 @@ end)
 -- ============================= --
 
 Skada:RegisterModule("DPS", function(L, P)
-	if Skada:IsDisabled("Damage") then return end
-
 	local mod = Skada:NewModule("DPS")
 
 	local function dps_tooltip(win, id, label, tooltip)
@@ -993,15 +991,13 @@ Skada:RegisterModule("DPS", function(L, P)
 		local dps = set:GetDPS()
 		return Skada:FormatNumber(dps), dps
 	end
-end)
+end, "Damage")
 
 -- =========================== --
 -- Damage Done By Spell Module --
 -- =========================== --
 
 Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C, new, _, clear)
-	if Skada:IsDisabled("Damage") then return end
-
 	local mod = Skada:NewModule("Damage Done By Spell")
 	local sourcemod = mod:NewModule("Damage spell sources")
 
@@ -1157,7 +1153,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C, new, _, clear)
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
 	end
-end)
+end, "Damage")
 
 -- ==================== --
 -- Useful Damage Module --
@@ -1169,8 +1165,6 @@ end)
 --
 
 Skada:RegisterModule("Useful Damage", function(L, P)
-	if Skada:IsDisabled("Damage") then return end
-
 	local mod = Skada:NewModule("Useful Damage")
 	local playermod = mod:NewModule("Damage spell list")
 	local targetmod = mod:NewModule("Damage target list")
@@ -1406,15 +1400,13 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 		)
 		return valuetext, amount
 	end
-end)
+end, "Damage")
 
 -- =============== --
 -- Overkill Module --
 -- =============== --
 
 Skada:RegisterModule("Overkill", function(L)
-	if Skada:IsDisabled("Damage") then return end
-
 	local mod = Skada:NewModule("Overkill")
 	local playermod = mod:NewModule("Overkill spell list")
 	local targetmod = mod:NewModule("Overkill target list")
@@ -1624,4 +1616,4 @@ Skada:RegisterModule("Overkill", function(L)
 		local overkill = set:GetOverkill()
 		return Skada:FormatNumber(overkill), overkill
 	end
-end)
+end, "Damage")
