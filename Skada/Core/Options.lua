@@ -142,6 +142,7 @@ Skada.defaults = {
 			["Useful Damage"] = true,
 			-- display systems
 			["Inline Bar Display"] = true,
+			["Legacy Bar Display"] = true,
 			["Data Text"] = true
 		},
 		windows = {windefaultscopy}
@@ -1513,6 +1514,11 @@ do
 			profile.__name = nil
 		end
 		local profileName = check_profile_name(name)
+
+		-- backwards compatibility
+		if profile["Skada"] and type(profile["Skada"]) == "table" then
+			profile = profile["Skada"]
+		end
 
 		local Old_ReloadSettings = Skada.ReloadSettings
 		Skada.ReloadSettings = function(self)

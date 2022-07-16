@@ -28,6 +28,34 @@ function Skada:Debug(...)
 end
 
 -------------------------------------------------------------------------------
+-- Register CLEU function
+
+function Skada:RegisterParser()
+	self.RegisterParser = nil -- remove it
+
+	-- only params that Skada needs.
+	local timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _
+	local A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12
+
+	if self.WoWBuild >= 40200 then
+		self.ParseCombatLog = function(self, ...)
+			_, timestamp, eventtype, _, srcGUID, srcName, srcFlags, _, dstGUID, dstName, dstFlags, _, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 = ...
+			return timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12
+		end
+	elseif self.WoWBuild >= 40100 then
+		self.ParseCombatLog = function(self, ...)
+			_, timestamp, eventtype, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 = ...
+			return timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12
+		end
+	else
+		self.ParseCombatLog = function(self, ...)
+			_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 = ...
+			return timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
 -- Classes, Specs and Schools
 
 function Skada:RegisterClasses()
@@ -623,6 +651,11 @@ do
 		end
 	end
 
+	local function update_fake_data(self)
+		randomize_fake_data(self.current, self.db.profile.updatefrequency or 0.25)
+		self:UpdateDisplay(true)
+	end
+
 	function Skada:TestMode()
 		if InCombatLockdown() or IsGroupInCombat() then
 			wipe(fakeSet)
@@ -648,10 +681,7 @@ do
 
 		self:Wipe()
 		self.current = generate_fake_data()
-		updateTimer = self:ScheduleRepeatingTimer(function()
-			randomize_fake_data(self.current, self.db.profile.updatefrequency or 0.25)
-			self:UpdateDisplay(true)
-		end, self.db.profile.updatefrequency or 0.25)
+		updateTimer = self:ScheduleRepeatingTimer(update_fake_data, self.db.profile.updatefrequency or 0.25, self)
 	end
 end
 
