@@ -56,8 +56,21 @@ do
 		return true
 	end
 
+	local pformat -- Thank you DBM!
+	do
+		local function replace(cap1)
+			return cap1 == "%" and UNKNOWN
+		end
+
+		function pformat(fstr, ...)
+			local ok, str = pcall(format, fstr, ...)
+			return ok and str or fstr:gsub("(%%+)([^%%%s<]+)", replace):gsub("%%%%", "%%")
+		end
+	end
+
 	lib.Dispatch = Dispatch
 	lib.QuickDispatch = QuickDispatch
+	lib.pformat = pformat
 end
 
 -------------------------------------------------------------------------------
@@ -803,6 +816,7 @@ local mixins = {
 	"WoWBuild",
 	"Dispatch",
 	"QuickDispatch",
+	"pformat",
 	-- table util
 	"tLength",
 	"tCopy",

@@ -1,7 +1,8 @@
 local Skada = Skada
 
 -- cache frequently used globals
-local pairs, format, max, floor = pairs, string.format, math.max, math.floor
+local pairs, max, floor = pairs, math.max, math.floor
+local format, pformat = string.format, Skada.pformat
 local UnitGUID, GetSpellInfo = UnitGUID, Skada.GetSpellInfo or GetSpellInfo
 local _
 
@@ -579,8 +580,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			for spellid, spell in pairs(actor.absorbspells) do
 				if spell.targets and spell.targets[win.targetname] then
 					nr = nr + 1
-					local d = win:spell(nr, spellid)
-					d.spellschool = spell.school
+					local d = win:spell(nr, spellid, spell)
 
 					d.value = spell.targets[win.targetname]
 					d.valuetext = Skada:FormatValueCols(
@@ -618,8 +618,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			local actortime, nr = mod.metadata.columns.sAPS and actor:GetTime(), 0
 			for spellid, spell in pairs(actor.absorbspells) do
 				nr = nr + 1
-				local d = win:spell(nr, spellid)
-				d.spellschool = spell.school
+				local d = win:spell(nr, spellid, spell)
 
 				d.value = spell.amount
 				d.valuetext = Skada:FormatValueCols(
@@ -637,11 +636,11 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 
 	function targetmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's absorbed targets"], label)
+		win.title = pformat(L["%s's absorbed targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's absorbed targets"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's absorbed targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -968,8 +967,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 				for spellid, spell in pairs(actor.healspells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-						local d = win:spell(nr, spellid, spell)
-						d.spellschool = spell.school
+						local d = win:spell(nr, spellid, spell, nil, true)
 
 						d.value = enemy and spell.targets[win.targetname] or spell.targets[win.targetname].amount or 0
 						d.valuetext = Skada:FormatValueCols(
@@ -989,8 +987,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 				for spellid, spell in pairs(actor.absorbspells) do
 					if spell.targets and spell.targets[win.targetname] then
 						nr = nr + 1
-						local d = win:spell(nr, spellid)
-						d.spellschool = spell.school
+						local d = win:spell(nr, spellid, spell)
 
 						d.value = spell.targets[win.targetname] or 0
 						d.valuetext = Skada:FormatValueCols(
@@ -1030,8 +1027,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 			if actor.healspells then
 				for spellid, spell in pairs(actor.healspells) do
 					nr = nr + 1
-					local d = win:spell(nr, spellid, spell)
-					d.spellschool = spell.school
+					local d = win:spell(nr, spellid, spell, nil, true)
 
 					d.value = spell.amount
 					d.valuetext = Skada:FormatValueCols(
@@ -1049,8 +1045,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 			if actor.absorbspells then
 				for spellid, spell in pairs(actor.absorbspells) do
 					nr = nr + 1
-					local d = win:spell(nr, spellid)
-					d.spellschool = spell.school
+					local d = win:spell(nr, spellid, spell)
 
 					d.value = spell.amount
 					d.valuetext = Skada:FormatValueCols(
@@ -1069,11 +1064,11 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 	function targetmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's absorbed and healed targets"], label)
+		win.title = pformat(L["%s's absorbed and healed targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = format(L["%s's absorbed and healed targets"], win.actorname or L["Unknown"])
+		win.title = pformat(L["%s's absorbed and healed targets"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetAbsorbHeal() or 0
@@ -1449,11 +1444,11 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's sources"], label)
+		win.title = pformat(L["%s's sources"], label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = format(L["%s's sources"], win.spellname or L["Unknown"])
+		win.title = pformat(L["%s's sources"], win.spellname)
 		if not (win.spellid and set) then return end
 
 		-- let's go...
@@ -1512,8 +1507,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 			local settime, nr = self.metadata.columns.HPS and set:GetTime(), 0
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
-				local d = win:spell(nr, spellid, spell)
-				d.spellschool = spell.school
+				local d = win:spell(nr, spellid, spell, nil, true)
 
 				d.value = spell.amount
 				d.valuetext = Skada:FormatValueCols(
