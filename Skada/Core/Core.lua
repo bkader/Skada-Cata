@@ -1766,7 +1766,7 @@ function Skada:GetPlayer(set, guid, name, flag)
 	end
 
 	-- fix players created before their info was received
-	if player.class and Skada.validclass[player.class] then
+	if player.class and Skada.validclass[player.class] and (player.role == nil or player.role == "NONE" or player.spec == nil) then
 		if player.role == nil or player.role == "NONE" then
 			if player.id == self.userGUID and self.userRole then
 				player.role = self.userRole
@@ -2231,7 +2231,7 @@ do
 				t:Show()
 			elseif md.click1 or md.click2 or md.click3 or md.click4 or md.tooltip then
 				t:ClearLines()
-				local hasClick = md.click1 or md.click2 or md.click3 or md.click4
+				local hasClick = md.click1 or md.click2 or md.click3 or md.click4 or nil
 
 				if md.tooltip then
 					local numLines = t:NumLines()
@@ -3334,7 +3334,7 @@ function Skada:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileChanged", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileCopied", "ReloadSettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ReloadSettings")
-	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
+	self.db.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes", true)
 
 	self:RegisterParser()
 	self:RegisterInitOptions()
@@ -3514,26 +3514,47 @@ end
 -------------------------------------------------------------------------------
 
 do
-	local function clear_indexes(set)
+	local function clear_indexes(set, mt)
 		if set then
 			set._playeridx = nil
 			set._enemyidx = nil
+
+			-- should clear metatables?
+			if not mt then return end
+
+			if set.players then -- players
+				for i = 1, #set.players do
+					local p = set.players[i]
+					if p and p.super then
+						p.super = nil
+					end
+				end
+			end
+
+			if set.enemies then -- enemies
+				for i = 1, #set.enemies do
+					local e = set.enemies[i]
+					if e and e.super then
+						e.super = nil
+					end
+				end
+			end
 		end
 	end
 
-	function Skada:ClearAllIndexes()
-		clear_indexes(Skada.current)
-		clear_indexes(Skada.total)
+	function Skada:ClearAllIndexes(mt)
+		clear_indexes(Skada.current, mt)
+		clear_indexes(Skada.total, mt)
 
 		if Skada.char.sets then
 			for i = 1, #Skada.char.sets do
-				clear_indexes(Skada.char.sets[i])
+				clear_indexes(Skada.char.sets[i], mt)
 			end
 		end
 
 		if Skada.tempsets then
 			for i = 1, #Skada.tempsets do
-				clear_indexes(Skada.tempsets[i])
+				clear_indexes(Skada.tempsets[i], mt)
 			end
 		end
 	end
