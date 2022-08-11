@@ -65,6 +65,7 @@ globals = {
 	"GetNumSubgroupMembers",
 	"GetNumGroupMembers",
 	"LibCompat_TimerFrame",
+	"CombatLogGetCurrentEventInfo",
 
 	"AceGUIWidgetLSMlists",
 

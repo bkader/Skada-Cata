@@ -549,20 +549,30 @@ do
 	-- there was no discrimination with classes and specs
 	-- the only reason this group composition was made is
 	-- to have all 10 classes displayed on windows.
-	local fakePlayers = {
-		-- Tanks & Healers
-		{"Deafknight", "DEATHKNIGHT", "TANK", 250}, -- Blood Death Knight
-		{"Bubbleboy", "PRIEST", "HEALER", 256}, -- Discipline Priest
-		{"Channingtotem", "SHAMAN", "HEALER", 264}, -- Restoration Shaman
-		-- Damagers
-		{"Shiftycent", "DRUID", "DAMAGER", 102}, -- Balance Druid
-		{"Beargrills", "HUNTER", "DAMAGER", 254}, -- Marksmanship Hunter
-		{"Foodanddps", "MAGE", "DAMAGER", 63}, -- Fire Mage
-		{"Retryhard", "PALADIN", "DAMAGER", 70}, -- Retribution Paladin
-		{"Stabass", "ROGUE", "DAMAGER", 260}, -- Combat Rogue
-		{"Summonbot", "WARLOCK", "DAMAGER", 266}, -- Demonology Warlock
-		{"Chuggernaut", "WARRIOR", "DAMAGER", 72} -- Fury Warrior
-	}
+	local fake_players
+	do
+		local playersTable = nil
+		function fake_players()
+			if not playersTable then
+				playersTable = {
+					-- Tanks & Healers
+					{"Deafknight", "DEATHKNIGHT", "TANK", 250}, -- Blood Death Knight
+					{"Bubbleboy", "PRIEST", "HEALER", 256}, -- Discipline Priest
+					{"Channingtotem", "SHAMAN", "HEALER", 264}, -- Restoration Shaman
+					-- Damagers
+					{"Shiftycent", "DRUID", "DAMAGER", 102}, -- Balance Druid
+					{"Beargrills", "HUNTER", "DAMAGER", 254}, -- Marksmanship Hunter
+					{"Foodanddps", "MAGE", "DAMAGER", 63}, -- Fire Mage
+					{"Retryhard", "PALADIN", "DAMAGER", 70}, -- Retribution Paladin
+					{"Stabass", "ROGUE", "DAMAGER", 260}, -- Combat Rogue
+					{"Summonbot", "WARLOCK", "DAMAGER", 266}, -- Demonology Warlock
+					{"Chuggernaut", "WARRIOR", "DAMAGER", 72} -- Fury Warrior
+				}
+			end
+
+			return playersTable
+		end
+	end
 
 	local function generate_fake_data()
 		wipe(fakeSet)
@@ -573,8 +583,9 @@ do
 		fakeSet.absorb = 0
 		fakeSet.players = wipe(fakeSet.players or {})
 
-		for i = 1, #fakePlayers do
-			local name, class, role, spec = fakePlayers[i][1], fakePlayers[i][2], fakePlayers[i][3], fakePlayers[i][4]
+		local players = fake_players()
+		for i = 1, #players do
+			local name, class, role, spec = players[i][1], players[i][2], players[i][3], players[i][4]
 			local damage, heal, absorb = 0, 0, 0
 
 			if role == "TANK" then
