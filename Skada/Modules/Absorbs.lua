@@ -507,6 +507,24 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		end
 	end
 
+	local function absorb_tooltip(win, id, label, tooltip)
+		local set = win:GetSelectedSet()
+		local actor = set and set:GetActor(label, id)
+		if not actor then return end
+
+		local totaltime = set:GetTime()
+		local activetime = actor:GetTime(true)
+		local aps, damage = actor:GetAPS()
+
+		tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, totaltime), nil, nil, nil, 1, 1, 1)
+		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
+		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
+		tooltip:AddDoubleLine(L["Absorbs"], Skada:FormatNumber(damage), 1, 1, 1)
+
+		local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
+		tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(aps), 1, 1, 1)
+	end
+
 	local function playermod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
 		if not set then return end
@@ -746,6 +764,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		targetmod.metadata = {showspots = true, click1 = spellmod}
 		self.metadata = {
 			showspots = true,
+			post_tooltip = absorb_tooltip,
 			click1 = playermod,
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
