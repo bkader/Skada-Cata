@@ -1381,6 +1381,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 	local mod = Skada:NewModule("Healing Done By Spell")
 	local spellmod = mod:NewModule("Healing spell sources")
 	local spellschools = Skada.spellschools
+	local get_absorb_heal_spells = nil
 
 	local function player_tooltip(win, id, label, tooltip)
 		local set = win.spellname and win:GetSelectedSet()
@@ -1518,7 +1519,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 	function mod:Update(win, set)
 		win.title = L["Healing Done By Spell"]
 		local total = set and set:GetAbsorbHeal() or 0
-		local spells = (total > 0) and set:GetAbsorbHealSpells()
+		local spells = (total > 0) and get_absorb_heal_spells(set)
 
 		if not spells then
 			return
@@ -1561,8 +1562,6 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 
 	---------------------------------------------------------------------------
 
-	local setPrototype = Skada.setPrototype
-
 	local function fill_spells_table(t, spellid, info)
 		local spell = t[spellid]
 		if not spell then
@@ -1583,7 +1582,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 		end
 	end
 
-	function setPrototype:GetAbsorbHealSpells(tbl)
+	get_absorb_heal_spells = function(self, tbl)
 		if not self.players or not (self.absorb or self.heal) then return end
 
 		tbl = clear(tbl or C)

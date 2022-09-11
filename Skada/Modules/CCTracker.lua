@@ -2,7 +2,6 @@ local Skada = Skada
 
 local pairs, tostring, format, pformat = pairs, tostring, string.format, Skada.pformat
 local GetSpellInfo, GetSpellLink = Skada.GetSpellInfo or GetSpellInfo, Skada.GetSpellLink or GetSpellLink
-local setPrototype, playerPrototype = Skada.setPrototype, Skada.playerPrototype
 local _
 
 local CCSpells = {
@@ -120,6 +119,8 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")
 	local sourcemod = playermod:NewModule("Crowd Control Sources")
+	local get_cc_done_sources = nil
+	local get_cc_done_targets = nil
 
 	local function log_ccdone(set, cc)
 		local player = Skada:GetPlayer(set, cc.playerid, cc.playername, cc.playerflags)
@@ -211,7 +212,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccdone or 0
-		local targets = (total > 0) and player:GetCCDoneTargets()
+		local targets = (total > 0) and get_cc_done_targets(player)
 
 		if not targets then
 			return
@@ -245,7 +246,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 		win.title = pformat(L["%s's sources"], win.spellname)
 		if not set or not win.spellid then return end
 
-		local total, sources = set:GetCCDoneSources(win.spellid)
+		local total, sources = get_cc_done_sources(set, win.spellid)
 
 		if not sources then
 			return
@@ -344,7 +345,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 		return tostring(ccdone), ccdone
 	end
 
-	function setPrototype:GetCCDoneSources(spellid, tbl)
+	get_cc_done_sources = function(self, spellid, tbl)
 		local total = 0
 		if not self.ccdone or not spellid then return total end
 
@@ -364,7 +365,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 		return total, tbl
 	end
 
-	function playerPrototype:GetCCDoneTargets(tbl)
+	get_cc_done_targets = function(self, tbl)
 		if not self.ccdonespells then return end
 
 		tbl = clear(tbl or C)
@@ -393,6 +394,8 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local sourcemod = mod:NewModule("Crowd Control Sources")
 	local targetmod = playermod:NewModule("Crowd Control Targets")
+	local get_cc_taken_targets = nil
+	local get_cc_taken_sources = nil
 
 	local RaidCCSpells = {}
 
@@ -487,7 +490,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.cctaken or 0
-		local sources = (total > 0) and player:GetCCTakenSources()
+		local sources = (total > 0) and get_cc_taken_sources(player)
 
 		if not sources then
 			return
@@ -521,7 +524,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 		win.title = pformat(L["%s's targets"], win.spellname)
 		if not set or not win.spellid then return end
 
-		local total, targets = set:GetCCTakenTargets(win.spellid)
+		local total, targets = get_cc_taken_targets(set, win.spellid)
 
 		if not targets then
 			return
@@ -620,7 +623,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 		return tostring(cctaken), cctaken
 	end
 
-	function setPrototype:GetCCTakenTargets(spellid, tbl)
+	get_cc_taken_targets = function(self, spellid, tbl)
 		local total = 0
 		if not self.cctaken or not spellid then return total end
 
@@ -640,7 +643,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 		return total, tbl
 	end
 
-	function playerPrototype:GetCCTakenSources(tbl)
+	get_cc_taken_sources = function(self, tbl)
 		if not self.cctakenspells then return end
 
 		tbl = clear(tbl or C)
@@ -668,6 +671,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 	local mod = Skada:NewModule("CC Breaks")
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")
+	local get_cc_break_targets = nil
 
 	local UnitName, UnitInRaid, IsInRaid = UnitName, UnitInRaid, Skada.IsInRaid
 	local GetPartyAssignment, UnitIterator = GetPartyAssignment, Skada.UnitIterator
@@ -794,7 +798,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 
 		local player = set and set:GetPlayer(win.actorid, win.actorname)
 		local total = player and player.ccbreak or 0
-		local targets = (total > 0) and player:GetCCBreakTargets()
+		local targets = (total > 0) and get_cc_break_targets(player)
 
 		if not targets then
 			return
@@ -930,7 +934,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 		}
 	end
 
-	function playerPrototype:GetCCBreakTargets(tbl)
+	get_cc_break_targets = function(self, tbl)
 		if not self.ccbreakspells then return end
 
 		tbl = clear(tbl or C)
