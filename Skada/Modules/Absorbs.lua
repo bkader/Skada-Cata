@@ -1,9 +1,8 @@
 local Skada = Skada
 
 -- cache frequently used globals
-local pairs, max, floor = pairs, math.max, math.floor
+local pairs, floor = pairs, math.floor
 local format, pformat = string.format, Skada.pformat
-local UnitGUID, GetSpellInfo = UnitGUID, Skada.GetSpellInfo or GetSpellInfo
 local _
 
 -- ============== --
@@ -23,10 +22,10 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 	local COMBATLOG_OBJECT_AFFILIATION_OUTSIDER = COMBATLOG_OBJECT_AFFILIATION_OUTSIDER or 0x00000008
 	local COMBATLOG_OBJECT_REACTION_MASK = COMBATLOG_OBJECT_REACTION_MASK or 0x000000F0
 
+	local GetTime, band, tsort, max = GetTime, bit.band, table.sort, math.max
+	local UnitGUID, UnitName = UnitGUID, UnitName
+	local UnitBuff, UnitIsDeadOrGhost = UnitBuff, UnitIsDeadOrGhost
 	local GroupIterator = Skada.GroupIterator
-	local UnitName, UnitExists, UnitBuff = UnitName, UnitExists, UnitBuff
-	local UnitIsDeadOrGhost = UnitIsDeadOrGhost
-	local GetTime, band, tsort = GetTime, bit.band, table.sort
 	local T = Skada.Table
 
 	local absorbspells = {
@@ -55,6 +54,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		[81781] = 25, -- Power Word: Barrier
 		[7812] = 30, -- Sacrifice
 		[6229] = 30, -- Shadow Ward
+		[25228] = 86400, -- Soul Link
 		[29674] = 86400, -- Lesser Ward of Shielding
 		[29719] = 86400, -- Greater Ward of Shielding
 		[29701] = 86400, -- Greater Shielding
@@ -90,7 +90,6 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		[25747] = 15, -- Defiler's Talisman/Talisman of Arathor
 		[25746] = 15, -- Defiler's Talisman/Talisman of Arathor
 		[23991] = 15, -- Defiler's Talisman/Talisman of Arathor
-		[31000] = 300, -- Pendant of Shadow's End Usage
 		[30997] = 300, -- Pendant of Frozen Flame Usage
 		[31002] = 300, -- Pendant of the Null Rune
 		[30999] = 300, -- Pendant of Withering
@@ -159,7 +158,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function log_absorb(set, absorb, nocount)
+	local function log_absorb(set, nocount)
 		if not absorb.spellid or not absorb.amount or absorb.amount == 0 then return end
 
 		local player = Skada:GetPlayer(set, absorb.playerid, absorb.playername)
@@ -328,8 +327,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		end
 	end
 
-	local function handle_shield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local spellid = ...
+	local function handle_shield(timestamp, eventtype, srcGUID, srcName, srcFlags, _, dstName, _, spellid, _, spellschool)
 		if not spellid or not absorbspells[spellid] or not dstName or ignoredSpells[spellid] then return end
 
 		shields = shields or T.get("Skada_Shields") -- create table if missing
@@ -348,12 +346,13 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			return
 		end
 
-		-- complete data
-		local spellschool
-		spellid, _, spellschool = ...
-
 		-- create player's shields table
 		shields[dstName] = shields[dstName] or new()
+
+		-- Soul Link
+		if spellid == 25228 then
+			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+		end
 
 		-- shield refreshed
 		if eventtype == "SPELL_AURA_REFRESH" then
@@ -409,12 +408,10 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 				local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
 				for i = 1, 40 do
 					local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
-					if spellid then
-						if absorbspells[spellid] and unitCaster then
-							handle_shield(timestamp + expires - curtime, nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
-						end
-					else
+					if not spellid then
 						break -- nothing found
+					elseif absorbspells[spellid] and unitCaster then
+						handle_shield(timestamp + max(0, expires - curtime), nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
 					end
 				end
 			end
@@ -470,25 +467,27 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			absorb.school = shield.school
 			absorb.amount = absorbed
 
-			Skada:DispatchSets(log_absorb, absorb)
+			Skada:DispatchSets(log_absorb)
 		end
 	end
 
-	local function spell_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(timestamp, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
 		local spellschool, amount, absorbed
 
 		if eventtype == "SWING_DAMAGE" then
 			amount, _, _, _, _, absorbed = ...
+		elseif eventtype == "ENVIRONMENTAL_DAMAGE" then
+			_, amount, _, spellschool, _, _, absorbed = ...
 		else
 			_, _, spellschool, amount, _, _, _, _, absorbed = ...
 		end
 
 		if absorbed and absorbed > 0 and dstName and shields and shields[dstName] then
-			process_absorb(dstGUID, dstName, dstFlags, absorbed, spellschool or 1, amount)
+			process_absorb(dstGUID, dstName, dstFlags, absorbed, spellschool or 0x01, amount)
 		end
 	end
 
-	local function spell_missed(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(timestamp, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
 		local spellschool, misstype, absorbed
 
 		if eventtype == "SWING_MISSED" then
@@ -498,24 +497,7 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 		end
 
 		if misstype == "ABSORB" and absorbed and absorbed > 0 and dstName and shields and shields[dstName] then
-			process_absorb(dstGUID, dstName, dstFlags, absorbed, spellschool or 1, 0)
-		end
-	end
-
-	local function environment_damage(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
-		local envtype, amount, _, _, _, _, absorbed = ...
-		if absorbed and absorbed > 0 and dstName and shields and shields[dstName] then
-			local spellschool = 0x01
-
-			if envtype == "Fire" or envtype == "FIRE" then
-				spellschool = 0x04
-			elseif envtype == "Lava" or envtype == "LAVA" then
-				spellschool = 0x04
-			elseif envtype == "Slime" or envtype == "SLIME" then
-				spellschool = 0x08
-			end
-
-			process_absorb(dstGUID, dstName, dstFlags, absorbed, spellschool, amount)
+			process_absorb(dstGUID, dstName, dstFlags, absorbed, spellschool or 0x01, 0)
 		end
 	end
 
@@ -769,11 +751,6 @@ Skada:RegisterModule("Absorbs", function(L, P, _, _, new, del)
 			"SPELL_BUILDING_DAMAGE",
 			"RANGE_DAMAGE",
 			"SWING_DAMAGE",
-			flags_dst
-		)
-
-		Skada:RegisterForCL(
-			environment_damage,
 			"ENVIRONMENTAL_DAMAGE",
 			flags_dst
 		)
@@ -1306,6 +1283,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 	local mod = Skada:NewModule("Healing Done By Spell")
 	local spellmod = mod:NewModule("Healing spell sources")
 	local spellschools = Skada.spellschools
+	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
 	local get_absorb_heal_spells = nil
 
 	local function format_valuetext(d, columns, total, hps, metadata, subview)
@@ -1383,7 +1361,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C, new, _, clear
 		local spell = C[id]
 		if not spell then return end
 
-		tooltip:AddLine(GetSpellInfo(id))
+		tooltip:AddLine((GetSpellInfo(id)))
 		if spell.school and spellschools[spell.school] then
 			tooltip:AddLine(spellschools(spell.school))
 		end
