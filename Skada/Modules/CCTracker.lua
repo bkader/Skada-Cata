@@ -1,7 +1,6 @@
 local Skada = Skada
 
-local pairs, tostring = pairs, tostring
-local format, pformat = string.format, Skada.pformat
+local pairs, format, pformat = pairs, string.format, Skada.pformat
 local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 local cc_table = {} -- holds stuff from cleu
 local _
@@ -310,8 +309,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:GetSetSummary(set, win)
-		local ccdone = get_total_cc(set, "ccdone", win and win.class) or 0
-		return tostring(ccdone), ccdone
+		return get_total_cc(set, "ccdone", win and win.class) or 0
 	end
 
 	function mod:AddToTooltip(set, tooltip)
@@ -571,8 +569,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:GetSetSummary(set, win)
-		local cctaken = get_total_cc(set, "cctaken", win and win.class) or 0
-		return tostring(cctaken), cctaken
+		return get_total_cc(set, "cctaken", win and win.class) or 0
 	end
 
 	function mod:AddToTooltip(set, tooltip)
@@ -834,8 +831,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 	end
 
 	function mod:GetSetSummary(set, win)
-		local ccbreak = get_total_cc(set, "ccbreak", win and win.class) or 0
-		return tostring(ccbreak), ccbreak
+		return get_total_cc(set, "ccbreak", win and win.class) or 0
 	end
 
 	function mod:AddToTooltip(set, tooltip)
