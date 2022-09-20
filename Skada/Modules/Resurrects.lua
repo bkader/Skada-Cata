@@ -127,8 +127,8 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 
 	function mod:Update(win, set)
 		win.title = L["Resurrects"]
-		local total = set.ress
 
+		local total = set and set:GetTotal(win.class, nil, "ress")
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -141,7 +141,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and actor.ress then
+			if actor and actor.ress and (not win.class or win.class == actor.class) then
 				nr = nr + 1
 
 				local d = win:actor(nr, actor)
@@ -151,8 +151,9 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 		end
 	end
 
-	function mod:GetSetSummary(set)
-		return set and set.ress or 0
+	function mod:GetSetSummary(set, win)
+		if not set then return end
+		return set:GetTotal(win and win.class, nil, "ress") or 0
 	end
 
 	function mod:OnEnable()
@@ -160,6 +161,8 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C, new, _, clear)
 			valuesort = true,
 			click1 = playermod,
 			click2 = targetmod,
+			click4 = Skada.FilterClass,
+			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_resurrection]]
 		}
