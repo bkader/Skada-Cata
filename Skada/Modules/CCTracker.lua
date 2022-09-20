@@ -124,6 +124,22 @@ local function format_valuetext(d, columns, total, metadata, subview)
 	end
 end
 
+local function get_total_cc(set, key, class)
+	if not set or not key then return end
+
+	local total = set[key] or 0
+	if class and Skada.validclass[class] then
+		total = 0
+		for i = 1, #set.players do
+			local p = set.players[i]
+			if p and p.class == class and p[key] then
+				total = total + p[key]
+			end
+		end
+	end
+	return total
+end
+
 -- ======= --
 -- CC Done --
 -- ======= --
@@ -270,7 +286,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["CC Done"], L[win.class]) or L["CC Done"]
 
-		local total = set and set.ccdone
+		local total = get_total_cc(set, "ccdone", win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -290,6 +306,17 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 				d.value = actor.ccdone
 				format_valuetext(d, cols, total, win.metadata)
 			end
+		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		local ccdone = get_total_cc(set, "ccdone", win and win.class) or 0
+		return tostring(ccdone), ccdone
+	end
+
+	function mod:AddToTooltip(set, tooltip)
+		if set.ccdone and set.ccdone > 0 then
+			tooltip:AddDoubleLine(L["CC Done"], set.ccdone, 1, 1, 1)
 		end
 	end
 
@@ -323,17 +350,6 @@ Skada:RegisterModule("CC Done", function(L, P, _, C, new, _, clear)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-	end
-
-	function mod:AddToTooltip(set, tooltip)
-		if set.ccdone and set.ccdone > 0 then
-			tooltip:AddDoubleLine(L["CC Done"], set.ccdone, 1, 1, 1)
-		end
-	end
-
-	function mod:GetSetSummary(set, win)
-		local ccdone = set and set.ccdone or 0
-		return tostring(ccdone), ccdone
 	end
 
 	get_cc_done_sources = function(self, spellid, tbl)
@@ -531,7 +547,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["CC Taken"], L[win.class]) or L["CC Taken"]
 
-		local total = set and set.cctaken
+		local total = get_total_cc(set, "cctaken", win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -551,6 +567,17 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 				d.value = actor.cctaken
 				format_valuetext(d, cols, total, win.metadata)
 			end
+		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		local cctaken = get_total_cc(set, "cctaken", win and win.class) or 0
+		return tostring(cctaken), cctaken
+	end
+
+	function mod:AddToTooltip(set, tooltip)
+		if set.cctaken and set.cctaken > 0 then
+			tooltip:AddDoubleLine(L["CC Taken"], set.cctaken, 1, 1, 1)
 		end
 	end
 
@@ -584,17 +611,6 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C, new, _, clear)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-	end
-
-	function mod:AddToTooltip(set, tooltip)
-		if set.cctaken and set.cctaken > 0 then
-			tooltip:AddDoubleLine(L["CC Taken"], set.cctaken, 1, 1, 1)
-		end
-	end
-
-	function mod:GetSetSummary(set, win)
-		local cctaken = set and set.cctaken or 0
-		return tostring(cctaken), cctaken
 	end
 
 	get_cc_taken_targets = function(self, spellid, tbl)
@@ -794,7 +810,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 	function mod:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["CC Breaks"], L[win.class]) or L["CC Breaks"]
 
-		local total = set and set.ccbreak
+		local total = get_total_cc(set, "ccbreak", win.class)
 		if not total or total == 0 then
 			return
 		elseif win.metadata then
@@ -814,6 +830,17 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 				d.value = actor.ccbreak
 				format_valuetext(d, cols, total, win.metadata)
 			end
+		end
+	end
+
+	function mod:GetSetSummary(set, win)
+		local ccbreak = get_total_cc(set, "ccbreak", win and win.class) or 0
+		return tostring(ccbreak), ccbreak
+	end
+
+	function mod:AddToTooltip(set, tooltip)
+		if set.ccbreak and set.ccbreak > 0 then
+			tooltip:AddDoubleLine(L["CC Breaks"], set.ccbreak, 1, 1, 1)
 		end
 	end
 
@@ -845,17 +872,6 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, new, _, clear)
 
 	function mod:OnDisable()
 		Skada:RemoveMode(self)
-	end
-
-	function mod:AddToTooltip(set, tooltip)
-		if set.ccbreak and set.ccbreak > 0 then
-			tooltip:AddDoubleLine(L["CC Breaks"], set.ccbreak, 1, 1, 1)
-		end
-	end
-
-	function mod:GetSetSummary(set, win)
-		local ccbreak = set and set.ccbreak or 0
-		return tostring(ccbreak), ccbreak
 	end
 
 	function mod:OnInitialize()
