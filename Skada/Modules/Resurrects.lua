@@ -7,6 +7,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	local pairs, format, pformat = pairs, string.format, Skada.pformat
 	local new, clear = Skada.newTable, Skada.clearTable
 	local get_resurrected_targets = nil
+	local mod_cols = nil
 	local _
 
 	local resurrectSpells = {
@@ -84,14 +85,12 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for spellid, spell in pairs(actor.resspells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, nil, resurrectSpells[spellid])
 			d.value = spell.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -115,14 +114,12 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, nil, targetname)
 			d.value = target.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -137,7 +134,6 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -147,7 +143,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.ress
-				format_valuetext(d, cols, total, win.metadata)
+				format_valuetext(d, mod_cols, total, win.metadata)
 			end
 		end
 	end
@@ -167,6 +163,8 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_resurrection]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		playermod.nototal = true

@@ -134,6 +134,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 	local sourcemod = playermod:NewModule("Crowd Control Sources")
 	local get_cc_done_sources = nil
 	local get_cc_done_targets = nil
+	local mod_cols = nil
 
 	local function log_ccdone(set)
 		local player = Skada:GetPlayer(set, cc_table.srcGUID, cc_table.srcName, cc_table.srcFlags)
@@ -197,14 +198,12 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, nil, get_spell_school(spellid))
 			d.value = spell.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -227,14 +226,12 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, true, targetname)
 			d.value = target.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -256,14 +253,12 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for sourcename, source in pairs(sources) do
 			nr = nr + 1
 
 			local d = win:actor(nr, source, true, sourcename)
 			d.value = source.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -278,7 +273,6 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -288,7 +282,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.ccdone
-				format_valuetext(d, cols, total, win.metadata)
+				format_valuetext(d, mod_cols, total, win.metadata)
 			end
 		end
 	end
@@ -315,6 +309,8 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_frost_chainsofice]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		sourcemod.nototal = true
@@ -391,6 +387,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	local targetmod = playermod:NewModule("Crowd Control Targets")
 	local get_cc_taken_targets = nil
 	local get_cc_taken_sources = nil
+	local mod_cols = nil
 
 	local RaidCCSpells = {}
 
@@ -457,14 +454,12 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, nil, get_spell_school(spellid) or RaidCCSpells[spellid])
 			d.value = spell.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -487,14 +482,12 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for sourcename, source in pairs(sources) do
 			nr = nr + 1
 
 			local d = win:actor(nr, source, true, sourcename)
 			d.value = source.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -516,14 +509,12 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, true, targetname)
 			d.value = target.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -538,7 +529,6 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -548,7 +538,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.cctaken
-				format_valuetext(d, cols, total, win.metadata)
+				format_valuetext(d, mod_cols, total, win.metadata)
 			end
 		end
 	end
@@ -575,6 +565,8 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_magic_polymorphrabbit]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		playermod.nototal = true
@@ -649,6 +641,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 	local playermod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")
 	local get_cc_break_targets = nil
+	local mod_cols = nil
 
 	local UnitName, UnitInRaid, IsInRaid = UnitName, UnitInRaid, Skada.IsInRaid
 	local GetPartyAssignment, UnitIterator = GetPartyAssignment, Skada.UnitIterator
@@ -748,14 +741,12 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, nil, get_spell_school(spellid))
 			d.value = spell.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -778,14 +769,12 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		end
 
 		local nr = 0
-		local cols = mod.metadata.columns
-
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, true, targetname)
 			d.value = target.count
-			format_valuetext(d, cols, total, win.metadata, true)
+			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
 	end
 
@@ -800,7 +789,6 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 
 		local actors = set.players -- players
 		for i = 1, #actors do
@@ -810,7 +798,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 
 				local d = win:actor(nr, actor)
 				d.value = actor.ccbreak
-				format_valuetext(d, cols, total, win.metadata)
+				format_valuetext(d, mod_cols, total, win.metadata)
 			end
 		end
 	end
@@ -836,6 +824,8 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_sealofvalor]]
 		}
+
+		mod_cols = self.metadata.columns
 
 		-- no total click.
 		playermod.nototal = true

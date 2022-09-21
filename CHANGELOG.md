@@ -1,6 +1,10 @@
 # Changelog
 
-## [1.8.80] - 2022-09-13
+## [1.8.81] - 2022-09-21
+
+[view diff](https://github.com/bkader/Skada-Cata/compare/1.8.80...1.8.81)
+
+## [1.8.80] - 2022-09-19
 
 [view diff](https://github.com/bkader/Skada-Cata/compare/1.8.79...1.8.80)
 

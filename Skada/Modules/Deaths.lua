@@ -16,6 +16,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local GetSpellLink = Skada.GetSpellLink or GetSpellLink
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local GetTime, time, date = GetTime, time, date
+	local mod_cols, submod_cols = nil, nil
 	local _
 
 	-- cache colors
@@ -424,7 +425,6 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			tsort(deathlog.log, sort_logs)
 
 			local curtime = deathlog.time or set.last_time or GetTime()
-			local cols = self.metadata.columns
 			for i = #deathlog.log, 1, -1 do
 				local log = deathlog.log[i]
 				local diff = tonumber(log.time) - tonumber(curtime)
@@ -541,9 +541,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 						end
 
 						d.valuetext = Skada:FormatValueCols(
-							cols.Change and change,
-							cols.Health and Skada:FormatNumber(d.value),
-							cols.Percent and Skada:FormatPercent(log.hp or 0, deathlog.hpm or 1)
+							submod_cols.Change and change,
+							submod_cols.Health and Skada:FormatNumber(d.value),
+							submod_cols.Percent and Skada:FormatPercent(log.hp or 0, deathlog.hpm or 1)
 						)
 					end
 				else
@@ -574,7 +574,6 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		local nr = 0
 		local curtime = set.last_time or GetTime()
-		local cols = mod.metadata.columns
 
 		for i = 1, #deathlog do
 			local death = deathlog[i]
@@ -591,15 +590,15 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 				d.icon = d.icon or icon_death
 				d.label = d.label or L["Unknown"]
-				if cols.Source and death.src then
+				if mod_cols.Source and death.src then
 					d.text = format("%s (%s)", d.label, death.src)
 				end
 
 				d.value = death.time or curtime
 				if death.timeod then
 					d.valuetext = Skada:FormatValueCols(
-						cols.Time and date("%H:%M:%S", death.timeod),
-						cols.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
+						mod_cols.Time and date("%H:%M:%S", death.timeod),
+						mod_cols.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
 					)
 				else
 					d.valuetext = "..."
@@ -663,7 +662,6 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 
 		local nr = 0
-		local cols = self.metadata.columns
 		local curtime = set.last_time or GetTime()
 
 		local actors = set.players -- players
@@ -682,8 +680,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 							d.color = WATCH and GRAY_COLOR or nil
 							d.value = death.time
 							d.valuetext = Skada:FormatValueCols(
-								cols.Time and date("%H:%M:%S", death.timeod),
-								cols.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
+								mod_cols.Time and date("%H:%M:%S", death.timeod),
+								mod_cols.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
 							)
 						else
 							d.color = nil
@@ -691,12 +689,12 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 							d.valuetext = "..."
 						end
 
-						local src = cols.Source and death.src
+						local src = mod_cols.Source and death.src
 						if num ~= 1 then
 							d.text = format(src and "%s (%d) < %s" or "%s (%d)", d.text or d.label, num, src)
 							d.reportlabel = format("%s   %s", d.text, d.valuetext)
 						else
-							d.text = src and format("%s < %s", d.text or d.label, src) or nil
+							d.text = src and format("%s (%s)", d.text or d.label, src) or nil
 							d.reportlabel = d.text and format("%s   %s", d.text, d.valuetext) or nil
 						end
 
@@ -793,6 +791,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			playermod.metadata.click1 = nil
 			self.metadata.click1 = deathlogmod
 		end
+
+		mod_cols = self.metadata.columns
+		submod_cols = deathlogmod.metadata.columns
 
 		-- no total click.
 		deathlogmod.nototal = true
