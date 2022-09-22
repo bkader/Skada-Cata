@@ -1,4 +1,5 @@
 local _, Skada = ...
+local private = Skada.private
 
 -- cache frequently used globals
 local pairs, format = pairs, string.format
@@ -1299,7 +1300,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 	local mod = Skada:NewModule("Healing Done By Spell")
 	local spellmod = mod:NewModule("Healing spell sources")
 	local spellschools = Skada.spellschools
-	local GetSpellInfo = Skada.GetSpellInfo or GetSpellInfo
+	local GetSpellInfo = private.spell_info or GetSpellInfo
 	local clear = Skada.clearTable
 	local get_absorb_heal_spells = nil
 	local mod_cols = nil
