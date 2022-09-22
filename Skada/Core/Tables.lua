@@ -1,7 +1,7 @@
 -- Tables.lua
 -- Contains all tables used by different files and modules.
-local Skada = Skada
-local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
+local folder, Skada = ...
+local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 
 -------------------------------------------------------------------------------
 -- table we need.
@@ -177,6 +177,7 @@ creatureToFight[34456] = L["Faction Champions"] -- Malithas Brightblade <Paladin
 creatureToFight[34458] = L["Faction Champions"] -- Gorgrim Shadowcleave <Death Knight>
 creatureToFight[34459] = L["Faction Champions"] -- Erin Misthoof <Druid>
 creatureToFight[35610] = L["Faction Champions"] -- Cat <Ruj'kah's Pet / Alyssia Moonstalker's Pet>
+
 creatureToFight[34496] = L["Twin Val'kyr"] -- Eydis Darkbane
 creatureToFight[34497] = L["Twin Val'kyr"] -- Fjola Lightbane
 

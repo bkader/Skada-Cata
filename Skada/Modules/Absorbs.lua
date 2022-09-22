@@ -1,9 +1,8 @@
-local Skada = Skada
+local _, Skada = ...
 
 -- cache frequently used globals
 local pairs, format = pairs, string.format
 local pformat, new = Skada.pformat, Skada.newTable
-local _
 
 -- ============== --
 -- Absorbs module --

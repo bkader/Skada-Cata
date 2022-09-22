@@ -1,4 +1,4 @@
-local Skada = Skada
+local _, Skada = ...
 Skada:RegisterModule("Healthstones", function(L)
 	local mod = Skada:NewModule("Healthstones")
 	local stonespell = 6262
@@ -74,7 +74,6 @@ Skada:RegisterModule("Healthstones", function(L)
 		}
 
 		mod_cols = self.metadata.columns
-
 
 		Skada:RegisterForCL(stone_used, "SPELL_CAST_SUCCESS", {src_is_interesting = true})
 		Skada:AddMode(self)
