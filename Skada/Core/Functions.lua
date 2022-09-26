@@ -29,24 +29,17 @@ end
 function private.register_parser()
 	private.register_parser = nil -- remove it
 
-	-- only params that Skada needs.
-	local timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, _
-	local A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12
-
 	if Skada.WoWBuild >= 40200 then
-		Skada.ParseCombatLog = function(self, ...)
-			_, timestamp, eventtype, _, srcGUID, srcName, srcFlags, _, dstGUID, dstName, dstFlags, _, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 = ...
-			return timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12
+		Skada.ParseCombatLog = function(self, _, timestamp, eventtype, _, srcGUID, srcName, srcFlags, _, dstGUID, dstName, dstFlags, _, ...)
+			return timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...
 		end
 	elseif Skada.WoWBuild >= 40100 then
-		Skada.ParseCombatLog = function(self, ...)
-			_, timestamp, eventtype, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 = ...
-			return timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12
+		Skada.ParseCombatLog = function(self, _, timestamp, eventtype, _, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			return timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...
 		end
 	else
-		Skada.ParseCombatLog = function(self, ...)
-			_, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 = ...
-			return timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12
+		Skada.ParseCombatLog = function(self, _, timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...)
+			return timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, ...
 		end
 	end
 end
