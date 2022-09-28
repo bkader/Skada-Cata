@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0-Skada", 33
+local MAJOR, MINOR = "LibCompat-1.0-Skada", 34
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -298,7 +298,7 @@ do
 
 	local UnitIterator
 	do
-		local rmem, pmem, step, count
+		local nmem, step, count
 
 		local function SelfIterator(excPets)
 			while step do
@@ -330,7 +330,7 @@ do
 						unit, owner = format("partypet%d", count), format("party%d", count)
 					end
 					count = count + 1
-					step = count <= pmem and 3 or nil
+					step = count <= nmem and 3 or nil
 				end
 				if unit and UnitExists(unit) then
 					return unit, owner
@@ -348,7 +348,7 @@ do
 						unit, owner = format("raidpet%d", count), format("raid%d", count)
 					end
 					count = count + 1
-					step = count <= rmem and 1 or nil
+					step = count <= nmem and 1 or nil
 				end
 				if unit and UnitExists(unit) then
 					return unit, owner
@@ -357,10 +357,10 @@ do
 		end
 
 		function UnitIterator(excPets)
-			rmem, step = GetNumRaidMembers(), 1
-			if rmem == 0 then
-				pmem = GetNumPartyMembers()
-				if pmem == 0 then
+			nmem, step = GetNumRaidMembers(), 1
+			if nmem == 0 then
+				nmem = GetNumPartyMembers()
+				if nmem == 0 then
 					return SelfIterator, excPets
 				end
 				count = 1
@@ -567,7 +567,7 @@ do
 		if classCoordsTable == nil then
 			classCoordsTable = {}
 			for class, coords in pairs(CLASS_ICON_TCOORDS) do
-				classCoordsTable[class] = classCoordsTable[class] or coords
+				classCoordsTable[class] = coords
 			end
 		end
 
@@ -644,105 +644,130 @@ end
 -- Specs and Roles
 
 do
-	local LGT = LibStub("LibGroupTalents-1.0")
-	local UnitClass = UnitClass
-	local GetSpellInfo = GetSpellInfo
+	local UnitClass, GetSpellInfo = UnitClass, GetSpellInfo
+	local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 	local MAX_TALENT_TABS = MAX_TALENT_TABS or 3
-	local GetActiveTalentGroup = GetActiveTalentGroup
-	local GetTalentTabInfo = GetTalentTabInfo
+
+	local LGT = LibStub("LibGroupTalents-1.0")
 	local LGTRoleTable = {melee = "DAMAGER", caster = "DAMAGER", healer = "HEALER", tank = "TANK"}
 
 	-- list of class to specs
 	local specsTable = {
-		["MAGE"] = {62, 63, 64},
-		["PRIEST"] = {256, 257, 258},
-		["ROGUE"] = {259, 260, 261},
-		["WARLOCK"] = {265, 266, 267},
-		["WARRIOR"] = {71, 72, 73},
-		["PALADIN"] = {65, 66, 70},
-		["DEATHKNIGHT"] = {250, 251, 252},
-		["DRUID"] = {102, 103, 104, 105},
-		["HUNTER"] = {253, 254, 255},
-		["SHAMAN"] = {262, 263, 264}
+		MAGE = {62, 63, 64},
+		PRIEST = {256, 257, 258},
+		ROGUE = {259, 260, 261},
+		WARLOCK = {265, 266, 267},
+		WARRIOR = {71, 72, 73},
+		PALADIN = {65, 66, 70},
+		DEATHKNIGHT = {250, 251, 252},
+		DRUID = {102, 103, 104, 105},
+		HUNTER = {253, 254, 255},
+		SHAMAN = {262, 263, 264}
 	}
 
-	local guardianSpells = nil
+	local guardianSpells = {
+		[16929] = 2, -- Thick Hide
+		[57880] = 1, -- Natural Reactions
+		[80313] = 0, -- Pulverize
+	}
 	local function GetFeralSubSpec(unit, talentGroup)
-		if not guardianSpells then -- only create it if needed.
-			guardianSpells = {
-				[16929] = 2, -- Thick Hide
-				[57880] = 1, -- Natural Reactions
-				[80313] = 0, -- Pulverize
-			}
-		end
-
 		for spellid, points in pairs(guardianSpells) do
 			local pts = LGT:UnitHasTalent(unit, GetSpellInfo(spellid), talentGroup) or 0
 			if pts <= points then
 				return 2
 			end
 		end
-
 		return 3
 	end
 
-	local function GetUnitSpec(unit, class)
-		local spec  -- start with nil
+	-- cached specs
+	local cachedSpecs = setmetatable({}, {__index = function(self, id)
+		local unit = id and (GetUnitIdFromGUID(id, "group") or GetUnitIdFromGUID(id, "player"))
+		if not unit then return end
 
-		if unit and UnitExists(unit) then
-			if not class then
-				_, class = UnitClass(unit)
-			end
+		local _, class = UnitClass(unit)
+		if not class or not specsTable[class] then return end
 
-			if class and specsTable[class] then
-				local talentGroup = LGT:GetActiveTalentGroup(unit)
-				local maxPoints, index = 0, 0
+		local talentGroup = LGT:GetActiveTalentGroup(unit)
+		local maxPoints, index = 0, 0
 
-				for i = 1, MAX_TALENT_TABS do
-					local _, _, _, _, pointsSpent = LGT:GetTalentTabInfo(unit, i, talentGroup)
-					if pointsSpent ~= nil then
-						if maxPoints < pointsSpent then
-							maxPoints = pointsSpent
-							if class == "DRUID" and i >= 2 then
-								if i == 3 then
-									index = 4
-								elseif i == 2 then
-									index = GetFeralSubSpec(unit, talentGroup)
-								end
-							else
-								index = i
-							end
+		for i = 1, MAX_TALENT_TABS do
+			local _, _, _, _, pointsSpent = LGT:GetTalentTabInfo(unit, i, talentGroup)
+			if pointsSpent ~= nil then
+				if maxPoints < pointsSpent then
+					maxPoints = pointsSpent
+					if class == "DRUID" and i >= 2 then
+						if i == 3 then
+							index = 4
+						elseif i == 2 then
+							index = GetFeralSubSpec(unit, talentGroup)
 						end
+					else
+						index = i
 					end
 				end
-				spec = specsTable[class][index]
 			end
 		end
 
+		local spec = specsTable[class][index]
+		self[id] = spec
 		return spec
-	end
+	end})
 
-	local UnitGroupRolesAssigned = UnitGroupRolesAssigned
-	local function GetUnitRole(unit, class)
-		unit = unit or "player" -- always fallback to player
+	-- cached roles
+	local cachedRoles = setmetatable({}, {__index = function(self, id)
+		local unit = id and (GetUnitIdFromGUID(id, "group") or GetUnitIdFromGUID(id, "player"))
+		if not unit then return end
 
-		-- For LFG using "UnitGroupRolesAssigned" is enough.
 		local role = UnitGroupRolesAssigned(unit)
-		if role ~= "NONE" then
+		if role and role ~= "NONE" then
+			self[id] = role
 			return role
 		end
 
-		if not class then
-			_, class = UnitClass(unit)
-		end
-
+		local _, class = UnitClass(unit)
 		-- speedup things using classes.
 		if class == "HUNTER" or class == "MAGE" or class == "ROGUE" or class == "WARLOCK" then
-			return "DAMAGER"
+			role = "DAMAGER"
+		else
+			role = LGTRoleTable[LGT:GetUnitRole(unit)] or "NONE"
 		end
 
-		return LGTRoleTable[LGT:GetUnitRole(unit)] or "NONE"
+		self[id] = role
+		return role
+	end})
+
+	local function GetUnitSpec(guid)
+		return cachedSpecs[guid]
 	end
+
+	local function GetUnitRole(guid)
+		return cachedRoles[guid]
+	end
+
+	LGT:RegisterCallback("LibGroupTalents_Update", function(_, guid, unit, _, n1, n2, n3)
+		if not guid or not unit then return end
+
+		local _, class = UnitClass(unit)
+		if class and specsTable[class] then
+			local nx = max(n1, n2, n3) -- highest in points spent
+			local index = nx == n1 and 1 or nx == n2 and 2 or nx == n3 and 3
+
+			if class == "DRUID" and index == 3 then
+				index = 4
+			elseif class == "DRUID" and index == 2 then
+				local points = LGT:UnitHasTalent(unit, GetSpellInfo(57881))
+				index = (points and points > 0) and 3 or 2
+			end
+
+			cachedSpecs[guid] = specsTable[class][index]
+		end
+	end)
+
+	LGT:RegisterCallback("LibGroupTalents_RoleChange", function(_, guid, _, role, oldrole)
+		if not guid or role == oldrole then return end
+		cachedRoles[guid] = LGTRoleTable[role] or role
+	end)
 
 	lib.GetUnitSpec = GetUnitSpec
 	lib.GetUnitRole = GetUnitRole
