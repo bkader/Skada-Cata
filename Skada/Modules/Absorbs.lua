@@ -3,7 +3,7 @@ local private = Skada.private
 
 -- cache frequently used globals
 local pairs, format = pairs, string.format
-local uformat, new = private.uformat, Skada.newTable
+local uformat, new = private.uformat, private.newTable
 
 -- ============== --
 -- Absorbs module --
@@ -23,10 +23,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local COMBATLOG_OBJECT_REACTION_MASK = COMBATLOG_OBJECT_REACTION_MASK or 0x000000F0
 
 	local GetTime, band, tsort, max = GetTime, bit.band, table.sort, math.max
-	local UnitGUID, UnitName = UnitGUID, UnitName
-	local UnitBuff, UnitIsDeadOrGhost = UnitBuff, UnitIsDeadOrGhost
-	local GroupIterator = Skada.GroupIterator
-	local T, del = Skada.Table, Skada.delTable
+	local T, del = Skada.Table, private.delTable
 	local mod_cols = nil
 
 	local absorbspells = {
@@ -703,16 +700,20 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	end
 
 	do
+		local UnitGUID, UnitName = UnitGUID, UnitName
+		local UnitBuff, UnitIsDeadOrGhost = UnitBuff, UnitIsDeadOrGhost
+		local GroupIterator = Skada.GroupIterator
+
 		local function check_unit_shields(unit, owner, timestamp, curtime)
-			if not UnitIsDeadOrGhost(unit) then
-				local dstName, dstGUID = UnitName(unit), UnitGUID(unit)
-				for i = 1, 40 do
-					local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
-					if not spellid then
-						break -- nothing found
-					elseif absorbspells[spellid] and unitCaster then
-						handle_shield(timestamp + max(0, expires - curtime), nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
-					end
+			if UnitIsDeadOrGhost(unit) then return end
+
+			local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
+			for i = 1, 40 do
+				local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
+				if not spellid then
+					break -- nothing found
+				elseif absorbspells[spellid] and unitCaster and not ignoredSpells[spellid] then
+					handle_shield(timestamp + max(0, expires - curtime), nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
 				end
 			end
 		end
@@ -1306,7 +1307,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 	local spellmod = mod:NewModule("Healing spell sources")
 	local spellschools = Skada.spellschools
 	local GetSpellInfo = private.spell_info or GetSpellInfo
-	local clear = Skada.clearTable
+	local clear = private.clearTable
 	local get_absorb_heal_spells = nil
 	local mod_cols = nil
 
