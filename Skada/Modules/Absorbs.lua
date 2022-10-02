@@ -3,7 +3,7 @@ local private = Skada.private
 
 -- cache frequently used globals
 local pairs, format = pairs, string.format
-local pformat, new = Skada.pformat, Skada.newTable
+local uformat, new = private.uformat, Skada.newTable
 
 -- ============== --
 -- Absorbs module --
@@ -615,11 +615,11 @@ Skada:RegisterModule("Absorbs", function(L, P)
 
 	function targetmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = pformat(L["%s's absorbed targets"], label)
+		win.title = uformat(L["%s's absorbed targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's absorbed targets"], win.actorname)
+		win.title = uformat(L["%s's absorbed targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -1034,11 +1034,11 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 	function targetmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = pformat(L["%s's absorbed and healed targets"], label)
+		win.title = uformat(L["%s's absorbed and healed targets"], label)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's absorbed and healed targets"], win.actorname)
+		win.title = uformat(L["%s's absorbed and healed targets"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetAbsorbHeal()
@@ -1405,11 +1405,11 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 
 	function spellmod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = pformat(L["%s's sources"], label)
+		win.title = uformat(L["%s's sources"], label)
 	end
 
 	function spellmod:Update(win, set)
-		win.title = pformat(L["%s's sources"], win.spellname)
+		win.title = uformat(L["%s's sources"], win.spellname)
 		if not (win.spellid and set) then return end
 
 		-- let's go...

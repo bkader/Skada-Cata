@@ -1,8 +1,9 @@
 local _, Skada = ...
+local private = Skada.private
 
 -- cache frequently used globals
 local pairs, max = pairs, math.max
-local format, pformat = string.format, Skada.pformat
+local format, uformat = string.format, private.uformat
 local T = Skada.Table
 
 local function format_valuetext(d, columns, total, hps, metadata, subview)
@@ -306,7 +307,7 @@ Skada:RegisterModule("Healing", function(L, P)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's healed targets"], win.actorname)
+		win.title = uformat(L["%s's healed targets"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.heal
@@ -566,7 +567,7 @@ Skada:RegisterModule("Overhealing", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's overheal targets"], win.actorname)
+		win.title = uformat(L["%s's overheal targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid)
@@ -800,7 +801,7 @@ Skada:RegisterModule("Total Healing", function(L)
 	end
 
 	function targetmod:Update(win, set)
-		win.title = pformat(L["%s's healed targets"], win.actorname)
+		win.title = uformat(L["%s's healed targets"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetTotalHeal()
@@ -967,7 +968,7 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 	end
 
 	function sourcemod:Update(win, set)
-		win.title = pformat(L["%s's heal sources"], win.actorname)
+		win.title = uformat(L["%s's heal sources"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid, true)
@@ -1075,11 +1076,11 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 
 	function spellsourcemod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = pformat(L["%s's <%s> sources"], win.actorname, label)
+		win.title = uformat(L["%s's <%s> sources"], win.actorname, label)
 	end
 
 	function spellsourcemod:Update(win, set)
-		win.title = pformat(L["%s's <%s> sources"], win.actorname, win.spellname)
+		win.title = uformat(L["%s's <%s> sources"], win.actorname, win.spellname)
 		if not set or not win.actorname or not win.spellid then return end
 
 		local actor, enemy = set:GetActor(win.actorname, win.actorid, true)

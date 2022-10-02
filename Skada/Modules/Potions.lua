@@ -1,4 +1,5 @@
 local _, Skada = ...
+local private = Skada.private
 Skada:RegisterModule("Potions", function(L, P, _, C)
 	local mod = Skada:NewModule("Potions")
 	local playermod = mod:NewModule("Potions list")
@@ -10,7 +11,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	local GetItemInfo, UnitIsDeadOrGhost, GroupIterator = GetItemInfo, UnitIsDeadOrGhost, Skada.GroupIterator
 	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
 	local new, del, clear = Skada.newTable, Skada.delTable, Skada.clearTable
-	local T, pformat = Skada.Table, Skada.pformat
+	local T, uformat = Skada.Table, private.uformat
 	local potion_ids = {}
 	local mod_cols = nil
 
@@ -141,7 +142,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	end
 
 	function playermod:Update(win, set)
-		win.title = pformat(L["%s's used potions"], win.actorname)
+		win.title = uformat(L["%s's used potions"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor = Skada:FindPlayer(set, win.actorid, win.actorname, true)
@@ -327,7 +328,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		potion_ids[67489] = 41166 -- Runic Healing Injector
 		potion_ids[67490] = 42545 -- Runic Mana Injector
 
-		--[[ 4.3.4 ]]--
+		--[[ Cataclysm ]]--
 		potion_ids[78992] = 57193 -- Mighty Rejuvenation Potion
 		potion_ids[78993] = 57194 -- Potion of Concentration
 		potion_ids[79475] = 58090 -- Earthen Potion
