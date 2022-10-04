@@ -441,7 +441,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 	end
 
-	local function spell_damage(timestamp, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
+	local function spell_damage(_, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
 		if not shields or not dstName then return end
 
 		local spellschool, amount, absorbed
@@ -459,7 +459,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 	end
 
-	local function spell_missed(timestamp, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
+	local function spell_missed(_, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
 		if not shields or not dstName then return end
 
 		local spellschool, misstype, absorbed
