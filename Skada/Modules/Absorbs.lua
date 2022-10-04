@@ -313,7 +313,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		return valid
 	end
 
-	local function RemoveShield(dstName, srcGUID, spellid)
+	local function remove_shield(dstName, srcGUID, spellid)
 		shields[dstName] = shields[dstName] or new()
 		for i = 1, #shields[dstName] do
 			local shield = shields[dstName][i]
@@ -337,7 +337,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				for i = 1, #shields[dstName] do
 					local shield = shields[dstName][i]
 					if shield and shield.srcGUID == srcGUID and shield.spellid == spellid then
-						Skada:ScheduleTimer(RemoveShield, 0.1, dstName, srcGUID, spellid)
+						Skada:ScheduleTimer(remove_shield, 0.1, dstName, srcGUID, spellid)
 						break
 					end
 				end
@@ -726,8 +726,6 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 
 		function mod:CombatLeave()
-			T.clear(absorb)
-			T.free("Skada_Shields", shields, nil, del)
 			self.checked = nil
 		end
 	end
@@ -807,6 +805,9 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	end
 
 	function mod:SetComplete(set)
+		T.clear(absorb)
+		T.free("Skada_Shields", shields, nil, del)
+
 		-- clean absorbspells table:
 		if not set.absorb or set.absorb == 0 then return end
 		for i = 1, #set.players do
