@@ -23,7 +23,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local COMBATLOG_OBJECT_REACTION_MASK = COMBATLOG_OBJECT_REACTION_MASK or 0x000000F0
 
 	local GetTime, band, tsort, max = GetTime, bit.band, table.sort, math.max
-	local T, del = Skada.Table, private.delTable
+	local del, clear = private.delTable, private.clearTable
 	local mod_cols = nil
 
 	local absorbspells = {
@@ -328,7 +328,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local function handle_shield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool)
 		if not spellid or not absorbspells[spellid] or not dstName or ignoredSpells[spellid] then return end
 
-		shields = shields or T.get("Skada_Shields") -- create table if missing
+		shields = shields or {} -- create table if missing
 		dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
 
 		-- shield removed?
@@ -380,8 +380,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				shield.srcName = srcName
 				shield.srcFlags = srcFlags
 				shield.ts = timestamp
-
-				tinsert(shields[dstName], shield)
+				shields[dstName][#shields[dstName] + 1] = shield
 			else
 				shields[dstName][index].ts = timestamp
 			end
@@ -396,7 +395,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			shield.srcFlags = srcFlags
 			shield.ts = timestamp
 
-			tinsert(shields[dstName], shield)
+			shields[dstName][#shields[dstName] + 1] = shield
 			tsort(shields[dstName], shields_order_pred)
 		end
 	end
@@ -805,8 +804,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	end
 
 	function mod:SetComplete(set)
-		T.clear(absorb)
-		T.free("Skada_Shields", shields, nil, del)
+		clear(absorb)
+		clear(shields)
 
 		-- clean absorbspells table:
 		if not set.absorb or set.absorb == 0 then return end
