@@ -1139,6 +1139,7 @@ do
 		[3026] = [[Interface\ICONS\spell_shadow_soulgem]], --> Use Soulstone
 		[54755] = [[Interface\ICONS\inv_glyph_majordruid]], --> Glyph of Rejuvenation
 		[56160] = [[Interface\ICONS\inv_glyph_majorpriest]], --> Glyph of Power Word: Shield
+		[57842] = [[Interface\ICONS\ability_warrior_focusedrage]], --> Killing Spree Off-Hand
 		[61607] = [[Interface\ICONS\ability_hunter_rapidkilling]] --> Mark of Blood
 	}
 

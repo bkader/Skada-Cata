@@ -754,34 +754,34 @@ Skada:RegisterModule("Absorbs", function(L, P)
 
 		Skada:RegisterForCL(
 			handle_shield,
+			flags_src,
 			"SPELL_AURA_APPLIED",
 			"SPELL_AURA_REFRESH",
-			"SPELL_AURA_REMOVED",
-			flags_src
+			"SPELL_AURA_REMOVED"
 		)
 
 		local flags_dst = {dst_is_interesting = true}
 
 		Skada:RegisterForCL(
 			spell_damage,
+			flags_dst,
 			"DAMAGE_SHIELD",
 			"SPELL_DAMAGE",
 			"SPELL_PERIODIC_DAMAGE",
 			"SPELL_BUILDING_DAMAGE",
 			"RANGE_DAMAGE",
 			"SWING_DAMAGE",
-			"ENVIRONMENTAL_DAMAGE",
-			flags_dst
+			"ENVIRONMENTAL_DAMAGE"
 		)
 
 		Skada:RegisterForCL(
 			spell_missed,
+			flags_dst,
 			"SPELL_MISSED",
 			"SPELL_PERIODIC_MISSED",
 			"SPELL_BUILDING_MISSED",
 			"RANGE_MISSED",
-			"SWING_MISSED",
-			flags_dst
+			"SWING_MISSED"
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
