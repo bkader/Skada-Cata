@@ -657,7 +657,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) then
 				local aps, amount = actor:GetAPS(nil, not mod_cols.APS)
 				if amount > 0 then
 					nr = nr + 1
@@ -675,7 +675,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and not actor.fake and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set, true) then
 				local aps, amount = actor:GetAPS(nil, not mod_cols.APS)
 				if amount > 0 then
 					nr = nr + 1
@@ -1081,7 +1081,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) then
 				local hps, amount = actor:GetAHPS(nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
@@ -1099,7 +1099,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and not actor.fake and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set, true) then
 				local hps, amount = actor:GetAHPS(nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
@@ -1236,7 +1236,7 @@ Skada:RegisterModule("HPS", function(L, P)
 		local actors = set.players -- players
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set) then
 				local amount = actor:GetAHPS(nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
@@ -1254,7 +1254,7 @@ Skada:RegisterModule("HPS", function(L, P)
 
 		for i = 1, #actors do
 			local actor = actors[i]
-			if actor and not actor.fake and (not win.class or win.class == actor.class) then
+			if win:show_actor(actor, set, true) then
 				local amount = actor:GetHPS(nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
