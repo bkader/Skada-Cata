@@ -1,9 +1,9 @@
 local _, Skada = ...
-local private = Skada.private
+local Private = Skada.Private
 
 -- cache frequently used globals
 local pairs, max = pairs, math.max
-local format, uformat = string.format, private.uformat
+local format, uformat = string.format, Private.uformat
 
 local function format_valuetext(d, columns, total, hps, metadata, subview)
 	d.valuetext = Skada:FormatValueCols(
@@ -29,7 +29,7 @@ Skada:RegisterModule("Healing", function(L, P)
 	local spellschools = Skada.spellschools
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local next, del, clear = next, private.delTable, private.clearTable
+	local next, del, clear = next, Private.delTable, Private.clearTable
 	local mod_cols = nil
 
 	local function log_spellcast(set, playerid, playername, playerflags, spellid, spellschool)
@@ -913,7 +913,7 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 	local sourcespellmod = sourcemod:NewModule("Healing spell list")
 	local spellmod = mod:NewModule("Healing spell list")
 	local spellsourcemod = sourcemod:NewModule("Healing source list")
-	local new, clear = private.newTable, private.clearTable
+	local new, clear = Private.newTable, Private.clearTable
 	local C = Skada.cacheTable2
 	local mod_cols = nil
 
