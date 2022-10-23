@@ -325,19 +325,20 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 	end
 
-	local function handle_shield(timestamp, eventtype, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid, _, spellschool)
-		if not spellid or not absorbspells[spellid] or not dstName or ignoredSpells[spellid] then return end
+	local function handle_shield(t)
+		if not t.spellid or not absorbspells[t.spellid] or not t.dstName or ignoredSpells[t.spellid] then return end
 
 		shields = shields or {} -- create table if missing
-		dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
+		local dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
+		local srcGUID, srcName, srcFlags = t.srcGUID, t.srcName, t.srcFlags
 
 		-- shield removed?
-		if eventtype == "SPELL_AURA_REMOVED" then
+		if t.event == "SPELL_AURA_REMOVED" then
 			if shields[dstName] then
 				for i = 1, #shields[dstName] do
 					local shield = shields[dstName][i]
-					if shield and shield.srcGUID == srcGUID and shield.spellid == spellid then
-						Skada:ScheduleTimer(remove_shield, 0.1, dstName, srcGUID, spellid)
+					if shield and shield.srcGUID == srcGUID and shield.spellid == t.spellid then
+						Skada:ScheduleTimer(remove_shield, 0.1, dstName, srcGUID, t.spellid)
 						break
 					end
 				end
@@ -349,22 +350,22 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		shields[dstName] = shields[dstName] or new()
 
 		-- Soul Link
-		if spellid == 25228 then
+		if t.spellid == 25228 then
 			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 		end
 
 		-- shield refreshed
-		if eventtype == "SPELL_AURA_REFRESH" then
+		if t.event == "SPELL_AURA_REFRESH" then
 			local index = nil
 			for i = 1, #shields[dstName] do
 				local shield = shields[dstName][i]
-				if shield and shield.srcGUID == srcGUID and shield.spellid == spellid then
-					shield.ts = timestamp
+				if shield and shield.srcGUID == srcGUID and shield.spellid == t.spellid then
+					shield.ts = t.timestamp
 					index = i
 
 					-- fix school
-					if not shield.school and spellschool then
-						shield.school = spellschool
+					if not shield.school and t.spellschool then
+						shield.school = t.spellschool
 					end
 
 					break
@@ -374,30 +375,32 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			-- not found? add it
 			if not index then
 				local shield = new()
-				shield.spellid = spellid
-				shield.school = spellschool
+				shield.spellid = t.spellid
+				shield.school = t.spellschool
 				shield.srcGUID = srcGUID
 				shield.srcName = srcName
 				shield.srcFlags = srcFlags
-				shield.ts = timestamp
+				shield.ts = t.timestamp
 				shields[dstName][#shields[dstName] + 1] = shield
 			else
-				shields[dstName][index].ts = timestamp
+				shields[dstName][index].ts = t.timestamp
 			end
 
 			tsort(shields[dstName], shields_order_pred)
 		else
 			local shield = new()
-			shield.spellid = spellid
-			shield.school = spellschool
+			shield.spellid = t.spellid
+			shield.school = t.spellschool
 			shield.srcGUID = srcGUID
 			shield.srcName = srcName
 			shield.srcFlags = srcFlags
-			shield.ts = timestamp
+			shield.ts = t.timestamp
 
 			shields[dstName][#shields[dstName] + 1] = shield
 			tsort(shields[dstName], shields_order_pred)
 		end
+
+		if t.__temp then t = del(t) end
 	end
 
 	local function process_shield(dstName, spellschool)
@@ -440,37 +443,10 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 	end
 
-	local function spell_damage(_, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
-		if not shields or not dstName then return end
-
-		local spellschool, amount, absorbed
-		if eventtype == "SWING_DAMAGE" then
-			amount, _, _, _, _, absorbed = ...
-		elseif eventtype == "ENVIRONMENTAL_DAMAGE" then
-			_, amount, _, spellschool, _, _, absorbed = ...
-		else
-			_, _, spellschool, amount, _, _, _, _, absorbed = ...
-		end
-
-		dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
-		if absorbed and absorbed > 0 and shields[dstName] then
-			process_absorb(dstGUID, dstName, dstFlags, absorbed, spellschool or 0x01, amount)
-		end
-	end
-
-	local function spell_missed(_, eventtype, _, _, _, dstGUID, dstName, dstFlags, ...)
-		if not shields or not dstName then return end
-
-		local spellschool, misstype, absorbed
-		if eventtype == "SWING_MISSED" then
-			misstype, _, absorbed = ...
-		else
-			_, _, spellschool, misstype, _, absorbed = ...
-		end
-
-		dstName = Skada:FixPetsName(dstGUID, dstName, dstFlags)
-		if misstype == "ABSORB" and absorbed and absorbed > 0 and shields[dstName] then
-			process_absorb(dstGUID, dstName, dstFlags, absorbed, spellschool or 0x01, 0)
+	local function spell_damage(t)
+		local dstName = t.dstName and Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
+		if dstName and shields and shields[dstName] and t.absorbed and t.absorbed > 0 then
+			process_absorb(t.dstGUID, dstName, t.dstFlags, t.absorbed, t.spellschool or 0x01, t.amount)
 		end
 	end
 
@@ -695,14 +671,22 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				if not spellid then
 					break -- nothing found
 				elseif absorbspells[spellid] and unitCaster and not ignoredSpells[spellid] then
-					handle_shield(timestamp + max(0, expires - curtime), nil, UnitGUID(unitCaster), UnitName(unitCaster), nil, dstGUID, dstName, nil, spellid)
+					local t = new()
+					t.timestamp = timestamp + max(0, expires - curtime)
+					t.srcGUID = UnitGUID(unitCaster)
+					t.srcName = UnitName(unitCaster)
+					t.dstGUID = dstGUID
+					t.dstName = dstName
+					t.spellid = spellid
+					t.__temp = true
+					handle_shield(t)
 				end
 			end
 		end
 
-		function mod:CombatEnter(_, set, timestamp)
+		function mod:CombatEnter(_, set, args)
 			if set and not set.stopped and not self.checked then
-				GroupIterator(check_unit_shields, timestamp, set.last_time or GetTime())
+				GroupIterator(check_unit_shields, args.timestamp, set.last_time or GetTime())
 				self.checked = true
 			end
 		end
@@ -749,22 +733,21 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		Skada:RegisterForCL(
 			spell_damage,
 			flags_dst,
+			-- damage events
 			"DAMAGE_SHIELD",
+			"DAMAGE_SPLIT",
+			"RANGE_DAMAGE",
+			"SPELL_BUILDING_DAMAGE",
 			"SPELL_DAMAGE",
 			"SPELL_PERIODIC_DAMAGE",
-			"SPELL_BUILDING_DAMAGE",
-			"RANGE_DAMAGE",
 			"SWING_DAMAGE",
-			"ENVIRONMENTAL_DAMAGE"
-		)
-
-		Skada:RegisterForCL(
-			spell_missed,
-			flags_dst,
+			"ENVIRONMENTAL_DAMAGE",
+			-- missed events
+			"DAMAGE_SHIELD_MISSED",
+			"RANGE_MISSED",
+			"SPELL_BUILDING_MISSED",
 			"SPELL_MISSED",
 			"SPELL_PERIODIC_MISSED",
-			"SPELL_BUILDING_MISSED",
-			"RANGE_MISSED",
 			"SWING_MISSED"
 		)
 
