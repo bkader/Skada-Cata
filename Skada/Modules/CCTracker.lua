@@ -6,7 +6,7 @@ local GetSpellLink = Private.spell_link or GetSpellLink
 local new, clear = Private.newTable, Private.clearTable
 local cc_table = {} -- holds stuff from cleu
 
-local CCSpells = {
+local cc_spells = {
 	[118] = 0x40, -- Polymorph
 	[12809] = 0x01, -- Concussion Blow
 	[20066] = 0x02, -- Repentance
@@ -26,7 +26,7 @@ local CCSpells = {
 }
 
 -- extended CC list for only CC Done and CC Taken modules
-local ExtraCCSpells = {
+local extra_spells = {
 	-- Death Knight
 	[47476] = 0x20, -- Strangulate
 	[49203] = 0x10, -- Hungering Cold
@@ -104,15 +104,6 @@ local ExtraCCSpells = {
 	[67890] = 0x04 -- Cobalt Frag Bomb
 }
 
-local function get_spell_school(spellid)
-	if CCSpells[spellid] and CCSpells[spellid] ~= true then
-		return CCSpells[spellid]
-	end
-	if ExtraCCSpells[spellid] and ExtraCCSpells[spellid] ~= true then
-		return ExtraCCSpells[spellid]
-	end
-end
-
 local function format_valuetext(d, columns, total, metadata, subview)
 	d.valuetext = Skada:FormatValueCols(
 		columns.Count and d.value,
@@ -164,14 +155,13 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 	end
 
 	local function aura_applied(t)
-		if t.spellid and CCSpells[t.spellid] or ExtraCCSpells[t.spellid] then
+		if t.spellid and cc_spells[t.spellid] or extra_spells[t.spellid] then
 			cc_table.srcGUID, cc_table.srcName, cc_table.srcFlags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
 			cc_table.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
-			cc_table.spellid = t.spellid
+			cc_table.spellid = t.spellstring
 
 			cc_table.dstGUID = nil
 			cc_table.dstFlags = nil
-			cc_table.extraspellid = nil
 
 			Skada:DispatchSets(log_ccdone)
 		end
@@ -199,7 +189,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, nil, get_spell_school(spellid))
+			local d = win:spell(nr, spellid)
 			d.value = spell.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
@@ -388,7 +378,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	local get_cc_taken_targets = nil
 	local mod_cols = nil
 
-	local RaidCCSpells = {}
+	local raid_spells = {}
 
 	local function log_cctaken(set)
 		local player = Skada:GetPlayer(set, cc_table.dstGUID, cc_table.dstName, cc_table.dstFlags)
@@ -418,17 +408,16 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	end
 
 	local function aura_applied(t)
-		if t.spellid and CCSpells[t.spellid] or ExtraCCSpells[t.spellid] or RaidCCSpells[t.spellid] then
+		if t.spellid and cc_spells[t.spellid] or extra_spells[t.spellid] or raid_spells[t.spellid] then
 			cc_table.dstGUID = t.dstGUID
 			cc_table.dstName = t.dstName
 			cc_table.dstFlags = t.dstFlags
 
 			cc_table.srcName = t.srcName
-			cc_table.spellid = t.spellid
+			cc_table.spellid = t.spellstring
 
 			cc_table.srcGUID = nil
 			cc_table.srcFlags = nil
-			cc_table.extraspellid = nil
 
 			Skada:DispatchSets(log_cctaken)
 		end
@@ -456,7 +445,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, nil, get_spell_school(spellid) or RaidCCSpells[spellid])
+			local d = win:spell(nr, spellid)
 			d.value = spell.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
@@ -674,7 +663,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 	end
 
 	local function aura_broken(t)
-		if not t.spellid or not CCSpells[t.spellid] then return end
+		if not t.spellid or not cc_spells[t.spellid] then return end
 
 		local srcGUID, srcName, srcFlags = t.srcGUID, t.srcName, t.srcFlags
 		local _srcGUID, _srcName, _srcFlags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
@@ -683,12 +672,10 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		cc_table.srcName = _srcName
 		cc_table.srcFlags = _srcFlags
 		cc_table.dstName = t.dstName
+		cc_table.spellid = t.spellstring
 
 		cc_table.dstGUID = nil
 		cc_table.dstFlags = nil
-
-		cc_table.spellid = t.spellid
-		cc_table.extraspellid = t.extraspellid
 
 		Skada:DispatchSets(log_ccbreak)
 
@@ -742,7 +729,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, nil, get_spell_school(spellid))
+			local d = win:spell(nr, spellid)
 			d.value = spell.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end

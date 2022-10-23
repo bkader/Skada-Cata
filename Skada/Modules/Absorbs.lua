@@ -4,6 +4,8 @@ local Private = Skada.Private
 -- cache frequently used globals
 local pairs, format, uformat = pairs, string.format, Private.uformat
 local new, del = Private.newTable, Private.delTable
+local tooltip_school = Skada.tooltip_school
+local hits_perc = "%s (\124cffffffff%s\124r)"
 
 -- ============== --
 -- Absorbs module --
@@ -11,12 +13,12 @@ local new, del = Private.newTable, Private.delTable
 
 Skada:RegisterModule("Absorbs", function(L, P)
 	local mod = Skada:NewModule("Absorbs")
-	local playermod = mod:NewModule("Absorb spell list")
+	local spellmod = mod:NewModule("Absorb spell list")
 	local targetmod = mod:NewModule("Absorbed target list")
-	local spellmod = targetmod:NewModule("Absorb spell list")
-	local spellschools = Skada.spellschools
-	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local passiveSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local targetspellmod = targetmod:NewModule("Absorb spell list")
+	tooltip_school = tooltip_school or Skada.tooltip_school
+	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local passive_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local COMBATLOG_OBJECT_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
 	local COMBATLOG_OBJECT_AFFILIATION_OUTSIDER = COMBATLOG_OBJECT_AFFILIATION_OUTSIDER or 0x00000008
@@ -27,104 +29,103 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	local mod_cols = nil
 
 	local absorbspells = {
-		[48707] = 5, -- Anti-Magic Shell
-		[51052] = 10, -- Anti-Magic Zone
-		[108008] = 86400, -- Will of the Necropolis
-		[77535] = 10, -- Blood Shield
-		[62606] = 10, -- Savage Defense Proc
-		[11426] = 60, -- Ice Barrier
-		[1463] = 60, --  Mana shield
-		[543] = 30, -- Mage Ward
-		[86273] = 6, -- Illuminated Healing
-		[88063] = 6, -- Guarded by the Light
-		[96263] = 15, -- Sacred Shield
-		[31850] = 10, -- Ardent Defender
-		[105801] = 10, -- Delayed Judgment
-		[31230] = 10, -- Cheat Death
-		[17] = 30, -- Power Word: Shield
-		[47509] = 15, -- Divine Aegis (rank 1)
-		[47511] = 15, -- Divine Aegis (rank 2)
-		[47515] = 15, -- Divine Aegis (rank 3)
-		[47753] = 15, -- Divine Aegis (rank 1)
-		[54704] = 15, -- Divine Aegis (rank 1)
-		[47788] = 10, -- Guardian Spirit
-		[62618] = 25, -- Power Word: Barrier
-		[81781] = 25, -- Power Word: Barrier
-		[7812] = 30, -- Sacrifice
-		[6229] = 30, -- Shadow Ward
-		[25228] = 86400, -- Soul Link
-		[29674] = 86400, -- Lesser Ward of Shielding
-		[29719] = 86400, -- Greater Ward of Shielding
-		[29701] = 86400, -- Greater Shielding
-		[28538] = 120, -- Major Holy Protection Potion
-		[28537] = 120, -- Major Shadow Protection Potion
-		[28536] = 120, --  Major Arcane Protection Potion
-		[28513] = 120, -- Major Nature Protection Potion
-		[28512] = 120, -- Major Frost Protection Potion
-		[28511] = 120, -- Major Fire Protection Potion
-		[7233] = 120, -- Fire Protection Potion
-		[7239] = 120, -- Frost Protection Potion
-		[7242] = 120, -- Shadow Protection Potion
-		[7245] = 120, -- Holy Protection Potion
-		[6052] = 120, -- Nature Protection Potion
-		[53915] = 120, -- Mighty Shadow Protection Potion
-		[53914] = 120, -- Mighty Nature Protection Potion
-		[53913] = 120, -- Mighty Frost Protection Potion
-		[53911] = 120, -- Mighty Fire Protection Potion
-		[53910] = 120, -- Mighty Arcane Protection Potion
-		[17548] = 120, -- Greater Shadow Protection Potion
-		[17546] = 120, -- Greater Nature Protection Potion
-		[17545] = 120, -- Greater Holy Protection Potion
-		[17544] = 120, -- Greater Frost Protection Potion
-		[17543] = 120, -- Greater Fire Protection Potion
-		[17549] = 120, -- Greater Arcane Protection Potion
-		[28527] = 15, -- Fel Blossom
-		[29432] = 3600, -- Frozen Rune
-		[36481] = 4, -- Arcane Barrier (TK Kael'Thas) Shield
-		[57350] = 6, -- Darkmoon Card: Illusion
-		[70845] = 10, -- Stoicism
-		[17252] = 30, -- Mark of the Dragon Lord (LBRS epic ring)
-		[25750] = 15, -- Defiler's Talisman/Talisman of Arathor
-		[25747] = 15, -- Defiler's Talisman/Talisman of Arathor
-		[25746] = 15, -- Defiler's Talisman/Talisman of Arathor
-		[23991] = 15, -- Defiler's Talisman/Talisman of Arathor
-		[30997] = 300, -- Pendant of Frozen Flame Usage
-		[31002] = 300, -- Pendant of the Null Rune
-		[30999] = 300, -- Pendant of Withering
-		[30994] = 300, -- Pendant of Thawing
-		[31000] = 300, -- Pendant of Shadow's End
-		[23506]= 20, -- Arena Grand Master
-		[12561] = 60, -- Goblin Construction Helmet
-		[31771] = 20, -- Runed Fungalcap
-		[21956] = 10, -- Mark of Resolution
-		[29506] = 20, -- The Burrower's Shell
-		[4057] = 60, -- Flame Deflector
-		[4077] = 60, -- Ice Deflector
-		[39228] = 20, -- Argussian Compass (may not be an actual absorb)
-		[27779] = 30, -- Divine Protection (Priest dungeon set 1/2)
-		[11657] = 20, -- Jang'thraze (Zul Farrak)
-		[10368] = 15, -- Uther's Light Effect
-		[37515] = 15, -- Blade Turning
-		[42137] = 86400, -- Greater Rune of Warding
-		[26467] = 30, -- Scarab Brooch
-		[27539] = 6, -- Thick Obsidian Breatplate
-		[28810] = 30, -- Faith Set Proc Armor of Faith
-		[54808] = 12, -- Noise Machine Proc Sonic Shield
-		[55019] = 12, -- Sonic Shield
-		[64413] = 8, -- Val'anyr, Hammer of Ancient Kings proc Protection of Ancient Kings
-		[105909] = 6, -- Shield of Fury
-		[105801] = 6, -- Delayed Judgement
-		[40322] = 30, -- Teron's Vengeful Spirit Ghost - Spirit Shield
-		[65874] = 15, -- Twin Val'kyr's: Shield of Darkness
-		[67257] = 15, -- Twin Val'kyr's: Shield of Darkness (300000)
-		[67256] = 15, -- Twin Val'kyr's: Shield of Darkness (700000)
-		[67258] = 15, -- Twin Val'kyr's: Shield of Darkness (1200000)
-		[65858] = 15, -- Twin Val'kyr's Shield of Lights (175000)
-		[67260] = 15, -- Twin Val'kyr's: Shield of Lights (300000)
-		[67259] = 15, -- Twin Val'kyr's: Shield of Lights (700000)
-		[67261] = 15, -- Twin Val'kyr's: Shield of Lights (1200000)
-		[65686] = 86400, -- Twin Val'kyr: Light Essence
-		[65684] = 86400, -- Twin Val'kyr: Dark Essence
+		[17] = 0x02, -- Power Word: Shield
+		[543] = 0x40, -- Mage Ward
+		[1463] = 0x40, -- Mana shield
+		[4057] = 0x04, -- Flame Deflector (Fire Resistance)
+		[4077] = 0x10, -- Ice Deflector (Frost Resistance)
+		[6229] = 0x20, -- Shadow Ward
+		[7233] = 0x08, -- Fire Protection Potion
+		[7239] = 0x10, -- Frost Protection Potion
+		[7242] = 0x20, -- Shadow Protection Potion
+		[7245] = 0x02, -- Holy Protection Potion
+		[7259] = 0x01, -- Nature Protection Potion
+		[7812] = 0x20, -- Sacrifice
+		[10368] = 0x02, -- Uther's Light Effect
+		[11426] = 0x10, -- Ice Barrier
+		[11657] = 0x01, -- Jang'thraze
+		[12561] = 0x04, -- Goblin Construction Helmet (Fire Protection)
+		[17252] = 0x01, -- Mark of the Dragon Lord (LBRS epic ring)
+		[17543] = 0x04, -- Greater Fire Protection Potion
+		[17544] = 0x10, -- Greater Frost Protection Potion
+		[17545] = 0x02, -- Greater Holy Protection Potion
+		[17546] = 0x08, -- Greater Nature Protection Potion
+		[17548] = 0x20, -- Greater Shadow Protection Potion
+		[17549] = 0x04, -- Greater Arcane Protection Potion
+		[21956] = 0x02, -- Mark of Resolution (Physical Protection)
+		[23506] = 0x02, -- Arena Grand Master (Aura of Protection)
+		[23991] = 0x02, -- Defiler's Talisman/Talisman of Arathor
+		[25228] = 0x20, -- Soul Link
+		[25746] = 0x02, -- Defiler's Talisman/Talisman of Arathor
+		[25747] = 0x02, -- Defiler's Talisman/Talisman of Arathor
+		[25750] = 0x02, -- Defiler's Talisman/Talisman of Arathor
+		[26467] = 0x01, -- Scarab Brooch (Persistent Shield)
+		[27539] = 0x01, -- Thick Obsidian Breatplate (Obsidian Armor)
+		[27779] = 0x02, -- Divine Protection (Priest dungeon set 1/2)
+		[28511] = 0x08, -- Major Fire Protection Potion
+		[28512] = 0x10, -- Major Frost Protection Potion
+		[28513] = 0x08, -- Major Nature Protection Potion
+		[28527] = 0x02, -- Fel Blossom
+		[28536] = 0x04, --  Major Arcane Protection Potion
+		[28537] = 0x20, -- Major Shadow Protection Potion
+		[28538] = 0x02, -- Major Holy Protection Potion
+		[28810] = 0x02, -- Faith Set Proc (Armor of Faith)
+		[29432] = 0x04, -- Frozen Rune (Fire Protection)
+		[29506] = 0x02, -- The Burrower's Shell
+		[29674] = 0x40, -- Lesser Ward of Shielding
+		[29701] = 0x40, -- Greater Shielding
+		[29719] = 0x40, -- Greater Ward of Shielding
+		[30994] = 0x10, -- Pendant of Thawing (Frost Absorption)
+		[30997] = 0x04, -- Pendant of Frozen Flame (Fire Absorption)
+		[30999] = 0x08, -- Pendant of Withering (Nature Absorption)
+		[31000] = 0x20, -- Pendant of Shadow's End (Shadow Absorption)
+		[31002] = 0x40, -- Pendant of the Null Rune (Arcane Absorption)
+		[31230] = 0x01, -- Cheat Death
+		[31771] = 0x02, -- Runed Fungalcap (Shell of Deterrence)
+		[31850] = 0x01, -- Ardent Defender
+		[36481] = 0x40, -- Arcane Barrier (TK Kael'Thas) Shield
+		[37515] = 0x02, -- Blade Turning
+		[39228] = 0x02, -- Argussian Compass
+		[40322] = 0x10, -- Teron's Vengeful Spirit Ghost - Spirit Shield
+		[42137] = 0x01, -- Greater Rune of Warding
+		[47509] = 0x01, -- Divine Aegis (rank 1)
+		[47511] = 0x01, -- Divine Aegis (rank 2)
+		[47515] = 0x01, -- Divine Aegis (rank 3)
+		[47753] = 0x01, -- Divine Aegis (rank 1)
+		[47788] = 0x02, -- Guardian Spirit
+		[48707] = 0x20, -- Anti-Magic Shell
+		[51052] = 0x20, -- Anti-Magic Zone
+		[53910] = 0x04, -- Mighty Arcane Protection Potion
+		[53911] = 0x08, -- Mighty Fire Protection Potion
+		[53913] = 0x10, -- Mighty Frost Protection Potion
+		[53914] = 0x08, -- Mighty Nature Protection Potion
+		[53915] = 0x20, -- Mighty Shadow Protection Potion
+		[54704] = 0x01, -- Divine Aegis (rank 1)
+		[54808] = 0x01, -- Noise Machine (onic Shield)
+		[55019] = 0x01, -- Sonic Shield
+		[57350] = 0x01, -- Darkmoon Card: Illusion
+		[62606] = 0x08, -- Savage Defense
+		[62618] = 0x02, -- Power Word: Barrier
+		[64413] = 0x08, -- Protection of Ancient Kings (Val'anyr, Hammer of Ancient Kings)
+		[65684] = 0x01, -- Twin Val'kyr: Dark Essence
+		[65686] = 0x01, -- Twin Val'kyr: Light Essence
+		[65858] = 0x04, -- Twin Val'kyr's Shield of Lights (175000)
+		[65874] = 0x20, -- Twin Val'kyr's: Shield of Darkness
+		[67256] = 0x20, -- Twin Val'kyr's: Shield of Darkness (700000)
+		[67257] = 0x20, -- Twin Val'kyr's: Shield of Darkness (300000)
+		[67258] = 0x20, -- Twin Val'kyr's: Shield of Darkness (1200000)
+		[67259] = 0x04, -- Twin Val'kyr's: Shield of Lights (700000)
+		[67260] = 0x04, -- Twin Val'kyr's: Shield of Lights (300000)
+		[67261] = 0x04, -- Twin Val'kyr's: Shield of Lights (1200000)
+		[70845] = 0x01, -- Stoicism
+		[77535] = 0x20, -- Blood Shield
+		[81781] = 0x02, -- Power Word: Barrier
+		[86273] = 0x02, -- Illuminated Healing
+		[88063] = 0x02, -- Guarded by the Light
+		[96263] = 0x02, -- Sacred Shield
+		[105801] = 0x02, -- Delayed Judgment
+		[105909] = 0x02, -- Shield of Fury
+		[108008] = 0x01 -- Will of the Necropolis
 	}
 
 	local shields = nil -- holds the list of players shields and other stuff
@@ -142,27 +143,22 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 	end
 
-	local function log_spellcast(set, actorid, actorname, actorflags, spellid, spellschool)
+	local function log_spellcast(set, actorid, actorname, actorflags, spellid)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
 		local actor = Skada:FindPlayer(set, actorid, actorname, actorflags)
 		if actor and actor.absorbspells and actor.absorbspells[spellid] then
 			actor.absorbspells[spellid].casts = (actor.absorbspells[spellid].casts or 1) + 1
-
-			-- fix possible missing spell school.
-			if not actor.absorbspells[spellid].school and spellschool then
-				actor.absorbspells[spellid].school = spellschool
-			end
 		end
 	end
 
 	local function log_absorb(set, nocount)
-		if not absorb.spellid or not absorb.amount or absorb.amount == 0 then return end
+		if not absorb.amount or absorb.amount == 0 then return end
 
 		local actor = Skada:GetPlayer(set, absorb.actorid, absorb.actorname)
 		if not actor then
 			return
-		elseif actor.role ~= "DAMAGER" and not passiveSpells[absorb.spellid] and not nocount then
+		elseif actor.role ~= "DAMAGER" and not passive_spells[absorb.spellid] and not nocount then
 			Skada:AddActiveTime(set, actor, absorb.dstName)
 		end
 
@@ -177,33 +173,48 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		local spell = actor.absorbspells and actor.absorbspells[absorb.spellid]
 		if not spell then
 			actor.absorbspells = actor.absorbspells or {}
-			spell = {school = absorb.school, amount = absorb.amount, count = 1}
-			actor.absorbspells[absorb.spellid] = spell
-		else
-			if not spell.school and absorb.school then
-				spell.school = absorb.school
-			end
-			spell.amount = (spell.amount or 0) + absorb.amount
-			if not nocount then
-				spell.count = (spell.count or 0) + 1
-			end
+			actor.absorbspells[absorb.spellid] = {amount = 0}
+			spell = actor.absorbspells[absorb.spellid]
 		end
+
+		spell.amount = spell.amount + absorb.amount
 
 		-- start cast counter.
 		spell.casts = spell.casts or 1
 
-		if not spell.min or absorb.amount < spell.min then
-			spell.min = absorb.amount
-		end
-		if not spell.max or absorb.amount > spell.max then
-			spell.max = absorb.amount
+		if not nocount then
+			spell.count = (spell.count or 0) + 1
+
+			if absorb.critical then
+				spell.c_num = (spell.c_num or 0) + 1
+				spell.c_amt = (spell.c_amt or 0) + absorb.amount
+				if not spell.c_max or absorb.amount > spell.c_max then
+					spell.c_max = absorb.amount
+				end
+				if not spell.c_min or absorb.amount < spell.c_min then
+					spell.c_min = absorb.amount
+				end
+			else
+				spell.n_num = (spell.n_num or 0) + 1
+				spell.n_amt = (spell.n_amt or 0) + absorb.amount
+				if not spell.n_max or absorb.amount > spell.n_max then
+					spell.n_max = absorb.amount
+				end
+				if not spell.n_min or absorb.amount < spell.n_min then
+					spell.n_min = absorb.amount
+				end
+			end
 		end
 
 		-- record the target
-		if absorb.dstName then
+		if not absorb.dstName then return end
+		local target = spell.targets and spell.targets[absorb.dstName]
+		if not target then
 			spell.targets = spell.targets or {}
-			spell.targets[absorb.dstName] = (spell.targets[absorb.dstName] or 0) + absorb.amount
+			spell.targets[absorb.dstName] = 0
+			target = spell.targets[absorb.dstName]
 		end
+		target = target + absorb.amount
 	end
 
 	-- https://github.com/TrinityCore/TrinityCore/blob/5d82995951c2be99b99b7b78fa12505952e86af7/src/server/game/Spells/Auras/SpellAuraEffects.h#L316
@@ -326,7 +337,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	end
 
 	local function handle_shield(t)
-		if not t.spellid or not absorbspells[t.spellid] or not t.dstName or ignoredSpells[t.spellid] then return end
+		if not t.spellid or not absorbspells[t.spellid] or not t.dstName or ignored_spells[t.spellid] then return end
 
 		shields = shields or {} -- create table if missing
 		local dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
@@ -351,7 +362,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 
 		-- Soul Link
 		if t.spellid == 25228 then
-			srcGUID, srcName = Skada:FixMyPets(srcGUID, srcName, srcFlags)
+			srcGUID, srcName, srcFlags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 		end
 
 		-- shield refreshed
@@ -362,12 +373,6 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				if shield and shield.srcGUID == srcGUID and shield.spellid == t.spellid then
 					shield.ts = t.timestamp
 					index = i
-
-					-- fix school
-					if not shield.school and t.spellschool then
-						shield.school = t.spellschool
-					end
-
 					break
 				end
 			end
@@ -376,7 +381,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			if not index then
 				local shield = new()
 				shield.spellid = t.spellid
-				shield.school = t.spellschool
+				shield.string = t.spellstring
 				shield.srcGUID = srcGUID
 				shield.srcName = srcName
 				shield.srcFlags = srcFlags
@@ -390,7 +395,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		else
 			local shield = new()
 			shield.spellid = t.spellid
-			shield.school = t.spellschool
+			shield.string = t.spellstring
 			shield.srcGUID = srcGUID
 			shield.srcName = srcName
 			shield.srcFlags = srcFlags
@@ -398,6 +403,11 @@ Skada:RegisterModule("Absorbs", function(L, P)
 
 			shields[dstName][#shields[dstName] + 1] = shield
 			tsort(shields[dstName], shields_order_pred)
+
+			-- record spell cast (ignore pre-shields)
+			if not t.__temp then
+				Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, t.spellstring)
+			end
 		end
 
 		if t.__temp then t = del(t) end
@@ -435,8 +445,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 			absorb.dstName = dstName
 			absorb.dstFlags = dstFlags
 
-			absorb.spellid = shield.spellid
-			absorb.school = shield.school
+			absorb.spellid = shield.string
+			absorb.string = shield.string
 			absorb.amount = absorbed
 
 			Skada:DispatchSets(log_absorb)
@@ -468,63 +478,47 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(aps), 1, 1, 1)
 	end
 
-	local function playermod_tooltip(win, id, label, tooltip)
+	local function spellmod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
 		if not set then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if not actor or enemy then return end -- unavailable for enemies yet
-
-		local spell = actor.absorbspells and actor.absorbspells[id]
+		local actor = set:GetActor(win.actorname, win.actorid)
+		local spell = actor and actor.absorbspells and actor.absorbspells[id]
 		if not spell then return end
 
 		tooltip:AddLine(actor.name .. " - " .. label)
-		if spell.school and spellschools[spell.school] then
-			tooltip:AddLine(spellschools(spell.school))
-		end
+		tooltip_school(tooltip, id)
 
 		if spell.casts and spell.casts > 0 then
 			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 		end
 
-		local average = nil
-		if spell.count and spell.count > 0 then
-			tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
-			average = spell.amount / spell.count
-		end
+		if not spell.count or spell.count == 0 then return end
 
-		local separator = nil
+		-- hits and average
+		tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
+		tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 
-		if spell.min then
+		-- normal hits
+		if spell.n_num then
 			tooltip:AddLine(" ")
-			separator = true
-			tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.min), 1, 1, 1)
-		end
-
-		if spell.max then
-			if not separator then
-				tooltip:AddLine(" ")
-				separator = true
+			tooltip:AddDoubleLine(L["Normal Hits"], format(hits_perc, Skada:FormatNumber(spell.n_num), Skada:FormatPercent(spell.n_num, spell.count)))
+			if spell.n_min then
+				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.n_min), 1, 1, 1)
 			end
-			tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.max), 1, 1, 1)
-		end
-
-		if average then
-			if not separator then
-				tooltip:AddLine(" ")
-				separator = true
+			if spell.n_max then
+				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.n_max), 1, 1, 1)
 			end
-
-			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(average), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.n_amt / spell.n_num), 1, 1, 1)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function targetspellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
 		win.title = L["actor absorb spells"](win.actorname or L["Unknown"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function targetspellmod:Update(win, set)
 		win.title = L["actor absorb spells"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not set or not win.targetname then return end
 
@@ -554,12 +548,12 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = L["actor absorb spells"](label)
 	end
 
-	function playermod:Update(win, set)
+	function spellmod:Update(win, set)
 		win.title = L["actor absorb spells"](win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
@@ -670,7 +664,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
 				if not spellid then
 					break -- nothing found
-				elseif absorbspells[spellid] and unitCaster and not ignoredSpells[spellid] then
+				elseif absorbspells[spellid] and unitCaster and not ignored_spells[spellid] then
 					local t = new()
 					t.timestamp = timestamp + max(0, expires - curtime)
 					t.srcGUID = UnitGUID(unitCaster)
@@ -678,6 +672,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 					t.dstGUID = dstGUID
 					t.dstName = dstName
 					t.spellid = spellid
+					t.spellstring = format("%s.%s", spellid, absorbspells[spellid])
 					t.__temp = true
 					handle_shield(t)
 				end
@@ -699,12 +694,12 @@ Skada:RegisterModule("Absorbs", function(L, P)
 	end
 
 	function mod:OnEnable()
-		playermod.metadata = {tooltip = playermod_tooltip}
-		targetmod.metadata = {showspots = true, click1 = spellmod}
+		spellmod.metadata = {tooltip = spellmod_tooltip}
+		targetmod.metadata = {showspots = true, click1 = targetspellmod}
 		self.metadata = {
 			showspots = true,
 			post_tooltip = absorb_tooltip,
-			click1 = playermod,
+			click1 = spellmod,
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
@@ -715,7 +710,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		mod_cols = self.metadata.columns
 
 		-- no total click.
-		playermod.nototal = true
+		spellmod.nototal = true
 		targetmod.nototal = true
 
 		local flags_src = {src_is_interesting = true}
@@ -756,12 +751,12 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		Skada:AddMode(self, L["Absorbs and Healing"])
 
 		-- table of ignored spells:
-		if Skada.ignoredSpells then
-			if Skada.ignoredSpells.absorbs then
-				ignoredSpells = Skada.ignoredSpells.absorbs
+		if Skada.ignored_spells then
+			if Skada.ignored_spells.absorbs then
+				ignored_spells = Skada.ignored_spells.absorbs
 			end
-			if Skada.ignoredSpells.activeTime then
-				passiveSpells = Skada.ignoredSpells.activeTime
+			if Skada.ignored_spells.activeTime then
+				passive_spells = Skada.ignored_spells.activeTime
 			end
 		end
 	end
@@ -793,10 +788,9 @@ end)
 
 Skada:RegisterModule("Absorbs and Healing", function(L, P)
 	local mod = Skada:NewModule("Absorbs and Healing")
-	local playermod = mod:NewModule("Absorbs and healing spells")
+	local spellmod = mod:NewModule("Absorbs and healing spells")
 	local targetmod = mod:NewModule("Absorbed and healed targets")
-	local spellmod = targetmod:NewModule("Absorbs and healing spells")
-	local spellschools = Skada.spellschools
+	local targetspellmod = targetmod:NewModule("Absorbs and healing spells")
 	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, hps, metadata, subview)
@@ -831,88 +825,65 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. suffix, Skada:FormatNumber(hps), 1, 1, 1)
 	end
 
-	local function playermod_tooltip(win, id, label, tooltip)
+	local function spellmod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		if not set or not win.actorname then return end
+		if not set then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
 
-		local spell = actor.absorbspells and actor.absorbspells[id] -- absorb?
-		spell = spell or actor.healspells and actor.healspells[id] -- heal?
+		local spell = actor.healspells and actor.healspells[id] or actor.absorbspells and actor.absorbspells[id]
 		if not spell then return end
 
 		tooltip:AddLine(actor.name .. " - " .. label)
-		if spell.school and spellschools[spell.school] then
-			tooltip:AddLine(spellschools(spell.school))
-		end
+		tooltip_school(tooltip, id)
 
-		if enemy then
-			tooltip:AddDoubleLine(L["Amount"], spell.amount, 1, 1, 1)
-			return
-		end
-
-		if spell.casts then
+		if spell.casts and spell.casts > 0 then
 			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
 		end
 
-		local average = nil
-		if spell.count and spell.count > 0 then
-			tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
-			average = spell.amount / spell.count
+		if not spell.count or spell.count == 0 then return end
 
-			if spell.c_num and spell.c_num > 0 then
-				tooltip:AddDoubleLine(L["Critical"], Skada:FormatPercent(spell.c_num, spell.count), 0.67, 1, 0.67)
-			end
-		end
-
+		-- hits and average
+		tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
+		tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.amount / spell.count), 1, 1, 1)
 		if spell.o_amt and spell.o_amt > 0 then
-			tooltip:AddDoubleLine(L["Total Healing"], Skada:FormatNumber(spell.o_amt + spell.amount), 1, 1, 1)
-			tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.o_amt), Skada:FormatPercent(spell.o_amt, spell.o_amt + spell.amount)), 1, 0.67, 0.67)
+			tooltip:AddDoubleLine(L["Overheal"], format(hits_perc, Skada:FormatNumber(spell.o_amt), Skada:FormatPercent(spell.o_amt, spell.amount + spell.o_amt)), 1, 0.67, 0.67)
 		end
 
-		local separator = nil
-
-		if spell.min then
+		-- normal hits
+		if spell.n_num then
 			tooltip:AddLine(" ")
-			separator = true
-
-			local spellmin = spell.min
-			if spell.c_min and spell.c_min < spellmin then
-				spellmin = spell.c_min
+			tooltip:AddDoubleLine(L["Normal Hits"], format(hits_perc, Skada:FormatNumber(spell.n_num), Skada:FormatPercent(spell.n_num, spell.count)))
+			if spell.n_min then
+				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.n_min), 1, 1, 1)
 			end
-			tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spellmin), 1, 1, 1)
+			if spell.n_max then
+				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.n_max), 1, 1, 1)
+			end
+			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.n_amt / spell.n_num), 1, 1, 1)
 		end
 
-		if spell.max then
-			if not separator then
-				tooltip:AddLine(" ")
-				separator = true
+		-- critical hits
+		if spell.c_num then
+			tooltip:AddLine(" ")
+			tooltip:AddDoubleLine(L["Critical Hits"], format(hits_perc, Skada:FormatNumber(spell.c_num), Skada:FormatPercent(spell.c_num, spell.count)))
+			if spell.c_min then
+				tooltip:AddDoubleLine(L["Minimum"], Skada:FormatNumber(spell.c_min), 1, 1, 1)
 			end
-
-			local spellmax = spell.max
-			if spell.c_max and spell.c_max > spellmax then
-				spellmax = spell.c_max
+			if spell.c_max then
+				tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spell.c_max), 1, 1, 1)
 			end
-			tooltip:AddDoubleLine(L["Maximum"], Skada:FormatNumber(spellmax), 1, 1, 1)
-		end
-
-		if average then
-			if not separator then
-				tooltip:AddLine(" ")
-				separator = true
-			end
-
-			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(average), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Average"], Skada:FormatNumber(spell.c_amt / spell.c_num), 1, 1, 1)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function targetspellmod:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
 		win.title = L["actor absorb and heal spells"](win.actorname or L["Unknown"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function targetspellmod:Update(win, set)
 		win.title = L["actor absorb and heal spells"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not set or not win.targetname then return end
 
@@ -958,12 +929,12 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = L["actor absorb and heal spells"](label)
 	end
 
-	function playermod:Update(win, set)
+	function spellmod:Update(win, set)
 		win.title = L["actor absorb and heal spells"](win.actorname or L["Unknown"])
 		if not win.actorname then return end
 
@@ -1100,11 +1071,11 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 	end
 
 	function mod:OnEnable()
-		playermod.metadata = {tooltip = playermod_tooltip}
-		targetmod.metadata = {showspots = true, click1 = spellmod}
+		spellmod.metadata = {tooltip = spellmod_tooltip}
+		targetmod.metadata = {showspots = true, click1 = targetspellmod}
 		self.metadata = {
 			showspots = true,
-			click1 = playermod,
+			click1 = spellmod,
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
@@ -1116,7 +1087,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		mod_cols = self.metadata.columns
 
 		-- no total click.
-		playermod.nototal = true
+		spellmod.nototal = true
 		targetmod.nototal = true
 
 		Skada:AddFeed(L["Healing: Personal HPS"], feed_personal_hps)
@@ -1237,8 +1208,7 @@ end, "Absorbs", "Healing", "Absorbs and Healing")
 
 Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 	local mod = Skada:NewModule("Healing Done By Spell")
-	local spellmod = mod:NewModule("Healing spell sources")
-	local spellschools = Skada.spellschools
+	local sourcemod = mod:NewModule("Healing spell sources")
 	local GetSpellInfo = Private.spell_info or GetSpellInfo
 	local clear = Private.clearTable
 	local get_absorb_heal_spells = nil
@@ -1256,7 +1226,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 		end
 	end
 
-	local function player_tooltip(win, id, label, tooltip)
+	local function sourcemod_tooltip(win, id, label, tooltip)
 		local set = win.spellname and win:GetSelectedSet()
 		local player = set and set:GetActor(label, id)
 		if not player then return end
@@ -1291,62 +1261,12 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 		end
 	end
 
-	local function spell_tooltip(win, id, label, tooltip)
-		local set = win:GetSelectedSet()
-		local total = set and set:GetAbsorbHeal()
-		if not total or total == 0 then return end
-
-		clear(C)
-		for i = 1, #set.actors do
-			local actor = set.actors[i]
-			if actor and not actor.enemy and (actor.absorbspells or actor.healspells) then
-				local spell = actor.absorbspells and actor.absorbspells[id] or actor.healspells and actor.healspells[id]
-				if spell and spell.amount then
-					local t = C[id]
-					if not t then
-						t = new()
-						t.school = spell.school
-						t.amount = spell.amount
-						t.o_amt = spell.o_amt
-						t.isabsorb = (actor.absorbspells and actor.absorbspells[id])
-						C[id] = t
-					else
-						t.amount = t.amount + spell.amount
-						if spell.o_amt then
-							t.o_amt = (t.o_amt or 0) + spell.o_amt
-						end
-					end
-				end
-			end
-		end
-
-		local spell = C[id]
-		if not spell then return end
-
-		tooltip:AddLine((GetSpellInfo(id)))
-		if spell.school and spellschools[spell.school] then
-			tooltip:AddLine(spellschools(spell.school))
-		end
-
-		if spell.casts and spell.casts > 0 then
-			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
-		end
-
-		if spell.count and spell.count > 0 then
-			tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
-		end
-		tooltip:AddDoubleLine(spell.isabsorb and L["Absorbs"] or L["Healing"], format("%s (%s)", Skada:FormatNumber(spell.amount), Skada:FormatPercent(spell.amount, total)), 1, 1, 1)
-		if set.overheal and spell.o_amt and spell.o_amt > 0 then
-			tooltip:AddDoubleLine(L["Overheal"], format("%s (%s)", Skada:FormatNumber(spell.o_amt), Skada:FormatPercent(spell.o_amt, set.overheal)), 1, 1, 1)
-		end
-	end
-
-	function spellmod:Enter(win, id, label)
+	function sourcemod:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = uformat(L["%s's sources"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function sourcemod:Update(win, set)
 		win.title = uformat(L["%s's sources"], win.spellname)
 		if not (win.spellid and set) then return end
 
@@ -1419,10 +1339,9 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 	end
 
 	function mod:OnEnable()
-		spellmod.metadata = {showspots = true, tooltip = player_tooltip}
+		sourcemod.metadata = {showspots = true, tooltip = sourcemod_tooltip}
 		self.metadata = {
-			click1 = spellmod,
-			post_tooltip = spell_tooltip,
+			click1 = sourcemod,
 			columns = {Healing = true, HPS = false, Percent = true, sHPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_nature_healingwavelesser]]
 		}
@@ -1443,7 +1362,6 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 		if not spell then
 			spell = new()
 			-- common
-			spell.school = info.school
 			spell.amount = info.amount
 
 			-- for heals
