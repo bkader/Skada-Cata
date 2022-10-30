@@ -9,8 +9,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 
 	local pairs, format, GetTime, uformat = pairs, string.format, GetTime, Private.uformat
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
-	local GetSpellInfo = Private.spell_info or GetSpellInfo
 	local GetSpellLink = Private.spell_link or GetSpellLink
+	local spellnames = Skada.spellnames
 
 	local sunder_targets -- holds sunder targets details for announcement
 	local active_sunders = {} -- holds sunder targets to consider refreshes
@@ -123,10 +123,10 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 
 	local function double_check_sunder()
 		if not spell_sunder then
-			spell_sunder = GetSpellInfo(7386)
+			spell_sunder = spellnames[7386]
 		end
 		if not spell_devastate then
-			spell_devastate = GetSpellInfo(20243)
+			spell_devastate = spellnames[20243]
 		end
 		if not sunder_link then
 			sunder_link = GetSpellLink(7386)
