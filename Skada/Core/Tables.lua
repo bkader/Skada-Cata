@@ -111,16 +111,40 @@ ns.cc_spells = {
 	[28272] = 0x40, -- Polymorph: Pig
 	[33786] = 0x08, -- Cyclone
 	[45524] = 0x10, -- Chains of Ice
+	[51514] = 0x08, -- Hex
 	[51722] = 0x01, -- Dismantle
 }
 
 -- extended list of crowd control spells
 ns.extra_cc_spells = setmetatable({
+	-- Warrior
+	[5246] = 0x01, -- Initmidating Shout
+	[6552] = 0x01, -- Pummel
+	[7922] = 0x01, -- Charge
+	[12323] = 0x01, -- Piercing Howl
+	[46968] = 0x01, -- Shockwave
+	[58357] = 0x01, -- Heroic Throw silence
 	-- Death Knight
 	[47476] = 0x20, -- Strangulate
 	[47481] = 0x01, -- Gnaw
 	[49203] = 0x10, -- Hungering Cold
 	[49560] = 0x01, -- Death Grip
+	-- Paladin
+	[853] = 0x02, -- Hammer of Justice
+	[2812] = 0x02, -- Holy Wrath
+	[10326] = 0x02, -- Turn Evil
+	[31935] = 0x02, -- Avengers Shield
+	-- Priest
+	[605] = 0x20, -- Dominate Mind (Mind Control)
+	[8122] = 0x20, -- Psychic Scream
+	[15487] = 0x20, -- Silence
+	[64044] = 0x20, -- Psychic Horror
+	-- Shaman
+	[3600] = 0x08, -- Earthbind (Earthbind Totem)
+	[8034] = 0x10, -- Frostbrand Weapon
+	[8056] = 0x10, -- Frost Shock
+	[39796] = 0x01, -- Stoneclaw Stun (Stoneclaw Totem)
+	[64695] = 0x08, -- Earthgrab
 	-- Druid
 	[339] = 0x08, -- Entangling Roots
 	[16979] = 0x01, -- Feral Charge - Bear
@@ -128,6 +152,27 @@ ns.extra_cc_spells = setmetatable({
 	[22570] = 0x01, -- Maim
 	[45334] = 0x01, -- Feral Charge Effect
 	[66070] = 0x08, -- Entangling Roots (Force of Nature)
+	-- Rogue
+	[408] = 0x01, -- Kidney Shot
+	[1330] = 0x01, -- Garrote - Silence
+	[1776] = 0x01, -- Gouge
+	[1833] = 0x01, -- Cheap Shot
+	[2094] = 0x01, -- Blind
+	-- Mage
+	[122] = 0x10, -- Frost Nova
+	[31661] = 0x04, -- Dragon's Breath
+	[33395] = 0x10, -- Freeze (Frost Water Elemental)
+	[44572] = 0x10, -- Deep Freeze
+	[55021] = 0x40, -- Silenced - Improved Counterspell
+	[61305] = 0x40, -- Polymorph Cat
+	[61721] = 0x40, -- Polymorph Rabbit
+	[61780] = 0x40, -- Polymorph Turkey
+	-- Warlock
+	[5484] = 0x20, -- Howl of Terror
+	[6789] = 0x20, -- Death Coil
+	[22703] = 0x04, -- Infernal Awakening
+	[24259] = 0x20, -- Spell Lock
+	[30283] = 0x20, -- Shadowfury
 	-- Hunter
 	[1513] = 0x08, -- Scare Beast
 	[4167] = 0x01, -- Web (Spider)
@@ -139,51 +184,6 @@ ns.extra_cc_spells = setmetatable({
 	[26090] = 0x08, -- Pummel (Gorilla)
 	[50541] = 0x01, -- Clench (Scorpid)
 	[64803] = 0x01, -- Entrapment
-	-- Mage
-	[122] = 0x10, -- Frost Nova
-	[31661] = 0x04, -- Dragon's Breath
-	[33395] = 0x10, -- Freeze (Frost Water Elemental)
-	[44572] = 0x10, -- Deep Freeze
-	[55021] = 0x40, -- Silenced - Improved Counterspell
-	[61305] = 0x40, -- Polymorph Cat
-	[61721] = 0x40, -- Polymorph Rabbit
-	[61780] = 0x40, -- Polymorph Turkey
-	-- Paladin
-	[853] = 0x02, -- Hammer of Justice
-	[2812] = 0x02, -- Holy Wrath
-	[10326] = 0x02, -- Turn Evil
-	[31935] = 0x02, -- Avengers Shield
-	-- Priest
-	[605] = 0x20, -- Dominate Mind (Mind Control)
-	[8122] = 0x20, -- Psychic Scream
-	[15487] = 0x20, -- Silence
-	[64044] = 0x20, -- Psychic Horror
-	-- Rogue
-	[408] = 0x01, -- Kidney Shot
-	[1330] = 0x01, -- Garrote - Silence
-	[1776] = 0x01, -- Gouge
-	[1833] = 0x01, -- Cheap Shot
-	[2094] = 0x01, -- Blind
-	-- Shaman
-	[3600] = 0x08, -- Earthbind (Earthbind Totem)
-	[8034] = 0x10, -- Frostbrand Weapon
-	[8056] = 0x10, -- Frost Shock
-	[39796] = 0x01, -- Stoneclaw Stun (Stoneclaw Totem)
-	[51514] = 0x08, -- Hex
-	[64695] = 0x08, -- Earthgrab (Earthbind Totem with Storm, Earth and Fire talent)
-	-- Warlock
-	[5484] = 0x20, -- Howl of Terror
-	[6789] = 0x20, -- Death Coil
-	[22703] = 0x04, -- Infernal Awakening
-	[24259] = 0x20, -- Spell Lock
-	[30283] = 0x20, -- Shadowfury
-	-- Warrior
-	[5246] = 0x01, -- Initmidating Shout
-	[6552] = 0x01, -- Pummel
-	[7922] = 0x01, -- Charge
-	[12323] = 0x01, -- Piercing Howl
-	[46968] = 0x01, -- Shockwave
-	[58357] = 0x01, -- Heroic Throw silence
 	-- Racials
 	[20549] = 0x01, -- War Stomp (Tauren)
 	[28730] = 0x40, -- Arcane Torrent (Bloodelf)
@@ -192,6 +192,103 @@ ns.extra_cc_spells = setmetatable({
 	-- Engineering
 	[67890] = 0x04, -- Cobalt Frag Bomb
 }, {__index = ns.cc_spells})
+
+-- deathlog tracked buffs.
+do
+	local spellnames = ns.spellnames
+	ns.deathlog_tracked_buff = {
+		-- Warrior
+		[spellnames[871]] = true, -- Shield Wall
+		[spellnames[2565]] = true, -- Shield Block
+		[spellnames[12975]] = true, -- Last Stand
+		[spellnames[23920]] = true, -- Spell Reflection
+		[spellnames[58374]] = true, -- Glyph of Blocking
+		-- Death Knight
+		[spellnames[42650]] = true, -- Army of the Dead
+		[spellnames[45529]] = true, -- Blood Tap
+		[spellnames[48707]] = true, -- Anti-Magic Shell
+		[spellnames[48792]] = true, -- Icebound Fortitude
+		[spellnames[48982]] = true, -- Rune Tap
+		[spellnames[49039]] = true, -- Lichborne
+		[spellnames[49182]] = true, -- Blade Barrier
+		[spellnames[49222]] = true, -- Bone Shield
+		[spellnames[51052]] = true, -- Anti-Magic Zone
+		[spellnames[51271]] = true, -- Unbreakable Armor
+		[spellnames[54223]] = true, -- Shadow of Death
+		[spellnames[55233]] = true, -- Vampiric Blood
+		[spellnames[70654]] = true, -- Blood Armor
+		-- Paladin
+		[spellnames[498]] = true, -- Divine Protection
+		[spellnames[633]] = true, -- Lay on Hands
+		[spellnames[642]] = true, -- Divine Shield
+		[spellnames[1022]] = true, -- Hand of Protection
+		[spellnames[1038]] = true, -- Hand of Salvation
+		[spellnames[1044]] = true, -- Hand of Freedom
+		[spellnames[6940]] = true, -- Hand of Sacrifice
+		[spellnames[20925]] = true, -- Holy Shield
+		[spellnames[31821]] = true, -- Aura Mastery
+		[spellnames[31850]] = true, -- Ardent Defender
+		[spellnames[31884]] = true, -- Avenging Wrath
+		[spellnames[64205]] = true, -- Divine Sacrifice
+		[spellnames[70940]] = true, -- Divine Guardian
+		-- Priest
+		[spellnames[17]] = true, -- Power Word: Shield
+		[spellnames[586]] = true, -- Fade
+		[spellnames[14893]] = true, -- Inspiration
+		[spellnames[27827]] = true, -- Spirit of Redemption
+		[spellnames[33206]] = true, -- Pain Suppression
+		[spellnames[47585]] = true, -- Dispersion
+		[spellnames[47788]] = true, -- Guardian Spirit
+		[spellnames[64843]] = true, -- Divine Hymn
+		-- Shaman
+		[spellnames[16177]] = true, -- Ancestral Fortitude
+		[spellnames[30823]] = true, -- Shamanistic Rage
+		-- Druid
+		[spellnames[5487]] = true, -- Bear Form
+		[spellnames[8998]] = true, -- Cower
+		[spellnames[22812]] = true, -- Barkskin
+		[spellnames[22842]] = true, -- Frenzied Regeneration
+		[spellnames[61336]] = true, -- Survival Instincts
+		[spellnames[62606]] = true, -- Savage Defense
+		[spellnames[70725]] = true, -- Enraged Defense
+		-- Rogue
+		[spellnames[1856]] = true, -- Vanish
+		[spellnames[1966]] = true, -- Feint
+		[spellnames[5277]] = true, -- Evasion
+		[spellnames[31224]] = true, -- Cloak of Shadows
+		-- Mage
+		[spellnames[66]] = true, -- Invisibility
+		[spellnames[543]] = true, -- Mage Ward
+		[spellnames[1463]] = true, -- Mana shield
+		[spellnames[1953]] = true, -- Blink
+		[spellnames[11426]] = true, -- Ice Barrier
+		[spellnames[45438]] = true, -- Ice Block
+		[spellnames[55342]] = true, -- Mirror Image
+		-- Warlock
+		[spellnames[6229]] = true, -- Shadow Ward
+		-- Hunter
+		[spellnames[781]] = true, -- Disengage
+		[spellnames[5384]] = true, -- Feign Death
+		[spellnames[19263]] = true, -- Deterrence
+		-- Items
+		[spellnames[54861]] = true, -- Nitro Boosts
+		[spellnames[60180]] = true, -- Repelling Charge (Resolute)
+		[spellnames[60286]] = true, -- Defender's Code
+		[spellnames[64763]] = true, -- Heart of Iron
+		[spellnames[65011]] = true, -- Furnace Stone
+		[spellnames[65012]] = true, -- Royal Seal of King Llane
+		[spellnames[67596]] = true, -- Battlemaster's PvP (Tremendous Fortitude)
+		[spellnames[67631]] = true, -- The Black Heart (Aegis)
+		[spellnames[67694]] = true, -- Glyph of Indomitability (Defensive Tactics)
+		[spellnames[67753]] = true, -- Juggernaut's Vitality/Satrina's Impeding Scarab (Fortitude)
+		[spellnames[68443]] = true, -- Brawler's Souvenir (Drunken Evasiveness)
+		[spellnames[71569]] = true, -- Ick's Rotting Thumb (Increased Fortitude)
+		[spellnames[71586]] = true, -- Corroded Skeleton Key (Hardened Skin)
+		[spellnames[71638]] = true, -- Sindragosa's Flawless Fang (Aegis of Dalaran)
+		[spellnames[71639]] = true, -- Corpse Tongue Coin (Thick Skin)
+		[spellnames[75480]] = true, -- Petrified Twilight Scale (Scaly Nimbleness)
+	}
+end
 
 -------------------------------------------------------------------------------
 -- DO NOT EDIT THE CODE BELOW (unless you know what you're doing)
@@ -342,10 +439,6 @@ local LBI = LibStub("LibBossIDs-1.0", true)
 if LBI then setmetatable(ns.creature_to_boss, {__index = LBI.BossIDs}) end
 
 -------------------------------------------------------------------------------
-
-ns.dummyTable = {} -- a dummy table used as fallback
-ns.cacheTable = {} -- primary cache table
-ns.cacheTable2 = {} -- secondary cache table
 
 -- ignored spells table
 ns.ignored_spells = setmetatable(ignored_spells, {__index = function(t, key)
