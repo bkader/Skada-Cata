@@ -133,6 +133,11 @@ do
 	function ns:IsNone(flags)
 		return HasFlag(flags, BITMASK_NONE)
 	end
+
+	------------------------------------------------------
+	-- default flags used mainly for scan
+	------------------------------------------------------
+	Private.DEFAULT_FLAGS = 0x00000417
 end
 
 -------------------------------------------------------------------------------
@@ -1319,7 +1324,8 @@ do
 		[3026] = [[Interface\ICONS\spell_shadow_soulgem]], --> Use Soulstone
 		[54755] = [[Interface\ICONS\inv_glyph_majordruid]], --> Glyph of Rejuvenation
 		[56160] = [[Interface\ICONS\inv_glyph_majorpriest]], --> Glyph of Power Word: Shield
-		[61607] = [[Interface\ICONS\ability_hunter_rapidkilling]] --> Mark of Blood
+		[61607] = [[Interface\ICONS\ability_hunter_rapidkilling]], --> Mark of Blood
+		[67545] = [[Interface\ICONS\spell_fire_flamebolt]] --> Empowered Fire
 	}
 
 	function Private.spell_info(spellid)
