@@ -20,15 +20,11 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 	local ignored_spells = Skada.ignored_spells.absorb -- Edit Skada\Core\Tables.lua
 	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 
-	local COMBATLOG_OBJECT_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
-	local COMBATLOG_OBJECT_AFFILIATION_OUTSIDER = COMBATLOG_OBJECT_AFFILIATION_OUTSIDER or 0x00000008
-	local COMBATLOG_OBJECT_REACTION_MASK = COMBATLOG_OBJECT_REACTION_MASK or 0x000000F0
-
-	local GetTime, band, tsort, max = GetTime, bit.band, table.sort, math.max
+	local band, tsort, max = bit.band, table.sort, math.max
 	local wipe, clear = wipe, Private.clearTable
 	local mode_cols = nil
 
-	local absorbspells = {
+	local ABSORB_SPELLS = {
 		[17] = 0x02, -- Power Word: Shield
 		[543] = 0x40, -- Mage Ward
 		[1463] = 0x40, -- Mana shield
@@ -128,7 +124,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 		[108008] = 0x01 -- Will of the Necropolis
 	}
 
-	local shields = nil -- holds the list of players shields and other stuff
+	local shields = {} -- holds the list of players shields and other stuff
 	local absorb = {}
 
 	local function format_valuetext(d, columns, total, aps, metadata, subview)
@@ -140,15 +136,6 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 
 		if metadata and d.value > metadata.maxvalue then
 			metadata.maxvalue = d.value
-		end
-	end
-
-	local function log_spellcast(set, actorid, actorname, actorflags, spellid)
-		if not set or (set == Skada.total and not P.totalidc) then return end
-
-		local actor = Skada:FindActor(set, actorid, actorname, actorflags)
-		if actor and actor.absorbspells and actor.absorbspells[spellid] then
-			actor.absorbspells[spellid].casts = (actor.absorbspells[spellid].casts or 1) + 1
 		end
 	end
 
@@ -178,9 +165,6 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 		end
 
 		spell.amount = spell.amount + absorb.amount
-
-		-- start cast counter.
-		spell.casts = spell.casts or 1
 
 		if not nocount then
 			spell.count = (spell.count or 0) + 1
@@ -301,24 +285,6 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 		return (a.ts < b.ts)
 	end
 
-	-- local function ValidateShield(srcFlags, dstFlags)
-	-- 	local valid = nil
-
-	-- 	if srcFlags and dstFlags then
-	-- 		-- make sure both parts are valid.
-	-- 		valid = band(srcFlags, dstFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) ~= 0
-
-	-- 		-- make sure both are in the group
-	-- 		valid = valid and (band(srcFlags, COMBATLOG_OBJECT_AFFILIATION_OUTSIDER) == 0)
-	-- 		valid = valid and (band(dstFlags, COMBATLOG_OBJECT_AFFILIATION_OUTSIDER) == 0)
-
-	-- 		-- make sure both are friendly to each other
-	-- 		valid = valid and (band(srcFlags, dstFlags, COMBATLOG_OBJECT_REACTION_MASK) ~= 0)
-	-- 	end
-
-	-- 	return valid
-	-- end
-
 	local function remove_shield(dstName, srcGUID, spellid)
 		shields[dstName] = shields[dstName] or new()
 		for i = 1, #shields[dstName] do
@@ -332,9 +298,8 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 	end
 
 	local function handle_shield(t)
-		if not t.spellid or not absorbspells[t.spellid] or not t.dstName or ignored_spells[t.spellid] then return end
+		if not t.spellid or not ABSORB_SPELLS[t.spellid] or not t.dstName then return end
 
-		shields = shields or {} -- create table if missing
 		local dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
 		local srcGUID, srcName, srcFlags = t.srcGUID, t.srcName, t.srcFlags
 
@@ -398,11 +363,6 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 
 			shields[dstName][#shields[dstName] + 1] = shield
 			tsort(shields[dstName], shields_order_pred)
-
-			-- record spell cast (ignore pre-shields)
-			if not t.__temp then
-				Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, t.spellstring)
-			end
 		end
 	end
 
@@ -429,7 +389,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 		shields[dstName] = shields[dstName] or new()
 
 		local shield = process_shield(dstName, spellschool)
-		if shield then
+		if shield and not ignored_spells[shield.spellid] then
 			absorb.actorid = shield.srcGUID
 			absorb.actorname = shield.srcName
 			absorb.actorflags = shield.srcFlags
@@ -449,7 +409,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 
 	local function spell_damage(t)
 		local dstName = t.dstName and Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
-		if dstName and shields and shields[dstName] and t.absorbed and t.absorbed > 0 then
+		if dstName and shields[dstName] and t.absorbed and t.absorbed > 0 then
 			process_absorb(t.dstGUID, dstName, t.dstFlags, t.absorbed, t.spellschool or 0x01, t.amount)
 		end
 	end
@@ -482,10 +442,6 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 
 		tooltip:AddLine(actor.name .. " - " .. label)
 		tooltip_school(tooltip, id)
-
-		if spell.casts and spell.casts > 0 then
-			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
-		end
 
 		if not spell.count or spell.count == 0 then return end
 
@@ -644,25 +600,27 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 		return amount, valuetext
 	end
 
-	do
-		local UnitGUID, UnitFullName = UnitGUID, Private.UnitFullName
-		local actorflags = Private.DEFAULT_FLAGS -- default
-		function mode:Skada_UnitBuff(_, _, owner, curtime, timestamp, actorid, actorname, args)
-			if not absorbspells[args.id] or ignored_spells[args.id] then return end
+	function mode:UnitBuff(_, args)
+		if not args.auras or not args.timestamp then return end
+		local curtime = args.Time or Skada._Time
 
-			local t = new()
-			t.timestamp = timestamp + max(0, args.expires - curtime)
-			t.srcGUID = UnitGUID(args.source)
-			t.srcName = UnitFullName(args.source)
-			t.srcFlags = owner and 0 or actorflags
-			t.dstGUID = actorid
-			t.dstName = actorname
-			t.dstFlags = owner and 0 or actorflags
-			t.spellid = args.id
-			t.spellstring = format("%s.%s", args.id, absorbspells[args.id])
-			t.__temp = true
-			handle_shield(t)
-			t = del(t)
+		for _, aura in pairs(args.auras) do
+			if ABSORB_SPELLS[aura.id] then
+				local t = new()
+				t.event = "SPELL_AURA_APPLIED"
+				t.timestamp = args.timestamp + max(0, aura.expires - curtime)
+				t.srcGUID = aura.srcGUID
+				t.srcName = aura.srcName
+				t.srcFlags = aura.srcFlags
+				t.dstGUID = args.dstGUID
+				t.dstName = args.dstName
+				t.dstFlags = args.dstFlags
+				t.spellid = aura.id
+				t.spellstring = format("%s.%s", aura.id, ABSORB_SPELLS[aura.id])
+				t.__temp = true
+				handle_shield(t)
+				t = del(t)
+			end
 		end
 	end
 
@@ -720,7 +678,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 			"SWING_MISSED"
 		)
 
-		Skada.RegisterCallback(self, "Skada_UnitBuff")
+		Skada.RegisterCallback(self, "Skada_UnitBuffs", "UnitBuff")
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, "Absorbs and Healing")
 	end
@@ -799,10 +757,6 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 		tooltip:AddLine(actor.name .. " - " .. label)
 		tooltip_school(tooltip, id)
-
-		if spell.casts and spell.casts > 0 then
-			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
-		end
 
 		if not spell.count or spell.count == 0 then return end
 
@@ -1197,10 +1151,6 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 		if not spell then return end
 
 		tooltip:AddLine(label .. " - " .. win.spellname)
-
-		if spell.casts then
-			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
-		end
 
 		if spell.count then
 			tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)

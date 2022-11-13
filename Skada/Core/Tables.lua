@@ -291,6 +291,67 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- grouped and custom units
+
+do
+	------------------------------------------------------
+	-- grouped units (fake)
+	------------------------------------------------------
+	--
+	-- holds the units to which the damage done is collected
+	-- into a single standalone fake unit.
+	--
+	-- table structure:
+	-- option #1:	[creature id] = "Group Name"
+	-- option #2:	[creature name] = "Group Name"
+	--
+
+	local grouped_units = {
+		-- Example: The Lich King - Important targets
+		-- [36597] = L["Important targets"], -- The Lich King
+		-- [36609] = L["Important targets"], -- Val'kyr Shadowguard
+		-- [36633] = L["Important targets"], -- Ice Sphere
+		-- [36701] = L["Important targets"], -- Raging Spirit
+		-- [39190] = L["Important targets"], -- Wicked Spirit
+	}
+
+	------------------------------------------------------
+	-- custom units (fake)
+	------------------------------------------------------
+	--
+	-- holds units that should craete a fake unit at certain
+	-- health or power percentage.
+	-- Useful in case you want to collect stuff done to units
+	-- at certain encounter phases for example.
+	--
+	-- table structure
+	-- 	name: 		name of the fake unit (optional)
+	-- 	text: 		text to use *format()* with (optional)
+	-- 	start: 		when to start collecting (1 = 100%)
+	-- 	stop: 		when to stop collecting (0.5 = 50%)
+	-- 	diff: 		table of allowed difficulties (omit for all)
+	-- 	power: 		which type of power to trach (omit for health)
+	-- 	values: 	table of difficulties to max health (optional)
+	--
+	-- **optional** fields will be generated and cached by the addon.
+	--
+
+	local custom_units = {
+		-- Example ICC - Lady Deathwhisper
+		-- [36855] = {
+		-- 	text = L["%s - Phase 2"],
+		-- 	start = 0,
+		-- 	power = 0
+		-- },
+	}
+
+	------------------------------------------------------
+
+	ns.grouped_units = grouped_units
+	ns.custom_units = custom_units
+end
+
+-------------------------------------------------------------------------------
 -- DO NOT EDIT THE CODE BELOW (unless you know what you're doing)
 -------------------------------------------------------------------------------
 
