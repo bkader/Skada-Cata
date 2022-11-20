@@ -142,7 +142,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 	local function log_absorb(set, nocount)
 		if not absorb.amount or absorb.amount == 0 then return end
 
-		local actor = Skada:GetActor(set, absorb.actorid, absorb.actorname, absorb.actorflags)
+		local actor = Skada:GetActor(set, absorb.actorname, absorb.actorid, absorb.actorflags)
 		if not actor then
 			return
 		elseif actor.role ~= "DAMAGER" and not passive_spells[absorb.spell] and not nocount then
@@ -416,7 +416,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 
 	local function absorb_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local actor = set and set:GetActor(id, label)
+		local actor = set and set:GetActor(label, id)
 		if not actor then return end
 
 		local totaltime = set:GetTime()
@@ -436,7 +436,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 		local set = win:GetSelectedSet()
 		if not set then return end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.absorbspells and actor.absorbspells[id]
 		if not spell then return end
 
@@ -472,7 +472,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 		win.title = L["actor absorb spells"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not set or not win.targetname then return end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		if not actor or actor.enemy then return end -- unavailable for enemies yet
 
 		local total = actor.absorb
@@ -507,7 +507,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 		win.title = L["actor absorb spells"](win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		if not actor or actor.enemy then return end -- unavailable for enemies yet
 
 		local total = actor.absorb
@@ -539,7 +539,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 		win.title = uformat(L["%s's absorbed targets"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		if not actor or actor.enemy then return end -- unavailable for enemies yet
 
 		local total = actor and actor.absorb or 0
@@ -582,7 +582,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = amount
 					format_valuetext(d, mode_cols, total, aps, win.metadata)
 					win:color(d, set, actor.enemy)
@@ -728,7 +728,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		local set = win:GetSelectedSet()
 		if not set then return end
 
-		local actor = set:GetActor(id, label)
+		local actor = set:GetActor(label, id)
 		if not actor then return end
 
 		local totaltime = set:GetTime()
@@ -748,7 +748,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		local set = win:GetSelectedSet()
 		if not set then return end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		if not actor then return end
 
 		local spell = actor.healspells and actor.healspells[id] or actor.absorbspells and actor.absorbspells[id]
@@ -802,7 +802,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		win.title = L["actor absorb and heal spells"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not set or not win.targetname then return end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetAbsorbHealOnTarget(win.targetname)
 
 		if not total or total == 0 or not (actor.healspells or actor.absorbspells) then
@@ -853,7 +853,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		win.title = L["actor absorb and heal spells"](win.actorname or L["Unknown"])
 		if not win.actorname then return end
 
-		local actor = set and set:GetActor(win.actorid, win.actorname)
+		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetAbsorbHeal()
 
 		if not total or total == 0 or not (actor.healspells or actor.absorbspells) then
@@ -896,7 +896,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's absorbed and healed targets"], win.actorname)
 
-		local actor = set and set:GetActor(win.actorid, win.actorname)
+		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetAbsorbHeal()
 		local targets = (total and total > 0) and actor:GetAbsorbHealTargets(set)
 
@@ -939,7 +939,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = amount
 					format_valuetext(d, mode_cols, total, hps, win.metadata)
 					win:color(d, set, actor.enemy)
@@ -973,7 +973,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 	local function feed_personal_hps()
 		local set = Skada:GetSet("current")
-		local actor = set and set:GetActor(Skada.userGUID, Skada.userName)
+		local actor = set and set:GetActor(Skada.userName, Skada.userGUID)
 		if actor then
 			return format("%s %s", Skada:FormatNumber((actor:GetAHPS(set))), L["HPS"])
 		end
@@ -1041,7 +1041,7 @@ Skada:RegisterModule("HPS", function(L, P)
 		local set = win:GetSelectedSet()
 		if not set then return end
 
-		local actor = set:GetActor(id, label)
+		local actor = set:GetActor(label, id)
 		if not actor then return end
 
 		local totaltime = set:GetTime()
@@ -1076,7 +1076,7 @@ Skada:RegisterModule("HPS", function(L, P)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = amount
 					format_valuetext(d, mode_cols, total, win.metadata)
 					win:color(d, set, actor.enemy)
@@ -1140,7 +1140,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 
 	local function mode_source_tooltip(win, id, label, tooltip)
 		local set = win.spellname and win:GetSelectedSet()
-		local actor = set and set:GetActor(id, label)
+		local actor = set and set:GetActor(label, id)
 		if not actor then return end
 
 		local spell = actor.healspells and actor.healspells[win.spellid]

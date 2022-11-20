@@ -1333,6 +1333,8 @@ do
 		[75] = [[Interface\ICONS\inv_weapon_bow_07]], --> Auto Shot
 		[6603] = [[Interface\ICONS\inv_sword_04]], --> Melee
 		[3026] = [[Interface\ICONS\spell_shadow_soulgem]], --> Use Soulstone
+		[31786] = [[Interface\ICONS\spell_holy_revivechampion]], --> Spiritual Attunement
+		[49088] = [[Interface\ICONS\spell_shadow_antimagicshell]], --> Anti-Magic Shell
 		[54755] = [[Interface\ICONS\inv_glyph_majordruid]], --> Glyph of Rejuvenation
 		[56160] = [[Interface\ICONS\inv_glyph_majorpriest]], --> Glyph of Power Word: Shield
 		[61607] = [[Interface\ICONS\ability_hunter_rapidkilling]], --> Mark of Blood
@@ -1500,7 +1502,12 @@ do
 	end
 
 	-- returns unit's full name
-	local function UnitFullName(unit, ownerUnit)
+	local function UnitFullName(unit, ownerUnit, fmt)
+		if ownerUnit and fmt then
+			local name, realm = UnitName(ownerUnit)
+			return format("%s <%s>", UnitName(unit), realm and realm ~= "" and format("%s-%s", name, realm) or name)
+		end
+
 		local name, realm = UnitName(unit)
 		return not ownerUnit and realm and realm ~= "" and format("%s-%s", name, realm) or name
 	end
@@ -1786,8 +1793,8 @@ do
 				return d
 			end
 
-			d.id = actor.id or actor.name or actorname
-			d.label = actor.name or actorname or L["Unknown"]
+			d.id = actor.id or actorname
+			d.label = actorname or L["Unknown"]
 
 			-- speed up things if it's a pet/enemy.
 			if strmatch(d.label, "%<(%a+)%>") then
@@ -1808,7 +1815,7 @@ do
 			d.spec = actor.spec
 
 			if actor.id and ns.validclass[d.class] then
-				d.text = ns:FormatName(actor.name or actorname, actor.id)
+				d.text = ns:FormatName(actorname, actor.id)
 			end
 		end
 		return d
