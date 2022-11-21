@@ -1,16 +1,22 @@
-# Skada for Cataclysm `4.x.x` (_Revisited - v1.8.83_)
+# Skada for Cataclysm `4.x.x` (_Revisited - v1.8.84_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-Cata)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bkader/Skada-Cata?label=version)
 
-_This version is a total **Rewrite** of Skada `r301` for `3.3.5` and not a **Backport** like some believe._
-
 Skada is a modular damage meter with various viewing modes, segmented fights and customizable windows. It aims to be highly efficient with memory and CPU.
 
-_**Also available for [Wrath of the Lich King](https://github.com/bkader/Skada-WoTLK/)**_
+<p align="center"><img src="https://user-images.githubusercontent.com/4732702/157116158-711528b9-0964-45bc-994e-46f3e870810e.png" alt="Skada Damage Meter"></p>
 
-<p align="center"><img src="https://user-images.githubusercontent.com/4732702/157116158-711528b9-0964-45bc-994e-46f3e870810e.png" alt="Skada Cata"></p>
+_**FOR PRIVATE SERVERS**_:
+* _[Wrath of the Lich King](https://github.com/bkader/Skada-WoTLK)_
+* _[Mists of Pandaria](https://github.com/bkader/Skada-MoP)_
+
+_**FOR OFFICIAL SERVERS**_:
+* _[Retail/Classic Wrath](https://github.com/bkader/Skada-Damage-Meter)_
+
+> ***Is this a backported version?***
+> **No**! This is total **rewrite** of the original addon, it all started from version `r301` for `3.3.5`and built up to the current state.
 
 ## IMPORTANT: How to install
 
@@ -22,9 +28,16 @@ _**Also available for [Wrath of the Lich King](https://github.com/bkader/Skada-W
 
 ## Show Love & Support
 
-Though it's not required, **PayPal** donations are most welcome at **bkader[at]mail.com**, or via Discord [Donate Bot](https://donatebot.io/checkout/795698054371868743).
+Though it's not required, **PayPal**/**Paysera** donations are most welcome at **bkader[at]mail.com**.
 
-##   OTHER ADDONS
+## Special Credits
+
+* Original author: **Zarnivoop**
+* Localization: **meatgaga** (CN), **Ícar** & **Septimun** (ES), **Kader** (FR), **NGL** (RU)
+* Direct and indirect contributors: **Abel**, **Iqui**, **Jeb**, **Shoggoth**, **Havi** & **Ganrod**, **WotLK Community**.
+* The man behind the wheel: **[Nomadra](https://github.com/ridepad)**
+
+## OTHER ADDONS (Private Servers)
 
 * **!ElvinCDs**: [https://github.com/bkader/ElvinCDs](https://github.com/bkader/ElvinCDs)
 * **!KTracker**: [https://github.com/bkader/KTracker](https://github.com/bkader/KTracker)
