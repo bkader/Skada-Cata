@@ -2140,6 +2140,7 @@ do
 	local function SmartStop(set)
 		if set.endtime then return end
 		Skada:StopSegment(L["Smart Stop"])
+		Skada:SetModes()
 	end
 
 	function Skada:SmartStop(set)
