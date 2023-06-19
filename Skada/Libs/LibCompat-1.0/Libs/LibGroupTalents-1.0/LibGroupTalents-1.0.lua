@@ -1338,9 +1338,9 @@ end
 function lib:SendCommMessage(msg, target, channel)
 	if (msg) then
 		if (ChatThrottleLib) then
-			ChatThrottleLib:SendAddonMessage("NORMAL", MAJOR, msg, channel or "WHISPER", target)
+			ChatThrottleLib:SendAddonMessage("NORMAL", "LibGroupTalents", msg, channel or "WHISPER", target)
 		else
-			SendAddonMessage(MAJOR, msg, channel or "WHISPER", target)
+			SendAddonMessage("LibGroupTalents", msg, channel or "WHISPER", target)
 		end
 	end
 end
