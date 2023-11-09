@@ -2147,8 +2147,7 @@ end
 -- first hit check
 
 do
-	local UnitExists, UnitName = UnitExists, UnitName
-	local SpellLink = Private.SpellLink or GetSpellLink
+	local UnitExists, SpellLink = UnitExists, Private.SpellLink or GetSpellLink
 	local IsPet, uformat = Private.IsPet, Private.uformat
 	local ignored_spells = Skada.ignored_spells.firsthit
 	local firsthit_fmt = {"%s (%s)", "%s (\124c%s%s\124r)", "\124c%s%s\124r", "\124c%s%s\124r (%s)"}
@@ -2170,7 +2169,7 @@ do
 				end
 
 				target_table = target_table or TempTable()
-				target_table:insert(uformat("%s > %s", UnitName(unit), target))
+				target_table:insert(uformat("%s > %s", UnitFullName(unit), target))
 			end
 		end
 
