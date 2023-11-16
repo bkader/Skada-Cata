@@ -1481,6 +1481,11 @@ do
 	local BITMASK_NPC = Private.BITMASK_NPC
 	local BITMASK_PLAYER = Private.BITMASK_PLAYER
 
+	ns.userGUID = UnitGUID("player")
+	_, ns.userClass = UnitClass("player")
+	ns.userName = UnitName("player")
+	ns.userRealm = gsub(GetRealmName(), "%s", "")
+
 	-- checks if the given guid/flags are those of a creature.
 	function Private.IsCreature(guid, flags)
 		if tonumber(guid) then
@@ -1622,10 +1627,6 @@ do
 		guidToClass[guid] = class
 		guidToName[guid] = UnitFullName(unit)
 	end
-
-	ns.userGUID = UnitGUID('player')
-	_, ns.userClass = UnitClass('player')
-	ns.userName = UnitFullName("player")
 end
 
 -------------------------------------------------------------------------------
