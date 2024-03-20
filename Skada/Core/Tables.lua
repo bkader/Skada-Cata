@@ -119,6 +119,8 @@ ns.cc_spells = {
 	[45524] = 0x10, -- Chains of Ice
 	[51514] = 0x08, -- Hex
 	[51722] = 0x01, -- Dismantle
+	[52719] = 0x01, -- Concussion Blow
+	[96294] = 0x10, -- Chains of Ice
 }
 
 -- extended list of crowd control spells
@@ -130,16 +132,22 @@ ns.extra_cc_spells = setmetatable({
 	[12323] = 0x01, -- Piercing Howl
 	[46968] = 0x01, -- Shockwave
 	[58357] = 0x01, -- Heroic Throw silence
+	[107566] = 0x01, -- Staggering Shout
+	[132168] = 0x01, -- Shockwave
 	-- Death Knight
 	[47476] = 0x20, -- Strangulate
 	[47481] = 0x01, -- Gnaw
 	[49203] = 0x10, -- Hungering Cold
+	[47528] = 0x10, -- Mind Freeze
 	[49560] = 0x01, -- Death Grip
+	[79092] = 0x10, -- Hungering Cold
+	[91807] = 0x01, -- Shambling Rush
 	-- Paladin
 	[853] = 0x02, -- Hammer of Justice
 	[2812] = 0x02, -- Holy Wrath
 	[10326] = 0x02, -- Turn Evil
 	[31935] = 0x02, -- Avengers Shield
+	[96231] = 0x01, -- Rebuke
 	-- Priest
 	[605] = 0x20, -- Dominate Mind (Mind Control)
 	[8122] = 0x20, -- Psychic Scream
@@ -150,17 +158,24 @@ ns.extra_cc_spells = setmetatable({
 	[8034] = 0x10, -- Frostbrand Weapon
 	[8056] = 0x10, -- Frost Shock
 	[39796] = 0x01, -- Stoneclaw Stun (Stoneclaw Totem)
+	[57994] = 0x08,  -- Wind Shear
 	[64695] = 0x08, -- Earthgrab
 	-- Druid
-	[339] = 0x08, -- Entangling Roots
+	[99] = 0x01, -- Incapacitating Roar
+	[5211] = 0x01, -- Mighty Bash
 	[16979] = 0x01, -- Feral Charge - Bear
 	[19975] = 0x08, -- Entangling Roots (Nature's Grasp)
 	[22570] = 0x01, -- Maim
 	[45334] = 0x01, -- Feral Charge Effect
+	[50259] = 0x01, -- Dazed
+	[61391] = 0x08, -- Typhoon
 	[66070] = 0x08, -- Entangling Roots (Force of Nature)
+	[93985] = 0x01, -- Skull Bash
+	[102359] = 0x08, -- Mass Entanglement
 	-- Rogue
 	[408] = 0x01, -- Kidney Shot
 	[1330] = 0x01, -- Garrote - Silence
+	[1766] = 0x01, -- Kick
 	[1776] = 0x01, -- Gouge
 	[1833] = 0x01, -- Cheap Shot
 	[2094] = 0x01, -- Blind
@@ -173,9 +188,12 @@ ns.extra_cc_spells = setmetatable({
 	[61305] = 0x40, -- Polymorph Cat
 	[61721] = 0x40, -- Polymorph Rabbit
 	[61780] = 0x40, -- Polymorph Turkey
+	[82691] = 0x10, -- Ring of Frost
+	[82691] = 0x10, -- Ring of Frost
 	-- Warlock
 	[5484] = 0x20, -- Howl of Terror
 	[6789] = 0x20, -- Death Coil
+	[19647] = 0x20, -- Spell Lock
 	[22703] = 0x04, -- Infernal Awakening
 	[24259] = 0x20, -- Spell Lock
 	[30283] = 0x20, -- Shadowfury
