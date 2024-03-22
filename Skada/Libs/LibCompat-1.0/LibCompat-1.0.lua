@@ -422,6 +422,9 @@ do
 		return 3
 	end
 
+	-- cached talents
+	local cached_talents = setmetatable({}, {__mode = "kv"})
+
 	-- cached specs
 	GetUnitSpec = setmetatable(GetUnitSpec, {
 		__index = function(self, guid)
@@ -467,7 +470,7 @@ do
 			rawset(self, guid, spec)
 		end,
 		__call = function(self, guid)
-			return self[guid]
+			return self[guid], rawget(cached_talents, guid)
 		end
 	})
 
@@ -519,6 +522,7 @@ do
 				index = (points and points > 0) and 3 or 2
 			end
 
+			rawset(cached_talents, guid, format("%s/%s/%s", n1, n2, n3))
 			rawset(GetUnitSpec, guid, specsTable[class][index])
 		end
 	end)
